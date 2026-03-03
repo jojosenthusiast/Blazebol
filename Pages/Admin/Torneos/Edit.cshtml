@@ -1,0 +1,206 @@
+@page "{id:int}"
+@model EditModel
+@{
+    ViewData["Title"] = "Editar Torneo";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Admin/Torneos/Details" asp-route-id="@Model.Input.Id" class="back-link">← Volver al Detalle</a>
+            <h1>Editar Torneo</h1>
+            <p class="page-subtitle">@Model.Input.Nombre</p>
+        </div>
+        @if (!Model.EsFinalizado)
+        {
+            <span class="badge badge-@Model.Input.Estado.ToLower()">@Model.Input.Estado</span>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.EsFinalizado)
+    {
+        <div style="border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:24px;background:rgba(239,68,68,0.06);margin-bottom:24px;">
+            <div style="font-weight:700;font-size:1rem;color:#ef4444;margin-bottom:8px;">Torneo Finalizado — Solo Lectura</div>
+            <p style="font-size:0.88rem;opacity:0.7;margin:0 0 16px;">
+                Este torneo ha sido marcado como <strong>Finalizado</strong> y no permite modificaciones de estructura.
+                Solo se puede consultar la información.
+            </p>
+            <a asp-page="/Admin/Torneos/Details" asp-route-id="@Model.Input.Id" class="btn btn-secondary">
+                Ver Detalles del Torneo
+            </a>
+        </div>
+
+        <!-- Vista de solo lectura del torneo finalizado -->
+        <div class="form-container" style="opacity:0.65;pointer-events:none;">
+            <div class="form-section">
+                <h3 class="form-section-title">Información (Solo Lectura)</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre del Torneo</label>
+                        <input type="text" class="form-control" value="@Model.Input.Nombre" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <input type="text" class="form-control" value="@Model.Input.Estado" disabled />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha Inicio</label>
+                        <input type="text" class="form-control" value="@Model.Input.FechaInicio.ToString("dd/MM/yyyy")" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha Fin</label>
+                        <input type="text" class="form-control" value="@Model.Input.FechaFin.ToString("dd/MM/yyyy")" disabled />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="form-container">
+            <form method="post" class="form-horizontal">
+                <input type="hidden" asp-for="Input.Id" />
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Información Básica</h3>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Nombre" class="required"></label>
+                        <input asp-for="Input.Nombre" class="form-control" maxlength="150" />
+                        <span asp-validation-for="Input.Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label asp-for="Input.LigaId" class="required"></label>
+                            <select asp-for="Input.LigaId" class="form-control"
+                                    asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(Model.Ligas, "Id", "Nombre"))">
+                                <option value="">— Seleccione una liga —</option>
+                            </select>
+                            <span asp-validation-for="Input.LigaId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Input.TemporadaId" class="required"></label>
+                            <select asp-for="Input.TemporadaId" class="form-control">
+                                <option value="">— Seleccione una temporada —</option>
+                                @foreach (var temporada in Model.Temporadas)
+                                {
+                                    <option value="@temporada.Id">@temporada.Nombre (@temporada.Anio)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Input.TemporadaId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label asp-for="Input.CategoriaId" class="required"></label>
+                            <select asp-for="Input.CategoriaId" class="form-control"
+                                    asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(Model.Categorias, "Id", "Nombre"))">
+                                <option value="">— Seleccione una categoría —</option>
+                            </select>
+                            <span asp-validation-for="Input.CategoriaId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Input.Formato" class="required"></label>
+                            <select asp-for="Input.Formato" class="form-control">
+                                <option value="">— Seleccione un formato —</option>
+                                <option value="TodosContraTodos">Todos contra Todos (Liga)</option>
+                                <option value="EliminacionDirecta">Eliminación Directa</option>
+                                <option value="GruposYEliminacion">Grupos + Eliminación</option>
+                            </select>
+                            <span asp-validation-for="Input.Formato" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Fechas del Torneo</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label asp-for="Input.FechaInicio" class="required"></label>
+                            <input asp-for="Input.FechaInicio" class="form-control" type="date" />
+                            <span asp-validation-for="Input.FechaInicio" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Input.FechaFin" class="required"></label>
+                            <input asp-for="Input.FechaFin" class="form-control" type="date" />
+                            <span asp-validation-for="Input.FechaFin" class="text-danger"></span>
+                            <small class="form-hint">Debe ser posterior a la fecha de inicio.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Número de Equipos</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label asp-for="Input.NumeroEquiposMinimo" class="required"></label>
+                            <input asp-for="Input.NumeroEquiposMinimo" class="form-control" type="number" min="2" max="100" />
+                            <span asp-validation-for="Input.NumeroEquiposMinimo" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Input.NumeroEquiposMaximo"></label>
+                            <input asp-for="Input.NumeroEquiposMaximo" class="form-control" type="number" min="2" max="100" />
+                            <span asp-validation-for="Input.NumeroEquiposMaximo" class="text-danger"></span>
+                            <small class="form-hint">Opcional. Dejar vacío para sin límite.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Estado del Torneo</h3>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Estado" class="required"></label>
+                        <select asp-for="Input.Estado" class="form-control" id="selectEstado">
+                            <option value="Borrador">Borrador</option>
+                            <option value="Activo">Activo</option>
+                            <option value="Finalizado">Finalizado</option>
+                        </select>
+                        <span asp-validation-for="Input.Estado" class="text-danger"></span>
+                        <div id="warningFinalizado" style="display:none;margin-top:8px;padding:10px 14px;
+                             background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);
+                             border-radius:8px;font-size:0.82rem;color:#ef4444;">
+                            ⚠️ Marcar como <strong>Finalizado</strong> bloqueará todas las ediciones futuras del torneo. Esta acción no se puede deshacer desde aquí.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <a asp-page="/Admin/Torneos/Details" asp-route-id="@Model.Input.Id" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('selectEstado')?.addEventListener('change', function () {
+            document.getElementById('warningFinalizado').style.display =
+                this.value === 'Finalizado' ? 'block' : 'none';
+        });
+    </script>
+}

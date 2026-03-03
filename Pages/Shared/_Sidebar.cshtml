@@ -1,0 +1,126 @@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole");
+    var currentPath = HttpContextAccessor.HttpContext?.Request.Path.Value?.ToLower() ?? "";
+}
+
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <span class="logo-text">Control Torneos</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        @if (userRole == "Administrador")
+        {
+            <a asp-page="/Admin/Dashboard" class="nav-item @(currentPath.StartsWith("/admin/dashboard") ? "active" : "")">
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <div class="nav-section">
+                <div class="nav-section-title">TORNEOS</div>
+                <a asp-page="/Admin/Torneos/Index" class="nav-item @(currentPath.Contains("/torneos") ? "active" : "")">
+                    <span class="nav-text">Ver Todos</span>
+                </a>
+                <a asp-page="/Admin/Torneos/Create" class="nav-item">
+                    <span class="nav-text">Crear Nuevo</span>
+                </a>
+                @* Sprint 2: Gestión de partidos (HU-7)
+                <a asp-page="/Admin/Partidos/Index" class="nav-item @(currentPath.Contains("/admin/partidos") ? "active" : "")">
+                    <span class="nav-text">Partidos</span>
+                </a>
+                *@
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">GESTIÓN</div>
+                @* Sprint 2: Gestión de usuarios
+                <a asp-page="/Admin/Usuarios/Index" class="nav-item @(currentPath.Contains("/usuarios") ? "active" : "")">
+                    <span class="nav-text">Usuarios</span>
+                </a>
+                *@
+                <a asp-page="/Admin/Arbitros/Pendientes" class="nav-item @(currentPath.Contains("/arbitros") ? "active" : "")">
+                    <span class="nav-text">Árbitros Pendientes</span>
+                </a>
+            </div>
+
+            @* Sprint 2: Auditoría del sistema
+            <div class="nav-section">
+                <div class="nav-section-title">SISTEMA</div>
+                <a asp-page="/Admin/Auditoria" class="nav-item @(currentPath.Contains("/auditoria") ? "active" : "")">
+                    <span class="nav-text">Auditoría</span>
+                </a>
+            </div>
+            *@
+        }
+        else if (userRole == "Jugador")
+        {
+            <a asp-page="/Jugador/Dashboard" class="nav-item @(currentPath.StartsWith("/jugador/dashboard") ? "active" : "")">
+                <span class="nav-text">Mi Dashboard</span>
+            </a>
+            <a asp-page="/Jugador/Perfil" class="nav-item @(currentPath == "/jugador/perfil" ? "active" : "")">
+                <span class="nav-text">Mi Perfil</span>
+            </a>
+            @* Sprint 2: Partidos, búsqueda de equipos y solicitudes (HU-20, HU-21)
+            <a asp-page="/Jugador/Partidos/Index" class="nav-item @(currentPath.Contains("/jugador/partidos") ? "active" : "")">
+                <span class="nav-text">Mis Partidos</span>
+            </a>
+            <a asp-page="/Jugador/BuscarEquipos" class="nav-item @(currentPath.Contains("/buscarequipos") ? "active" : "")">
+                <span class="nav-text">Buscar Equipos</span>
+            </a>
+            <a asp-page="/Jugador/Solicitudes" class="nav-item @(currentPath.Contains("/jugador/solicitudes") ? "active" : "")">
+                <span class="nav-text">Mis Solicitudes</span>
+            </a>
+            *@
+        }
+        else if (userRole == "Entrenador")
+        {
+            <a asp-page="/Entrenador/Dashboard" class="nav-item @(currentPath.StartsWith("/entrenador/dashboard") ? "active" : "")">
+                <span class="nav-text">Mi Dashboard</span>
+            </a>
+            <a asp-page="/Entrenador/Plantilla/Index" class="nav-item @(currentPath.Contains("/plantilla") ? "active" : "")">
+                <span class="nav-text">Plantilla</span>
+            </a>
+            @* Sprint 2: Mi Equipo, Partidos y Solicitudes (HU-22, HU-23, HU-25 ext.)
+            <a asp-page="/Entrenador/MiEquipo" class="nav-item @(currentPath == "/entrenador/miequipo" ? "active" : "")">
+                <span class="nav-text">Mi Equipo</span>
+            </a>
+            <a asp-page="/Entrenador/Partidos/Index" class="nav-item @(currentPath.Contains("/entrenador/partidos") ? "active" : "")">
+                <span class="nav-text">Partidos</span>
+            </a>
+            <a asp-page="/Entrenador/Solicitudes/Index" class="nav-item @(currentPath.Contains("/entrenador/solicitudes") ? "active" : "")">
+                <span class="nav-text">Solicitudes</span>
+            </a>
+            *@
+        }
+        else if (userRole == "Arbitro")
+        {
+            <a asp-page="/Arbitro/Dashboard" class="nav-item @(currentPath.StartsWith("/arbitro/dashboard") ? "active" : "")">
+                <span class="nav-text">Mi Dashboard</span>
+            </a>
+            <a asp-page="/Arbitro/Partidos/Index" class="nav-item @(currentPath.Contains("/arbitro/partidos") ? "active" : "")">
+                <span class="nav-text">Mis Partidos</span>
+            </a>
+        }
+        else if (userRole == "Espectador")
+        {
+            <a asp-page="/Espectador/Index" class="nav-item @(currentPath.StartsWith("/espectador") ? "active" : "")">
+                <span class="nav-text">Inicio</span>
+            </a>
+            <a asp-page="/Espectador/Torneos" class="nav-item">
+                <span class="nav-text">Ver Torneos</span>
+            </a>
+            <a asp-page="/Espectador/Preferencias" class="nav-item @(currentPath.Contains("/preferencias") ? "active" : "")">
+                <span class="nav-text">Mis Preferencias</span>
+            </a>
+        }
+    </nav>
+
+    <div class="sidebar-footer">
+        <a asp-page="/Account/Logout" class="nav-item logout-item">
+            <span class="nav-text">Cerrar Sesión</span>
+        </a>
+    </div>
+</aside>

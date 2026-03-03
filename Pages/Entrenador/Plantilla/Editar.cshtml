@@ -1,0 +1,76 @@
+@page "{id:int}"
+@model ControlTorneosFutbol.Pages.Entrenador.Plantilla.EditarModel
+@{
+    ViewData["Title"] = "Editar Jugador en Plantilla";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Entrenador/Plantilla/Index" asp-route-torneoId="@Model.Input.TorneoId" class="back-link">← Volver a Plantilla</a>
+            <h1>Editar Jugador</h1>
+            <p class="page-subtitle">@Model.NombreEquipo — @Model.NombreTorneo</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    <div class="form-container" style="max-width:480px">
+        <form method="post" class="form-horizontal">
+            <input type="hidden" asp-for="Input.Id" />
+            <input type="hidden" asp-for="Input.TorneoId" />
+
+            <div class="form-section">
+                <h3 class="form-section-title">Datos del Jugador</h3>
+
+                <div class="form-group">
+                    <label>Jugador</label>
+                    <input type="text" class="form-control" value="@Model.NombreJugador" disabled />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Torneo</label>
+                        <input type="text" class="form-control" value="@Model.NombreTorneo" disabled />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Posición</label>
+                        <input type="text" class="form-control"
+                               value="@(Model.PosicionJugador ?? "No especificada")" disabled />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha de Inscripción</label>
+                        <input type="text" class="form-control"
+                               value="@Model.FechaInscripcion.ToString("dd/MM/yyyy")" disabled />
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.NumeroCamiseta" class="required"></label>
+                        <input asp-for="Input.NumeroCamiseta" class="form-control"
+                               type="number" min="1" max="99" />
+                        <span asp-validation-for="Input.NumeroCamiseta" class="text-danger"></span>
+                        <small class="form-hint">Entre 1 y 99. No puede repetirse en el mismo torneo.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                <a asp-page="/Entrenador/Plantilla/Index" asp-route-torneoId="@Model.Input.TorneoId"
+                   class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

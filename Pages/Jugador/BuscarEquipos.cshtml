@@ -1,0 +1,157 @@
+@page
+@model ControlTorneosFutbol.Pages.Jugador.BuscarEquiposModel
+@{
+    ViewData["Title"] = "Buscar Equipos";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Jugador/Dashboard" class="back-link">← Volver al Dashboard</a>
+            <h1>Buscar Equipos</h1>
+            <p class="page-subtitle">Encuentra equipos y solicita unirte</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    <div class="form-container" style="max-width:600px;margin-bottom:24px;">
+        <form method="get" class="form-horizontal">
+            <div class="form-section">
+                <h3 class="form-section-title">Filtros de Búsqueda</h3>
+                <div class="form-group">
+                    <label>Nombre del equipo</label>
+                    <input type="text" name="buscar" class="form-control"
+                           value="@Model.BuscarTerm"
+                           placeholder="Ej: Deportivo FC" />
+                </div>
+                <div class="form-group">
+                    <label>Torneo</label>
+                    <select name="torneoId" class="form-control">
+                        <option value="">-- Todos los torneos --</option>
+                        @foreach (var t in Model.TorneosActivos)
+                        {
+                            <option value="@t.Id" selected="@(Model.TorneoFiltro == t.Id)">@t.Nombre</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+                <a asp-page="/Jugador/BuscarEquipos" class="btn btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Equipos.Any())
+    {
+        <div class="card">
+            <div class="card-header">
+                <h3 style="margin:0;">@Model.Equipos.Count equipo(s)
+                    @if (!string.IsNullOrEmpty(Model.BuscarTerm) || Model.TorneoFiltro.HasValue)
+                    {
+                        <span style="font-weight:400;opacity:0.55;font-size:0.85rem;"> encontrado(s)</span>
+                    }
+                    else
+                    {
+                        <span style="font-weight:400;opacity:0.55;font-size:0.85rem;"> disponibles</span>
+                    }
+                </h3>
+            </div>
+            <div class="card-body" style="padding:0;">
+                @foreach (var eq in Model.Equipos)
+                {
+                    <div style="display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;
+                                padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.05);">
+
+                        <!-- Escudo / color -->
+                        <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;
+                                    background:@(string.IsNullOrEmpty(eq.ColorPrimario) ? "rgba(255,255,255,0.08)" : eq.ColorPrimario + "22");flex-shrink:0;">
+                            @if (!string.IsNullOrEmpty(eq.Logo))
+                            {
+                                <img src="@eq.Logo" style="width:38px;height:38px;object-fit:contain;" alt="@eq.Nombre" />
+                            }
+                            else if (!string.IsNullOrEmpty(eq.Abreviacion))
+                            {
+                                <span style="font-weight:700;font-size:0.78rem;color:@(eq.ColorPrimario ?? "rgba(255,255,255,0.6)");">@eq.Abreviacion</span>
+                            }
+                            else
+                            {
+                                <span style="font-size:1.4rem;opacity:0.3;">⚽</span>
+                            }
+                        </div>
+
+                        <!-- Info del equipo -->
+                        <div>
+                            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
+                                <strong style="font-size:0.95rem;">@eq.Nombre</strong>
+                                @if (!string.IsNullOrEmpty(eq.Abreviacion))
+                                {
+                                    <span style="font-size:0.72rem;opacity:0.4;font-family:monospace;">[@eq.Abreviacion]</span>
+                                }
+                            </div>
+                            <div style="font-size:0.8rem;opacity:0.55;margin-top:2px;">
+                                @if (!string.IsNullOrEmpty(eq.NombreEntrenador))
+                                {
+                                    <span>Entrenador: @eq.NombreEntrenador</span>
+                                    <span style="margin:0 6px;">·</span>
+                                }
+                                <span>@eq.Sede</span>
+                            </div>
+                            @if (eq.TorneosActivos.Any())
+                            {
+                                <div style="font-size:0.75rem;margin-top:4px;">
+                                    @foreach (var t in eq.TorneosActivos)
+                                    {
+                                        <span style="background:rgba(163,255,18,0.1);color:var(--accent);padding:1px 8px;border-radius:4px;margin-right:4px;">@t</span>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div style="font-size:0.75rem;opacity:0.35;margin-top:4px;">Sin torneos activos</div>
+                            }
+                        </div>
+
+                        <!-- Estado + Acción -->
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+                            @if (eq.YaMiembro)
+                            {
+                                <span class="badge badge-activo">Ya eres miembro</span>
+                            }
+                            else if (eq.SolicitudPendiente)
+                            {
+                                <span class="badge" style="background:rgba(163,255,18,0.15);color:var(--accent);">Solicitud enviada</span>
+                            }
+                            else if (eq.PuedeSolicitar)
+                            {
+                                <form method="post" asp-page-handler="Solicitar">
+                                    <input type="hidden" name="equipoId" value="@eq.EquipoId" />
+                                    @if (Model.TorneoFiltro.HasValue)
+                                    {
+                                        <input type="hidden" name="torneoId" value="@Model.TorneoFiltro" />
+                                    }
+                                    <button type="submit" class="btn btn-primary btn-sm">Solicitar Unirme</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>No se encontraron equipos con los filtros aplicados.</p>
+        </div>
+    }
+</div>

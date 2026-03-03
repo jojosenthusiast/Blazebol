@@ -1,0 +1,241 @@
+@page
+@model ControlTorneosFutbol.Pages.Admin.Torneos.ReglasTorneoModel
+@{
+    ViewData["Title"] = "Reglas del Torneo";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Admin/Torneos/Details" asp-route-id="@Model.TorneoId" class="back-link">← Volver al Torneo</a>
+            <h1>Reglas del Torneo</h1>
+            <p class="page-subtitle">@Model.NombreTorneo</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+    @if (!ModelState.IsValid && ModelState.Any(m => m.Value?.Errors.Any() == true))
+    {
+        <div class="alert alert-error">
+            @foreach (var e in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@e.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <!-- SECCIÓN 1: Reglas Base del Sistema (de ConfiguracionTorneo) -->
+    @if (Model.Configuracion != null)
+    {
+        <div class="card" style="margin-bottom:24px;">
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="margin:0;">Reglas Base del Sistema</h3>
+                <span style="font-size:0.8rem;opacity:0.5;">Derivadas de la configuración del torneo</span>
+            </div>
+            <div class="card-body">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+                    <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:14px;">
+                        <div style="font-size:0.72rem;opacity:0.45;margin-bottom:4px;">ACUMULACIÓN DE AMARILLAS</div>
+                        <strong>@Model.Configuracion.TarjetasAmarillasParaSuspension amarillas</strong>
+                        <span style="font-size:0.8rem;opacity:0.55;display:block;margin-top:2px;">→ suspensión de 1 partido</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:14px;">
+                        <div style="font-size:0.72rem;opacity:0.45;margin-bottom:4px;">ROJA DIRECTA</div>
+                        <strong>@Model.Configuracion.PartidosSuspensionTarjetaRoja partidos</strong>
+                        <span style="font-size:0.8rem;opacity:0.55;display:block;margin-top:2px;">de suspensión automática</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:14px;">
+                        <div style="font-size:0.72rem;opacity:0.45;margin-bottom:4px;">CONVOCATORIA</div>
+                        <strong>Mín. @Model.Configuracion.MinimoJugadoresTitulares titulares</strong>
+                        <span style="font-size:0.8rem;opacity:0.55;display:block;margin-top:2px;">Máx. @(Model.Configuracion.MaximoJugadoresConvocados?.ToString() ?? "∞") convocados</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:14px;">
+                        <div style="font-size:0.72rem;opacity:0.45;margin-bottom:4px;">DESEMPATE (1°)</div>
+                        <strong>@Model.Configuracion.CriterioDesempate1</strong>
+                        @if (!string.IsNullOrEmpty(Model.Configuracion.CriterioDesempate2))
+                        {
+                            <span style="font-size:0.8rem;opacity:0.55;display:block;margin-top:2px;">2°: @Model.Configuracion.CriterioDesempate2</span>
+                        }
+                    </div>
+                </div>
+                <p style="margin-top:12px;font-size:0.78rem;opacity:0.4;">
+                    Para modificar estas reglas base edita la <a asp-page="/Admin/Torneos/Details" asp-route-id="@Model.TorneoId" style="color:var(--accent);">Configuración del Torneo</a>.
+                </p>
+            </div>
+        </div>
+    }
+
+    <!-- SECCIÓN 2: Plantillas Rápidas -->
+    <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">
+            <h3 style="margin:0;">Agregar desde Plantilla</h3>
+        </div>
+        <div class="card-body">
+            <p style="font-size:0.83rem;opacity:0.55;margin-bottom:16px;">
+                Reglas comunes del fútbol. <span class="badge badge-activo" style="font-size:0.7rem;">Auto</span>
+                indica que el sistema las puede verificar automáticamente.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;">
+                @foreach (var p in ReglasTorneoModel.Plantillas)
+                {
+                    bool yaExiste = Model.NombresExistentes.Contains(p.Nombre);
+                    <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:14px;border:1px solid rgba(255,255,255,@(yaExiste ? "0.05" : "0.1"));@(yaExiste ? "opacity:0.5;" : "")">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+                            <strong style="font-size:0.88rem;line-height:1.3;">@p.Nombre</strong>
+                            <div style="display:flex;gap:4px;flex-shrink:0;">
+                                <span class="badge" style="background:rgba(255,255,255,0.08);font-size:0.68rem;">@p.Tipo</span>
+                                @if (p.EsAutomatica)
+                                {
+                                    <span class="badge badge-activo" style="font-size:0.68rem;">Auto</span>
+                                }
+                            </div>
+                        </div>
+                        <p style="font-size:0.78rem;opacity:0.55;margin:0 0 10px;line-height:1.4;">@p.Descripcion</p>
+                        @if (yaExiste)
+                        {
+                            <span style="font-size:0.75rem;opacity:0.4;">✓ Ya agregada a este torneo</span>
+                        }
+                        else
+                        {
+                            <form method="post" asp-page-handler="AgregarPlantilla" asp-route-torneoId="@Model.TorneoId">
+                                <input type="hidden" name="nombre" value="@p.Nombre" />
+                                <button type="submit" class="btn btn-secondary btn-sm">+ Agregar</button>
+                            </form>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 3: Reglas Configuradas -->
+    <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">
+            <h3 style="margin:0;">Reglas del Torneo (@Model.Reglas.Count)</h3>
+        </div>
+        <div class="card-body" style="padding:0;">
+            @if (Model.Reglas.Any())
+            {
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Auto</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in Model.Reglas)
+                        {
+                            <tr style="@(r.Activa ? "" : "opacity:0.45;")">
+                                <td style="opacity:0.5;">@r.Orden</td>
+                                <td><strong>@r.Nombre</strong></td>
+                                <td>
+                                    <span class="badge" style="background:rgba(255,255,255,0.1);font-size:0.73rem;">@r.Tipo</span>
+                                </td>
+                                <td style="font-size:0.82rem;max-width:260px;">@r.Descripcion</td>
+                                <td>
+                                    @if (r.EsAutomatica)
+                                    {
+                                        <span class="badge badge-activo" style="font-size:0.7rem;">Sí</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="opacity:0.4;font-size:0.8rem;">—</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge badge-@(r.Activa ? "activo" : "baja")">
+                                        @(r.Activa ? "Activa" : "Inactiva")
+                                    </span>
+                                </td>
+                                <td style="white-space:nowrap;">
+                                    <form method="post" asp-page-handler="ToggleActiva"
+                                          asp-route-torneoId="@Model.TorneoId" asp-route-id="@r.Id"
+                                          style="display:inline;">
+                                        <button type="submit" class="btn btn-secondary btn-sm">
+                                            @(r.Activa ? "Desactivar" : "Activar")
+                                        </button>
+                                    </form>
+                                    <form method="post" asp-page-handler="Eliminar"
+                                          asp-route-torneoId="@Model.TorneoId" asp-route-id="@r.Id"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('¿Eliminar la regla &quot;@r.Nombre&quot;?');">
+                                        <button type="submit" class="btn btn-sm"
+                                                style="background:rgba(239,68,68,0.15);color:#ef4444;margin-left:4px;">
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div style="padding:24px;text-align:center;opacity:0.6;">
+                    <p>No hay reglas configuradas. Usa las plantillas de arriba o crea una propia.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- SECCIÓN 4: Crear regla propia -->
+    <div class="card">
+        <div class="card-header">
+            <h3 style="margin:0;">Crear Regla Personalizada</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="Crear" asp-route-torneoId="@Model.TorneoId" class="form-horizontal">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group">
+                        <label asp-for="Input.Nombre" class="required">Nombre de la Regla</label>
+                        <input asp-for="Input.Nombre" class="form-control" placeholder="Ej: Límite de jugadores extranjeros" />
+                        <span asp-validation-for="Input.Nombre" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Input.Tipo" class="required">Tipo</label>
+                        <select asp-for="Input.Tipo" class="form-control">
+                            <option value="Suspension">Suspensión</option>
+                            <option value="Restriccion">Restricción</option>
+                            <option value="Validacion">Validación</option>
+                            <option value="Custom">Personalizada</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Input.Descripcion" class="required">Descripción</label>
+                    <textarea asp-for="Input.Descripcion" class="form-control" rows="2"
+                              placeholder="Describe qué implica esta regla y cómo se aplica..."></textarea>
+                    <span asp-validation-for="Input.Descripcion" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input asp-for="Input.EsAutomatica" type="checkbox" />
+                        <span>Validación Automática (el sistema la verifica antes del partido)</span>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Crear Regla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

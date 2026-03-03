@@ -1,0 +1,103 @@
+@page
+@model DashboardModel
+@{
+    ViewData["Title"] = "Mi Dashboard - Árbitro";
+    Layout = "_Layout";
+}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Mi Dashboard de Árbitro</h1>
+        <p class="dashboard-subtitle">Bienvenido, @Model.NombreCompleto</p>
+    </div>
+
+    <div class="referee-status-card">
+        <h3>Estado de Cuenta</h3>
+        <div class="status-badge status-@Model.EstadoAprobacion.ToLower()">
+            @Model.EstadoAprobacion
+        </div>
+        @if (Model.EstadoAprobacion == "Pendiente")
+        {
+            <p class="status-message">Tu cuenta está siendo revisada por un administrador.</p>
+        }
+        else if (Model.EstadoAprobacion == "Aprobado")
+        {
+            <p class="status-message">Tu cuenta ha sido aprobada. Ya puedes arbitrar partidos.</p>
+        }
+        else if (Model.EstadoAprobacion == "Rechazado")
+        {
+            <p class="status-message">Tu solicitud ha sido rechazada. Contacta al administrador para más información.</p>
+        }
+    </div>
+
+    @if (Model.EstadoAprobacion == "Aprobado")
+    {
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3>@Model.PartidosArbitrados</h3>
+                    <p>Partidos Arbitrados</p>
+                </div>
+            </div>
+            <div class="stat-card stat-active">
+                <div class="stat-content">
+                    <h3>@Model.ProximosPartidos.Count</h3>
+                    <p>Próximos Asignados</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-actions">
+            <h2>Acciones Rápidas</h2>
+            <div class="action-cards">
+                <a asp-page="/Arbitro/Partidos/Index" class="action-card">
+                    <h3>Mis Partidos</h3>
+                    <p>Ver todos los partidos asignados</p>
+                </a>
+            </div>
+        </div>
+
+        @if (Model.ProximosPartidos.Any())
+        {
+            <div style="margin-top:24px;">
+                <h2>Próximos Partidos Asignados</h2>
+                <div class="card" style="margin-top:12px;">
+                    <div class="card-body" style="padding:0;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha y Hora</th>
+                                    <th>Torneo</th>
+                                    <th>Partido</th>
+                                    <th>Sede</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in Model.ProximosPartidos)
+                                {
+                                    <tr>
+                                        <td>@p.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td style="font-size:0.85rem;opacity:0.8;">@p.NombreTorneo</td>
+                                        <td><strong>@p.NombreLocal</strong> vs <strong>@p.NombreVisitante</strong></td>
+                                        <td style="font-size:0.85rem;opacity:0.8;">@(p.Sede ?? "—")</td>
+                                        <td>
+                                            <a asp-page="/Arbitro/Partidos/Index" class="btn btn-primary btn-sm">Ver lista</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state" style="margin-top:24px;">
+                <p>No tienes partidos asignados próximamente.</p>
+                <p style="font-size:0.85rem;opacity:0.6;">Los partidos que te asigne el administrador aparecerán aquí.</p>
+            </div>
+        }
+    }
+</div>

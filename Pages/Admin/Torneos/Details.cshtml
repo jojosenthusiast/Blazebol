@@ -1,0 +1,314 @@
+@page "{id:int}"
+@model DetailsModel
+@{
+    ViewData["Title"] = "Detalles del Torneo";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Admin/Torneos/Index" class="back-link">← Volver a Torneos</a>
+            <h1>@Model.Torneo.Nombre</h1>
+            <span class="badge badge-@Model.Torneo.Estado.ToLower()">@Model.Torneo.Estado</span>
+        </div>
+        <div class="header-actions">
+            @if (Model.PuedeEditar)
+            {
+                <a asp-page="/Admin/Torneos/Edit" asp-route-id="@Model.Torneo.Id" class="btn btn-secondary">
+                     Editar
+                </a>
+            }
+            <a asp-page="/Admin/Torneos/ReglasTorneo" asp-route-torneoId="@Model.Torneo.Id" class="btn btn-primary">
+                 Configurar Reglas
+            </a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+
+    @* ── BANNER CAMPEÓN (solo cuando Finalizado) ── *@
+    @if (Model.Torneo.Estado == "Finalizado")
+    {
+        <div style="border:1px solid rgba(255,215,0,0.35);border-radius:14px;background:rgba(255,215,0,0.06);
+                    padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+            <div style="font-size:2rem;">🏆</div>
+            <div style="flex:1;min-width:200px;">
+                <div style="font-size:0.68rem;opacity:0.5;letter-spacing:0.1em;margin-bottom:4px;">TORNEO FINALIZADO — CAMPEÓN</div>
+                @if (!string.IsNullOrEmpty(Model.NombreCampeon))
+                {
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        @if (!string.IsNullOrEmpty(Model.LogoCampeon))
+                        {
+                            <img src="@Model.LogoCampeon" style="width:36px;height:36px;object-fit:contain;border-radius:6px;" />
+                        }
+                        else if (!string.IsNullOrEmpty(Model.ColorCampeon))
+                        {
+                            <span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:@Model.ColorCampeon;"></span>
+                        }
+                        <div>
+                            <div style="font-size:1.4rem;font-weight:900;color:#FFD700;">@Model.NombreCampeon</div>
+                            @if (!string.IsNullOrEmpty(Model.AbreviacionCampeon))
+                            {
+                                <div style="font-size:0.75rem;opacity:0.45;">[@Model.AbreviacionCampeon]</div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div style="font-size:1rem;opacity:0.5;font-style:italic;">Sin datos suficientes para determinar el campeón</div>
+                }
+            </div>
+            <div style="display:flex;gap:20px;text-align:center;">
+                @if (Model.TotalPartidosJugados > 0)
+                {
+                    <div>
+                        <div style="font-size:0.65rem;opacity:0.4;letter-spacing:0.07em;">PARTIDOS</div>
+                        <div style="font-size:1.5rem;font-weight:800;">@Model.TotalPartidosJugados</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.65rem;opacity:0.4;letter-spacing:0.07em;">GOLES</div>
+                        <div style="font-size:1.5rem;font-weight:800;">@Model.TotalGolesAnotados</div>
+                    </div>
+                }
+            </div>
+            @* Sprint 2: Gestión de partidos del torneo (HU-7)
+            <div>
+                <a asp-page="/Admin/Partidos/Index" asp-route-torneoId="@Model.Torneo.Id"
+                   class="btn btn-sm btn-secondary">Ver Partidos</a>
+            </div>
+            *@
+        </div>
+    }
+
+    <div class="details-grid">
+        <div class="details-card">
+            <h3>Información General</h3>
+            <div class="detail-item">
+                <span class="detail-label">Liga:</span>
+                <span class="detail-value">@Model.Torneo.NombreLiga</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Temporada:</span>
+                <span class="detail-value">@Model.Torneo.NombreTemporada</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Categoría:</span>
+                <span class="detail-value">@Model.Torneo.NombreCategoria</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Formato:</span>
+                <span class="detail-value">
+                    @switch (Model.Torneo.Formato)
+                    {
+                        case "TodosContraTodos":
+                            <span>Todos contra Todos (Liga)</span>
+                            break;
+                        case "EliminacionDirecta":
+                            <span>Eliminación Directa</span>
+                            break;
+                        case "GruposYEliminacion":
+                            <span>Grupos + Eliminación</span>
+                            break;
+                        default:
+                            <span>@Model.Torneo.Formato</span>
+                            break;
+                    }
+                </span>
+            </div>
+        </div>
+
+        <div class="details-card">
+            <h3>Fechas</h3>
+            <div class="detail-item">
+                <span class="detail-label">Fecha Inicio:</span>
+                <span class="detail-value">@Model.Torneo.FechaInicio.ToString("dd/MM/yyyy")</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Fecha Fin:</span>
+                <span class="detail-value">@Model.Torneo.FechaFin.ToString("dd/MM/yyyy")</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Duración:</span>
+                <span class="detail-value">@((Model.Torneo.FechaFin - Model.Torneo.FechaInicio).Days) días</span>
+            </div>
+        </div>
+
+        <div class="details-card">
+            <h3>Equipos</h3>
+            <div class="detail-item">
+                <span class="detail-label">Inscritos:</span>
+                <span class="detail-value">@Model.Torneo.NumeroEquiposInscritos</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Mínimo:</span>
+                <span class="detail-value">@Model.Torneo.NumeroEquiposMinimo</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Máximo:</span>
+                <span class="detail-value">@(Model.Torneo.NumeroEquiposMaximo?.ToString() ?? "Sin límite")</span>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Configuracion != null)
+    {
+        <div class="config-section">
+            <h2>Configuración de Puntuación y Reglas</h2>
+            <div class="config-grid">
+                <div class="config-card">
+                    <h3>Puntuación</h3>
+                    <ul class="config-list">
+                        <li>Victoria: <strong>@Model.Configuracion.PuntosPorVictoria</strong> puntos</li>
+                        <li>Empate: <strong>@Model.Configuracion.PuntosPorEmpate</strong> puntos</li>
+                        <li>Derrota: <strong>@Model.Configuracion.PuntosPorDerrota</strong> puntos</li>
+                    </ul>
+                </div>
+
+                <div class="config-card">
+                    <h3>Criterios de Desempate</h3>
+                    <ol class="config-list">
+                        <li>@Model.Configuracion.CriterioDesempate1</li>
+                        @if (!string.IsNullOrEmpty(Model.Configuracion.CriterioDesempate2))
+                        {
+                            <li>@Model.Configuracion.CriterioDesempate2</li>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Configuracion.CriterioDesempate3))
+                        {
+                            <li>@Model.Configuracion.CriterioDesempate3</li>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Configuracion.CriterioDesempate4))
+                        {
+                            <li>@Model.Configuracion.CriterioDesempate4</li>
+                        }
+                    </ol>
+                </div>
+
+                <div class="config-card">
+                    <h3>Sanciones Disciplinarias</h3>
+                    <ul class="config-list">
+                        <li>Tarjetas amarillas para suspensión: <strong>@Model.Configuracion.TarjetasAmarillasParaSuspension</strong></li>
+                        <li>Partidos de suspensión por roja: <strong>@Model.Configuracion.PartidosSuspensionTarjetaRoja</strong></li>
+                    </ul>
+                </div>
+
+                <div class="config-card">
+                    <h3>Convocatorias</h3>
+                    <ul class="config-list">
+                        <li>Jugadores titulares mínimos: <strong>@Model.Configuracion.MinimoJugadoresTitulares</strong></li>
+                        <li>Jugadores convocados máximo: <strong>@Model.Configuracion.MaximoJugadoresConvocados</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.ReglasPersonalizadas.Any())
+        {
+            <div class="rules-section">
+                <div class="section-header">
+                    <h2>Reglas Personalizadas del Torneo</h2>
+                    <a asp-page="/Admin/Torneos/ReglasTorneo" asp-route-torneoId="@Model.Torneo.Id" class="btn btn-secondary btn-sm">
+                        Gestionar Reglas
+                    </a>
+                </div>
+                
+                <div class="rules-list">
+                    @foreach (var regla in Model.ReglasPersonalizadas)
+                    {
+                        <div class="rule-card rule-@regla.Tipo.ToLower()">
+                            <div class="rule-header">
+                                <span class="rule-icon">
+                                    @switch (regla.Tipo)
+                                    {
+                                        case "Suspension":
+                                            <span>🚫</span>
+                                            break;
+                                        case "Restriccion":
+                                            <span>⚠️</span>
+                                            break;
+                                        case "Validacion":
+                                            <span>✅</span>
+                                            break;
+                                        default:
+                                            <span>📋</span>
+                                            break;
+                                    }
+                                </span>
+                                <h4>@regla.Nombre</h4>
+                                <span class="rule-badge badge-@(regla.Activa ? "success" : "inactive")">
+                                    @(regla.Activa ? "Activa" : "Inactiva")
+                                </span>
+                            </div>
+                            <p class="rule-description">@regla.Descripcion</p>
+                            @if (regla.EsAutomatica)
+                            {
+                                <span class="rule-tag">Validación Automática</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <p>No hay reglas personalizadas configuradas para este torneo</p>
+                <a asp-page="/Admin/Torneos/ReglasTorneo" asp-route-torneoId="@Model.Torneo.Id" class="btn btn-primary">
+                    Agregar Reglas Personalizadas
+                </a>
+            </div>
+        }
+    }
+
+    <div class="section-header">
+        <h2>Equipos Inscritos</h2>
+        <a asp-page="/Admin/Torneos/InscribirEquipo" asp-route-torneoId="@Model.Torneo.Id" class="btn btn-primary btn-sm">
+            Inscribir Equipo
+        </a>
+    </div>
+
+    @if (Model.EquiposInscritos.Any())
+    {
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:24px;">
+            @foreach (var eq in Model.EquiposInscritos)
+            {
+                string bgEq = eq.ColorPrimario != null ? eq.ColorPrimario + "18" : "rgba(255,255,255,0.04)";
+                <div style="background:@bgEq;border:1px solid rgba(255,255,255,0.08);border-radius:10px;
+                            padding:12px 14px;display:flex;align-items:center;gap:10px;">
+                    @if (!string.IsNullOrEmpty(eq.Logo))
+                    {
+                        <img src="@eq.Logo" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;border-radius:4px;" />
+                    }
+                    else if (!string.IsNullOrEmpty(eq.ColorPrimario))
+                    {
+                        <span style="display:inline-block;width:14px;height:14px;border-radius:3px;
+                                     background:@eq.ColorPrimario;flex-shrink:0;"></span>
+                    }
+                    <div style="min-width:0;">
+                        <div style="font-weight:600;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@eq.Nombre</div>
+                        @if (!string.IsNullOrEmpty(eq.Abreviacion))
+                        {
+                            <div style="font-size:0.68rem;opacity:0.4;">[@eq.Abreviacion]</div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>Aún no hay equipos inscritos en este torneo</p>
+            @if (Model.Torneo.Estado != "Finalizado")
+            {
+                <a asp-page="/Admin/Torneos/InscribirEquipo" asp-route-torneoId="@Model.Torneo.Id" class="btn btn-primary btn-sm">
+                    Inscribir Primer Equipo
+                </a>
+            }
+        </div>
+    }
+</div>

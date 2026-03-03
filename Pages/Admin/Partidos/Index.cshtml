@@ -1,0 +1,113 @@
+@page
+@model ControlTorneosFutbol.Pages.Admin.Partidos.IndexModel
+@{
+    ViewData["Title"] = "Partidos";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>Partidos</h1>
+            <p class="page-subtitle">Gestiona todos los partidos del torneo</p>
+        </div>
+        <div class="header-actions">
+            <a asp-page="/Admin/Partidos/Crear" class="btn btn-primary">Crear Partido</a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    <div class="filters-section">
+        <form method="get" class="filters-form">
+            <div class="filter-group">
+                <label>Torneo:</label>
+                <select name="torneoId" class="form-control" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    @foreach (var torneo in Model.TorneosDisponibles)
+                    {
+                        <option value="@torneo.Key" selected="@(Model.FiltroTorneoId == torneo.Key)">@torneo.Value</option>
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Estado:</label>
+                <select name="estado" class="form-control" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    <option value="Programado" selected="@(Model.FiltroEstado == "Programado")">Programado</option>
+                    <option value="EnCurso" selected="@(Model.FiltroEstado == "EnCurso")">En Curso</option>
+                    <option value="Finalizado" selected="@(Model.FiltroEstado == "Finalizado")">Finalizado</option>
+                    <option value="Cancelado" selected="@(Model.FiltroEstado == "Cancelado")">Cancelado</option>
+                </select>
+            </div>
+
+            <a asp-page="/Admin/Partidos/Index" class="btn btn-link">Limpiar</a>
+        </form>
+    </div>
+
+    @if (Model.Partidos.Any())
+    {
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Torneo</th>
+                        <th>Partido</th>
+                        <th>Resultado</th>
+                        <th>Árbitro</th>
+                        <th>Sede</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var partido in Model.Partidos)
+                    {
+                        <tr>
+                            <td>@partido.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@partido.NombreTorneo</td>
+                            <td>
+                                <strong>@partido.NombreLocal</strong>
+                                <span style="margin: 0 6px; opacity: 0.6;">vs</span>
+                                <strong>@partido.NombreVisitante</strong>
+                            </td>
+                            <td>@partido.Resultado</td>
+                            <td>@(partido.NombreArbitro ?? "—")</td>
+                            <td>@(partido.Sede ?? "—")</td>
+                            <td>
+                                <span class="badge badge-@partido.Estado.ToLower()">
+                                    @partido.Estado
+                                </span>
+                            </td>
+                            <td style="display:flex;gap:6px;">
+                                <a asp-page="/Admin/Partidos/Details" asp-route-id="@partido.Id" class="btn btn-secondary btn-sm">Ver</a>
+                                <a asp-page="/Admin/Partidos/Editar" asp-route-id="@partido.Id" class="btn btn-primary btn-sm">Editar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-summary">
+            <p>Mostrando @Model.Partidos.Count partido(s)</p>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>No se encontraron partidos con los filtros seleccionados</p>
+            <a asp-page="/Admin/Partidos/Crear" class="btn btn-primary">Crear Primer Partido</a>
+        </div>
+    }
+</div>

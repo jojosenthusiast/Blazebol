@@ -1,0 +1,117 @@
+@page
+@model DashboardModel
+@{
+    ViewData["Title"] = "Mi Dashboard - Entrenador";
+    Layout = "_Layout";
+}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Mi Dashboard de Entrenador</h1>
+        <p class="dashboard-subtitle">Bienvenido, @Model.NombreCompleto</p>
+    </div>
+
+    <div class="coach-info-card">
+        <div class="coach-details">
+            <h2>@Model.NombreCompleto</h2>
+            @if (!string.IsNullOrEmpty(Model.NombreEquipo))
+            {
+                <p class="team-name">
+                    <strong>Equipo:</strong> @Model.NombreEquipo
+                </p>
+            }
+            else
+            {
+                <p class="no-team">Sin equipo asignado</p>
+            }
+        </div>
+    </div>
+
+    @* Sprint 2: Estadísticas de rendimiento del equipo (HU-22/23)
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-content">
+                <h3>@Model.JugadoresEnPlantilla</h3>
+                <p>Jugadores en Plantilla</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <h3>@Model.PartidosJugados</h3>
+                <p>Partidos Jugados</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-success">
+            <div class="stat-content">
+                <h3>@Model.Victorias</h3>
+                <p>Victorias</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <h3>@Model.Empates</h3>
+                <p>Empates</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-danger">
+            <div class="stat-content">
+                <h3>@Model.Derrotas</h3>
+                <p>Derrotas</p>
+            </div>
+        </div>
+    </div>
+    *@
+
+    <div class="dashboard-actions">
+        <h2>Acciones Rápidas</h2>
+        <div class="action-cards">
+            <a asp-page="/Entrenador/Plantilla/Index" class="action-card">
+                <h3>Gestionar Plantilla</h3>
+                <p>Agregar, editar o eliminar jugadores</p>
+            </a>
+
+            @* Sprint 2: Solicitudes de jugadores, equipo, partidos y estadísticas (HU-22, HU-23, HU-25 ext.)
+            <a asp-page="/Entrenador/Solicitudes/Index" class="action-card">
+                <h3>Solicitudes de Jugadores</h3>
+                <p>Revisar solicitudes pendientes e invitaciones enviadas</p>
+            </a>
+
+            <a asp-page="/Entrenador/MiEquipo" class="action-card">
+                <h3>Mi Equipo</h3>
+                <p>Ver información y torneos del equipo</p>
+            </a>
+
+            <a asp-page="/Entrenador/Partidos/Index" class="action-card">
+                <h3>Partidos</h3>
+                <p>Calendario, resultados y convocatoria</p>
+            </a>
+
+            <div class="action-card" style="opacity:0.4; cursor:not-allowed;">
+                <h3>Estadísticas</h3>
+                <p>Próximamente disponible</p>
+            </div>
+            *@
+        </div>
+    </div>
+
+    @* Sprint 2: Próximos partidos del entrenador (HU-22/23)
+    @if (Model.ProximosPartidos.Any())
+    {
+        <div class="upcoming-matches">
+            <h2>Próximos Partidos</h2>
+            <div class="matches-list">
+                @foreach (var partido in Model.ProximosPartidos)
+                {
+                    <div class="match-card">
+                        <p class="match-info">@partido</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    *@
+</div>

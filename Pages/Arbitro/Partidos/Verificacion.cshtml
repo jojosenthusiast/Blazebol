@@ -1,0 +1,158 @@
+@page "{id:int}"
+@model ControlTorneosFutbol.Pages.Arbitro.Partidos.VerificacionModel
+@{
+    ViewData["Title"] = "Verificación de Identidades";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Arbitro/Partidos/Index" class="back-link">← Volver a Mis Partidos</a>
+            <h1>Verificación de Identidades</h1>
+            <p class="page-subtitle">
+                @Model.NombreLocal vs @Model.NombreVisitante —
+                @Model.FechaPartido.ToString("dd/MM/yyyy HH:mm")
+                @if (!string.IsNullOrEmpty(Model.Sede))
+                {
+                    <span>· @Model.Sede</span>
+                }
+            </p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+    else
+    {
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+            <!-- EQUIPO LOCAL -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="margin: 0; font-size: 1.1rem;">@Model.NombreLocal <span style="font-size: 0.8rem; opacity: 0.6;">(Local)</span></h2>
+                </div>
+                <div class="card-body">
+
+                    @if (Model.EntrenadoresLocal.Any())
+                    {
+                        <h4 style="color: var(--accent); margin-bottom: 8px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Cuerpo Técnico</h4>
+                        <table class="data-table" style="margin-bottom: 20px; font-size: 0.9rem;">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Rol</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var e in Model.EntrenadoresLocal)
+                                {
+                                    <tr>
+                                        <td>@e.NombreCompleto</td>
+                                        <td>@e.Rol</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+
+                    <h4 style="color: var(--accent); margin-bottom: 8px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Jugadores (@Model.JugadoresLocal.Count)</h4>
+                    @if (Model.JugadoresLocal.Any())
+                    {
+                        <table class="data-table" style="font-size: 0.9rem;">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nombre</th>
+                                    <th>Posición</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var j in Model.JugadoresLocal)
+                                {
+                                    <tr>
+                                        <td><strong>@j.NumeroCamiseta</strong></td>
+                                        <td>@j.NombreCompleto</td>
+                                        <td>@j.Rol</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p style="opacity: 0.6; font-size: 0.9rem;">Sin jugadores inscritos</p>
+                    }
+                </div>
+            </div>
+
+            <!-- EQUIPO VISITANTE -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="margin: 0; font-size: 1.1rem;">@Model.NombreVisitante <span style="font-size: 0.8rem; opacity: 0.6;">(Visitante)</span></h2>
+                </div>
+                <div class="card-body">
+
+                    @if (Model.EntrenadoresVisitante.Any())
+                    {
+                        <h4 style="color: var(--accent); margin-bottom: 8px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Cuerpo Técnico</h4>
+                        <table class="data-table" style="margin-bottom: 20px; font-size: 0.9rem;">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Rol</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var e in Model.EntrenadoresVisitante)
+                                {
+                                    <tr>
+                                        <td>@e.NombreCompleto</td>
+                                        <td>@e.Rol</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+
+                    <h4 style="color: var(--accent); margin-bottom: 8px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Jugadores (@Model.JugadoresVisitante.Count)</h4>
+                    @if (Model.JugadoresVisitante.Any())
+                    {
+                        <table class="data-table" style="font-size: 0.9rem;">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nombre</th>
+                                    <th>Posición</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var j in Model.JugadoresVisitante)
+                                {
+                                    <tr>
+                                        <td><strong>@j.NumeroCamiseta</strong></td>
+                                        <td>@j.NombreCompleto</td>
+                                        <td>@j.Rol</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p style="opacity: 0.6; font-size: 0.9rem;">Sin jugadores inscritos</p>
+                    }
+                </div>
+            </div>
+
+        </div>
+
+        <div style="margin-top: 24px; display: flex; gap: 12px;">
+            <a asp-page="/Arbitro/Partidos/Jugadores" asp-route-id="@Model.PartidoId"
+               class="btn btn-secondary">Ver Lista de Jugadores</a>
+            <a asp-page="/Arbitro/Partidos/Index" class="btn btn-link">Volver</a>
+        </div>
+    }
+</div>

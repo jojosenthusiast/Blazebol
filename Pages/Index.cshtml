@@ -1,0 +1,48 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>Sistema de Control de Torneos de Fútbol</h1>
+        <p class="hero-subtitle">Gestiona torneos, equipos, jugadores y partidos de manera profesional</p>
+        
+        @if (!Model.IsAuthenticated)
+        {
+            <div class="hero-buttons">
+                <a asp-page="/Account/Register" class="btn btn-primary">Crear Cuenta</a>
+                <a asp-page="/Account/Login" class="btn btn-secondary">Iniciar Sesión</a>
+            </div>
+        }
+        else
+        {
+            <div class="hero-buttons">
+                <a asp-page="@Model.DashboardPage" class="btn btn-primary">Ir al Dashboard</a>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="features-section">
+    <h2>Funcionalidades</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <h3>Gestión de Torneos</h3>
+            <p>Crea y administra torneos con diferentes formatos: liga, eliminación directa y más</p>
+        </div>
+        <div class="feature-card">
+            <h3>Equipos y Jugadores</h3>
+            <p>Registra equipos, gestiona plantillas y realiza seguimiento de estadísticas</p>
+        </div>
+        <div class="feature-card">
+            <h3>Tablas de Posiciones</h3>
+            <p>Visualiza clasificaciones actualizadas automáticamente con criterios de desempate</p>
+        </div>
+        <div class="feature-card">
+            <h3>Calendario de Partidos</h3>
+            <p>Programa encuentros, asigna árbitros y gestiona reprogramaciones</p>
+        </div>
+    </div>
+</div>

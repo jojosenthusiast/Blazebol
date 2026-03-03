@@ -1,0 +1,55 @@
+@page
+@model ControlTorneosFutbol.Pages.Espectador.PreferenciasModel
+@{
+    ViewData["Title"] = "Mis Preferencias";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Mis Preferencias</h1>
+        <p class="page-subtitle">Personaliza tu experiencia en el sistema</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success">@Model.SuccessMessage</div>
+}
+
+<form method="post" class="preferences-form">
+    <div class="form-card">
+        <h3>Equipo Favorito</h3>
+        <p class="form-description">Selecciona tu equipo favorito para recibir actualizaciones personalizadas</p>
+        
+        <div class="form-group">
+            <label asp-for="EquipoFavoritoId">Equipo Favorito:</label>
+            <select asp-for="EquipoFavoritoId" class="form-control">
+                <option value="">Sin equipo favorito</option>
+                @foreach (var equipo in Model.EquiposDisponibles)
+                {
+                    <option value="@equipo.Key">@equipo.Value</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h3>Notificaciones</h3>
+        <p class="form-description">Configura cómo deseas recibir información</p>
+        
+        <div class="form-group">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" asp-for="NotificacionesEmail" id="notif-email" />
+                <label for="notif-email">
+                    Recibir notificaciones por correo electrónico
+                </label>
+            </div>
+            <small class="form-hint">Te enviaremos actualizaciones sobre torneos y tu equipo favorito</small>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Guardar Preferencias</button>
+        <a asp-page="/Espectador/Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>

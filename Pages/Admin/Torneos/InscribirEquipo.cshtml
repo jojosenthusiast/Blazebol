@@ -1,0 +1,152 @@
+@page
+@model ControlTorneosFutbol.Pages.Admin.Torneos.InscribirEquipoModel
+@{
+    ViewData["Title"] = "Inscribir Equipo";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Admin/Torneos/Details" asp-route-id="@Model.TorneoId" class="back-link">← Volver al Torneo</a>
+            <h1>Inscribir Equipo</h1>
+            <p class="page-subtitle">
+                @Model.NombreTorneo
+                — @Model.EquiposInscritos.Count inscritos
+                @if (Model.MaxEquipos.HasValue)
+                {
+                    <span>/ @Model.MaxEquipos máx.</span>
+                }
+            </p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.EstadoTorneo == "Finalizado")
+    {
+        <div class="alert alert-error">Este torneo está finalizado. No se pueden inscribir más equipos.</div>
+    }
+    else
+    {
+        <!-- Búsqueda -->
+        <div class="form-container" style="max-width:500px;margin-bottom:24px;">
+            <form method="get" class="form-horizontal">
+                <input type="hidden" name="torneoId" value="@Model.TorneoId" />
+                <div class="form-group">
+                    <label>Buscar equipo por nombre</label>
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" name="buscar" class="form-control"
+                               value="@Model.BuscarTerm" placeholder="Nombre del equipo..." />
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                        @if (!string.IsNullOrEmpty(Model.BuscarTerm))
+                        {
+                            <a asp-page="/Admin/Torneos/InscribirEquipo" asp-route-torneoId="@Model.TorneoId"
+                               class="btn btn-secondary">Limpiar</a>
+                        }
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Equipos disponibles -->
+        <div class="card" style="margin-bottom:24px;">
+            <div class="card-header">
+                <h3 style="margin:0;">
+                    Equipos Disponibles
+                    @if (!string.IsNullOrEmpty(Model.BuscarTerm))
+                    {
+                        <span style="font-size:0.8rem;opacity:0.6;">— filtrado por "@Model.BuscarTerm"</span>
+                    }
+                </h3>
+            </div>
+            <div class="card-body" style="padding:0;">
+                @if (Model.EquiposDisponibles.Any())
+                {
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Sede</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var e in Model.EquiposDisponibles)
+                            {
+                                <tr>
+                                    <td><strong>@e.Nombre</strong></td>
+                                    <td>@(e.Sede ?? "—")</td>
+                                    <td>
+                                        <form method="post">
+                                            <input type="hidden" name="torneoId" value="@Model.TorneoId" />
+                                            <input type="hidden" name="equipoId" value="@e.EquipoId" />
+                                            <button type="submit" class="btn btn-primary btn-sm">Inscribir</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div style="padding:24px;text-align:center;opacity:0.6;">
+                        @if (!string.IsNullOrEmpty(Model.BuscarTerm))
+                        {
+                            <p>No se encontraron equipos con "@Model.BuscarTerm" disponibles para inscribir.</p>
+                        }
+                        else
+                        {
+                            <p>Todos los equipos ya están inscritos o no hay equipos registrados.</p>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Equipos ya inscritos -->
+    <div class="card">
+        <div class="card-header">
+            <h3 style="margin:0;">Ya Inscritos (@Model.EquiposInscritos.Count)</h3>
+        </div>
+        <div class="card-body" style="padding:0;">
+            @if (Model.EquiposInscritos.Any())
+            {
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Sede</th>
+                            <th>Fecha Inscripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var e in Model.EquiposInscritos)
+                        {
+                            <tr>
+                                <td>@e.Nombre</td>
+                                <td>@(e.Sede ?? "—")</td>
+                                <td>@e.FechaInscripcion?.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div style="padding:24px;text-align:center;opacity:0.6;">
+                    <p>Ningún equipo inscrito aún.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

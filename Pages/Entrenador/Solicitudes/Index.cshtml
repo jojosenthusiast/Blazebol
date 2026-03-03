@@ -1,0 +1,183 @@
+@page
+@model ControlTorneosFutbol.Pages.Entrenador.Solicitudes.IndexModel
+@{
+    ViewData["Title"] = "Solicitudes";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Entrenador/Dashboard" class="back-link">← Volver al Dashboard</a>
+            <h1>Solicitudes</h1>
+            <p class="page-subtitle">@Model.NombreEquipo</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    <!-- Solicitudes recibidas de jugadores -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h3 style="margin:0;">Solicitudes de Jugadores
+                @if (Model.SolicitudesRecibidas.Any())
+                {
+                    <span class="badge badge-activo" style="margin-left:8px;">@Model.SolicitudesRecibidas.Count</span>
+                }
+            </h3>
+        </div>
+        <div class="card-body">
+            @if (Model.SolicitudesRecibidas.Any())
+            {
+                @foreach (var s in Model.SolicitudesRecibidas)
+                {
+                    <div style="border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:16px;margin-bottom:12px;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                            <div>
+                                <strong style="font-size:1.05rem;">@s.NombreJugador</strong>
+                                <span style="opacity:0.5;margin-left:8px;font-size:0.82rem;">@s.NombreTorneo</span>
+                                <br />
+                                <small style="opacity:0.4;">@s.Fecha.ToString("dd/MM/yyyy HH:mm")</small>
+                            </div>
+                            <span class="badge" style="background:rgba(163,255,18,0.15);color:var(--accent);font-size:0.75rem;">Pendiente</span>
+                        </div>
+
+                        <!-- Información del jugador -->
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:12px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.06);">
+                            @if (!string.IsNullOrEmpty(s.Email))
+                            {
+                                <div>
+                                    <div style="font-size:0.65rem;opacity:0.45;letter-spacing:0.06em;margin-bottom:2px;">EMAIL</div>
+                                    <div style="font-size:0.82rem;word-break:break-all;">@s.Email</div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(s.Telefono))
+                            {
+                                <div>
+                                    <div style="font-size:0.65rem;opacity:0.45;letter-spacing:0.06em;margin-bottom:2px;">TELÉFONO</div>
+                                    <div style="font-size:0.82rem;">@s.Telefono</div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(s.Posicion))
+                            {
+                                <div>
+                                    <div style="font-size:0.65rem;opacity:0.45;letter-spacing:0.06em;margin-bottom:2px;">POSICIÓN</div>
+                                    <div style="font-size:0.82rem;">@s.Posicion</div>
+                                </div>
+                            }
+                            @if (s.Edad.HasValue)
+                            {
+                                <div>
+                                    <div style="font-size:0.65rem;opacity:0.45;letter-spacing:0.06em;margin-bottom:2px;">EDAD</div>
+                                    <div style="font-size:0.82rem;">@s.Edad años</div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(s.Mensaje))
+                        {
+                            <div style="font-size:0.85rem;font-style:italic;opacity:0.7;margin-bottom:12px;padding-left:4px;border-left:2px solid rgba(163,255,18,0.3);">"@s.Mensaje"</div>
+                        }
+
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <form method="post" asp-page-handler="Aceptar" asp-route-id="@s.Id" style="display:flex;gap:8px;align-items:center;">
+                                <input type="number" name="numeroCamiseta" placeholder="Nº Camiseta" min="1" max="99"
+                                       class="form-control" style="width:130px;" required />
+                                <button type="submit" class="btn btn-primary btn-sm">Aceptar</button>
+                            </form>
+                            <form method="post" asp-page-handler="Rechazar" asp-route-id="@s.Id"
+                                  onsubmit="return confirm('¿Rechazar la solicitud de @s.NombreJugador?');">
+                                <button type="submit" class="btn btn-secondary btn-sm">Rechazar</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p style="opacity:0.6;">No hay solicitudes pendientes de jugadores.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Invitaciones enviadas -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h3 style="margin:0;">Invitaciones Enviadas</h3>
+        </div>
+        <div class="card-body">
+            @if (Model.InvitacionesEnviadas.Any())
+            {
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Jugador</th>
+                            <th>Torneo</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var inv in Model.InvitacionesEnviadas)
+                        {
+                            <tr>
+                                <td>@inv.NombreJugador</td>
+                                <td>@inv.NombreTorneo</td>
+                                <td>@inv.Fecha.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <span class="badge badge-@inv.Estado.ToLower()">@inv.Estado</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p style="opacity:0.6;">No has enviado invitaciones aún.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Historial -->
+    @if (Model.Historial.Any())
+    {
+        <details>
+            <summary style="cursor:pointer;padding:12px;opacity:0.7;font-size:0.9rem;">
+                Historial de solicitudes (@Model.Historial.Count)
+            </summary>
+            <div class="card" style="margin-top:8px;">
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Jugador</th>
+                                <th>Torneo</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var h in Model.Historial)
+                            {
+                                <tr>
+                                    <td>@h.NombreJugador</td>
+                                    <td>@h.NombreTorneo</td>
+                                    <td>@h.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td><span class="badge badge-@h.Estado.ToLower()">@h.Estado</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+    }
+</div>

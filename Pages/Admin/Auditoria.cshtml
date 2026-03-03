@@ -1,0 +1,126 @@
+@page
+@model ControlTorneosFutbol.Pages.Admin.AuditoriaModel
+@{
+    ViewData["Title"] = "Auditoría de Accesos";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Auditoría de Accesos</h1>
+        <p class="page-subtitle">Registro completo de intentos de acceso al sistema</p>
+    </div>
+</div>
+
+<div class="stats-grid" style="margin-bottom: 24px;">
+    <div class="stat-card">
+        <div class="stat-label">Total Accesos Hoy</div>
+        <div class="stat-value">@Model.AccesosHoy</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Intentos Fallidos Hoy</div>
+        <div class="stat-value" style="color: var(--color-error);">@Model.FallidosHoy</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Usuarios Bloqueados</div>
+        <div class="stat-value" style="color: var(--color-error);">@Model.UsuariosBloqueados</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Accesos Exitosos</div>
+        <div class="stat-value" style="color: var(--color-success);">@Model.ExitososHoy</div>
+    </div>
+</div>
+
+<div class="filters-section">
+    <form method="get" class="filters-form">
+        <div class="filter-group">
+            <label>Resultado:</label>
+            <select name="resultado" class="form-control" onchange="this.form.submit()">
+                <option value="">Todos</option>
+                <option value="exitoso" selected="@(Model.FiltroResultado == "exitoso")">Exitosos</option>
+                <option value="fallido" selected="@(Model.FiltroResultado == "fallido")">Fallidos</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Últimos:</label>
+            <select name="dias" class="form-control" onchange="this.form.submit()">
+                <option value="1" selected="@(Model.FiltroDias == 1)">24 horas</option>
+                <option value="7" selected="@(Model.FiltroDias == 7)">7 días</option>
+                <option value="30" selected="@(Model.FiltroDias == 30)">30 días</option>
+                <option value="90" selected="@(Model.FiltroDias == 90)">90 días</option>
+            </select>
+        </div>
+
+        <a asp-page="/Admin/Auditoria" class="btn btn-link">Limpiar Filtros</a>
+    </form>
+</div>
+
+@if (Model.Registros.Any())
+{
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fecha/Hora</th>
+                    <th>Usuario</th>
+                    <th>IP</th>
+                    <th>Navegador</th>
+                    <th>Resultado</th>
+                    <th>Motivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var registro in Model.Registros)
+                {
+                    <tr>
+                        <td>
+                            <strong>@registro.FechaIntento.ToString("dd/MM/yyyy")</strong><br>
+                            <small style="color: var(--color-text-secondary);">@registro.FechaIntento.ToString("HH:mm:ss")</small>
+                        </td>
+                        <td>
+                            <strong>@registro.Email</strong>
+                        </td>
+                        <td>
+                            <code style="font-size: 12px;">@registro.DireccionIP</code>
+                        </td>
+                        <td>
+                            <small style="color: var(--color-text-secondary);">
+                                @(registro.UserAgent?.Length > 50 ? registro.UserAgent.Substring(0, 50) + "..." : registro.UserAgent)
+                            </small>
+                        </td>
+                        <td>
+                            @if (registro.Exitoso)
+                            {
+                                <span class="badge badge-success">Exitoso</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-error">Fallido</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!registro.Exitoso)
+                            {
+                                <small style="color: var(--color-error);">@registro.MotivoFallo</small>
+                            }
+                            else
+                            {
+                                <small style="color: var(--color-text-secondary);">-</small>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-summary">
+        <p>Mostrando @Model.Registros.Count registro(s) de los últimos @Model.FiltroDias días</p>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <p>No se encontraron registros de auditoría con los filtros seleccionados</p>
+    </div>
+}

@@ -1,0 +1,186 @@
+@page
+@model RegisterEntrenadorModel
+@{
+    ViewData["Title"] = "Registro de Entrenador";
+    Layout = "_Layout";
+}
+
+<div class="auth-container">
+    <div class="auth-card-wide">
+        <div class="auth-header">
+            <a asp-page="/Account/Register" class="back-link">← Volver</a>
+            <h1 class="auth-title">Registro de Entrenador</h1>
+            <p class="auth-subtitle">Crea tu cuenta y tu equipo en un solo paso</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-error">@Model.ErrorMessage</div>
+        }
+
+        <form method="post" class="auth-form" enctype="multipart/form-data">
+            <div class="form-section">
+                <h3 class="form-section-title">Información Personal</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.Nombre"></label>
+                        <input asp-for="Input.Nombre" class="form-control" />
+                        <span asp-validation-for="Input.Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.ApellidoPaterno"></label>
+                        <input asp-for="Input.ApellidoPaterno" class="form-control" />
+                        <span asp-validation-for="Input.ApellidoPaterno" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.ApellidoMaterno"></label>
+                        <input asp-for="Input.ApellidoMaterno" class="form-control" />
+                        <span asp-validation-for="Input.ApellidoMaterno" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Telefono"></label>
+                        <input asp-for="Input.Telefono" class="form-control" type="tel" placeholder="+503 1234-5678" />
+                        <span asp-validation-for="Input.Telefono" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.NumeroLicencia"></label>
+                        <input asp-for="Input.NumeroLicencia" class="form-control" placeholder="Opcional" />
+                        <span asp-validation-for="Input.NumeroLicencia" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.FechaExpiracionLicencia"></label>
+                        <input asp-for="Input.FechaExpiracionLicencia" class="form-control" type="date" />
+                        <span asp-validation-for="Input.FechaExpiracionLicencia" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Información del Equipo</h3>
+                <p class="form-section-description">Tu equipo se creará automáticamente al registrarte</p>
+                
+                <div class="form-group">
+                    <label asp-for="Input.NombreEquipo"></label>
+                    <input asp-for="Input.NombreEquipo" class="form-control" placeholder="Ej: Deportivo San Salvador" />
+                    <span asp-validation-for="Input.NombreEquipo" class="text-danger"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.ColorPrimario"></label>
+                        <div class="color-input-wrapper">
+                            <input asp-for="Input.ColorPrimario" class="form-control color-picker" type="color" value="#FF0000" />
+                            <input asp-for="Input.ColorPrimario" class="form-control" type="text" placeholder="#FF0000" />
+                        </div>
+                        <span asp-validation-for="Input.ColorPrimario" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.ColorSecundario"></label>
+                        <div class="color-input-wrapper">
+                            <input asp-for="Input.ColorSecundario" class="form-control color-picker" type="color" value="#FFFFFF" />
+                            <input asp-for="Input.ColorSecundario" class="form-control" type="text" placeholder="#FFFFFF" />
+                        </div>
+                        <span asp-validation-for="Input.ColorSecundario" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.Sede"></label>
+                    <input asp-for="Input.Sede" class="form-control" placeholder="Ej: Estadio Cuscatlán, San Salvador" />
+                    <span asp-validation-for="Input.Sede" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.Abreviacion"></label>
+                    <input asp-for="Input.Abreviacion" class="form-control"
+                           placeholder="Ej: DSS" maxlength="3" style="text-transform:uppercase;width:120px;" />
+                    <span asp-validation-for="Input.Abreviacion" class="text-danger"></span>
+                    <small class="form-text">Siglas que identifican al equipo (ej: "DSS" para Deportivo San Salvador)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="LogoFile">Escudo del Equipo (opcional)</label>
+                    <input type="file" id="LogoFile" name="LogoFile" class="form-control"
+                           accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+                           style="padding:6px;" />
+                    <small class="form-text">PNG, JPG, SVG o WebP. Máximo 2 MB.</small>
+                    <div id="logoPreview" style="margin-top:10px;display:none;">
+                        <img id="logoPreviewImg" style="max-width:120px;max-height:120px;border-radius:8px;border:2px solid rgba(255,255,255,0.15);" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Cuenta de Acceso</h3>
+                
+                <div class="form-group">
+                    <label asp-for="Input.Email"></label>
+                    <input asp-for="Input.Email" class="form-control" type="email" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.Password"></label>
+                        <input asp-for="Input.Password" class="form-control" type="password" />
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        <small class="form-text">Mínimo 8 caracteres, 1 mayúscula, 1 minúscula y 1 número</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.ConfirmPassword"></label>
+                        <input asp-for="Input.ConfirmPassword" class="form-control" type="password" />
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Crear Cuenta y Equipo</button>
+        </form>
+
+        <div class="auth-footer">
+            <p>¿Ya tienes una cuenta? <a asp-page="/Account/Login">Inicia sesión aquí</a></p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Logo preview
+        document.getElementById('LogoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                document.getElementById('logoPreviewImg').src = ev.target.result;
+                document.getElementById('logoPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Sincronizar color picker con input de texto
+        document.querySelectorAll('.color-picker').forEach(picker => {
+            const textInput = picker.nextElementSibling;
+            picker.addEventListener('change', () => {
+                textInput.value = picker.value;
+            });
+            textInput.addEventListener('input', () => {
+                if (/^#[0-9A-F]{6}$/i.test(textInput.value)) {
+                    picker.value = textInput.value;
+                }
+            });
+        });
+    </script>
+}

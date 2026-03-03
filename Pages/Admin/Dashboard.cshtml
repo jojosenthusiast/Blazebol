@@ -1,0 +1,148 @@
+@page
+@model DashboardModel
+@{
+    ViewData["Title"] = "Panel de Administración";
+    Layout = "_Layout";
+}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Panel de Administración</h1>
+        <p class="dashboard-subtitle">Bienvenido, @Model.UserName</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-content">
+                <h3>@Model.TotalTorneos</h3>
+                <p>Torneos Totales</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-active">
+            <div class="stat-content">
+                <h3>@Model.TorneosActivos</h3>
+                <p>Torneos Activos</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <h3>@Model.TotalEquipos</h3>
+                <p>Equipos Registrados</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <h3>@Model.TotalJugadores</h3>
+                <p>Jugadores</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <h3>@Model.TotalArbitros</h3>
+                <p>Árbitros</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-warning">
+            <div class="stat-content">
+                <h3>@Model.ArbitrosPendientesAprobacion</h3>
+                <p>Árbitros Pendientes</p>
+            </div>
+        </div>
+        <div class="stat-card">
+        <div class="stat-label">Accesos Hoy</div>
+        <div class="stat-value">@Model.AccesosHoy</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Intentos Fallidos</div>
+        <div class="stat-value" style="color: var(--color-error);">@Model.IntentosFallidos</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Usuarios Bloqueados</div>
+        <div class="stat-value" style="color: var(--color-error);">@Model.UsuariosBloqueados</div>
+    </div>
+    </div>
+
+    <div class="dashboard-actions">
+        <h2>Acciones Rápidas</h2>
+        <div class="action-cards">
+            <a asp-page="/Admin/Torneos/Create" class="action-card">
+                <h3>Crear Torneo</h3>
+                <p>Inicia un nuevo torneo</p>
+            </a>
+
+            <a asp-page="/Admin/Torneos/Index" class="action-card">
+                <h3>Gestionar Torneos</h3>
+                <p>Ver y editar torneos</p>
+            </a>
+
+            @* Sprint 2: Gestión de equipos y usuarios
+            <a asp-page="/Admin/Equipos/Index" class="action-card">
+                <h3>Gestionar Equipos</h3>
+                <p>Administrar equipos</p>
+            </a>
+
+            <a asp-page="/Admin/Usuarios/Index" class="action-card">
+                <h3>Gestionar Usuarios</h3>
+                <p>Ver jugadores, entrenadores y árbitros</p>
+            </a>
+            *@
+
+            @if (Model.ArbitrosPendientesAprobacion > 0)
+            {
+                <a asp-page="/Admin/Arbitros/Pendientes" class="action-card action-alert">
+                    <h3>Aprobar Árbitros</h3>
+                    <p>@Model.ArbitrosPendientesAprobacion pendientes de aprobación</p>
+                </a>
+            }
+        </div>
+    </div>
+
+    @if (Model.UltimosTorneos.Any())
+    {
+        <div class="recent-section">
+            <h2>Torneos Recientes</h2>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Liga</th>
+                            <th>Temporada</th>
+                            <th>Estado</th>
+                            <th>Fecha Inicio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var torneo in Model.UltimosTorneos)
+                        {
+                            <tr>
+                                <td>@torneo.Nombre</td>
+                                <td>@torneo.NombreLiga</td>
+                                <td>@torneo.NombreTemporada</td>
+                                <td>
+                                    <span class="badge badge-@torneo.Estado.ToLower()">
+                                        @torneo.Estado
+                                    </span>
+                                </td>
+                                <td>@torneo.FechaInicio.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <a asp-page="/Admin/Torneos/Details" asp-route-id="@torneo.Id" class="btn-link">Ver</a>
+                                    @if (torneo.PuedeEditar)
+                                    {
+                                        <a asp-page="/Admin/Torneos/Edit" asp-route-id="@torneo.Id" class="btn-link">Editar</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

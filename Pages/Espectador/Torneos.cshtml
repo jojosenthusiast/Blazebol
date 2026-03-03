@@ -1,0 +1,88 @@
+@page
+@model ControlTorneosFutbol.Pages.Espectador.TorneosModel
+@using ControlTorneosFutbol.Data.Entities
+@{
+    ViewData["Title"] = "Torneos";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>Torneos</h1>
+            <p class="page-subtitle">Explora todos los torneos disponibles</p>
+        </div>
+    </div>
+
+    <div class="filters-section">
+        <form method="get" class="filters-form">
+            <div class="filter-group">
+                <label>Estado:</label>
+                <select name="estado" class="form-control" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    <option value="Activo" selected="@(Model.FiltroEstado == "Activo")">Activos</option>
+                    <option value="Borrador" selected="@(Model.FiltroEstado == "Borrador")">Próximos</option>
+                    <option value="Finalizado" selected="@(Model.FiltroEstado == "Finalizado")">Finalizados</option>
+                </select>
+            </div>
+            <a asp-page="/Espectador/Torneos" class="btn btn-secondary">Limpiar</a>
+        </form>
+    </div>
+
+    @if (Model.Torneos.Any())
+    {
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px;">
+            @foreach (var t in Model.Torneos)
+            {
+                string badgeClass = t.Estado switch {
+                    EstadosTorneo.Activo    => "badge-activo",
+                    EstadosTorneo.Finalizado => "badge-finalizado",
+                    _                        => "badge-borrador"
+                };
+                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);
+                            border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">
+                    <div style="padding:18px 20px 12px;border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:5px;">
+                            <h3 style="margin:0;font-size:1.02rem;line-height:1.35;">@t.Nombre</h3>
+                            <span class="badge @badgeClass" style="flex-shrink:0;font-size:0.72rem;">@t.Estado</span>
+                        </div>
+                        <div style="font-size:0.78rem;opacity:0.5;">@t.NombreLiga &nbsp;·&nbsp; @t.NombreTemporada</div>
+                    </div>
+                    <div style="padding:14px 20px;flex:1;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                            <div>
+                                <div style="font-size:0.67rem;opacity:0.4;letter-spacing:0.06em;margin-bottom:2px;">CATEGORÍA</div>
+                                <div style="font-size:0.84rem;">@t.NombreCategoria</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.67rem;opacity:0.4;letter-spacing:0.06em;margin-bottom:2px;">FORMATO</div>
+                                <div style="font-size:0.84rem;">
+                                    @(t.Formato switch {
+                                        FormatosTorneo.TodosContraTodos   => "Liga",
+                                        FormatosTorneo.EliminacionDirecta => "Eliminación",
+                                        FormatosTorneo.GruposYEliminacion => "Grupos + Elim.",
+                                        _                                 => t.Formato })
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size:0.78rem;opacity:0.45;">
+                            @t.FechaInicio.ToString("dd/MM/yy") — @t.FechaFin.ToString("dd/MM/yyyy")
+                        </div>
+                    </div>
+                    <div style="padding:12px 20px;border-top:1px solid rgba(255,255,255,0.06);">
+                        <a asp-page="/Espectador/TorneoDetalle" asp-route-id="@t.Id"
+                           class="btn btn-primary btn-sm" style="width:100%;text-align:center;display:block;">
+                            Ver Torneo &amp; Partidos →
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>No se encontraron torneos con los filtros seleccionados.</p>
+        </div>
+    }
+</div>

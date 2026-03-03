@@ -1,0 +1,144 @@
+@page
+@model ControlTorneosFutbol.Pages.Entrenador.Plantilla.IndexModel
+@{
+    ViewData["Title"] = "Plantilla - " + Model.NombreEquipo;
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>Plantilla del Equipo</h1>
+            @if (!string.IsNullOrEmpty(Model.NombreEquipo))
+            {
+                <p class="page-subtitle">@Model.NombreEquipo</p>
+            }
+        </div>
+        @if (Model.EquipoId > 0 && Model.TorneoSeleccionado.HasValue)
+        {
+            <a asp-page="/Entrenador/Plantilla/Agregar" asp-route-torneoId="@Model.TorneoSeleccionado" class="btn btn-primary">
+                + Agregar Jugador
+            </a>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.EquipoId == 0)
+    {
+        <div class="empty-state">
+            <p>No tienes un equipo asignado. Contacta al administrador.</p>
+        </div>
+    }
+    else if (!Model.TorneosDisponibles.Any())
+    {
+        <div class="empty-state">
+            <p>Tu equipo no está inscrito en ningún torneo. Pide al administrador que inscriba tu equipo.</p>
+        </div>
+    }
+    else
+    {
+        <!-- Selector de Torneo -->
+        <div class="filter-bar">
+            <form method="get" class="filter-form">
+                <div class="form-group">
+                    <label>Torneo</label>
+                    <select name="torneoId" class="form-control" onchange="this.form.submit()">
+                        @foreach (var torneo in Model.TorneosDisponibles)
+                        {
+                            <option value="@torneo.TorneoId" selected="@(torneo.TorneoId == Model.TorneoSeleccionado)">
+                                @torneo.Nombre
+                                @if (torneo.Estado != "Activo")
+                                {
+                                    <text>(@torneo.Estado)</text>
+                                }
+                            </option>
+                        }
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        @if (!Model.Jugadores.Any())
+        {
+            <div class="empty-state">
+                <p>No hay jugadores en la plantilla para este torneo.</p>
+                <a asp-page="/Entrenador/Plantilla/Agregar" asp-route-torneoId="@Model.TorneoSeleccionado" class="btn btn-primary" style="margin-top:1rem">
+                    Agregar primer jugador
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre</th>
+                            <th>Posición</th>
+                            <th>Camiseta</th>
+                            <th>Estado</th>
+                            <th>Inscripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (jugador, i) in Model.Jugadores.Select((j, i) => (j, i + 1)))
+                        {
+                            <tr class="@(jugador.Activo ? "" : "row-inactive")">
+                                <td>@i</td>
+                                <td><strong>@jugador.NombreCompleto</strong></td>
+                                <td>@jugador.Posicion</td>
+                                <td>
+                                    <span class="badge badge-outline">@jugador.NumeroCamiseta</span>
+                                </td>
+                                <td>
+                                    @if (jugador.Activo)
+                                    {
+                                        <span class="badge badge-success">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Baja</span>
+                                    }
+                                </td>
+                                <td>@jugador.FechaInscripcion.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <div class="action-group">
+                                        @if (jugador.Activo)
+                                        {
+                                            <a asp-page="/Entrenador/Plantilla/Editar"
+                                               asp-route-id="@jugador.Id"
+                                               class="btn btn-sm btn-secondary">Editar</a>
+                                            <form method="post" asp-page-handler="Desactivar"
+                                                  style="display:inline"
+                                                  onsubmit="return confirm('¿Dar de baja a este jugador?')">
+                                                <input type="hidden" name="id" value="@jugador.Id" />
+                                                <input type="hidden" name="torneoId" value="@Model.TorneoSeleccionado" />
+                                                <button type="submit" class="btn btn-sm btn-danger">Dar de Baja</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-summary">
+                <span>Total activos: <strong>@Model.Jugadores.Count(j => j.Activo)</strong></span>
+                <span style="margin-left:1.5rem">Con baja: <strong>@Model.Jugadores.Count(j => !j.Activo)</strong></span>
+            </div>
+        }
+    }
+</div>

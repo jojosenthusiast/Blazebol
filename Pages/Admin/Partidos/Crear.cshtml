@@ -1,0 +1,138 @@
+@page
+@model ControlTorneosFutbol.Pages.Admin.Partidos.CrearModel
+@{
+    ViewData["Title"] = "Crear Partido";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Admin/Partidos/Index" class="back-link">← Volver a Partidos</a>
+            <h1>Crear Partido</h1>
+            <p class="page-subtitle">Programa un nuevo partido</p>
+        </div>
+    </div>
+
+    @if (!ModelState.IsValid)
+    {
+        <div class="alert alert-error">
+            @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <div class="form-container" style="max-width:560px">
+        <form method="post" class="form-horizontal">
+
+            <div class="form-section">
+                <h3 class="form-section-title">Datos del Partido</h3>
+
+                <div class="form-group">
+                    <label asp-for="Input.TorneoId" class="required"></label>
+                    <select asp-for="Input.TorneoId" class="form-control" id="torneoSelect">
+                        <option value="">-- Seleccionar torneo --</option>
+                        @foreach (var t in Model.Torneos)
+                        {
+                            <option value="@t.Id">@t.Nombre</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Input.TorneoId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.EquipoLocalId" class="required"></label>
+                    <select asp-for="Input.EquipoLocalId" class="form-control" id="equipoLocalSelect">
+                        <option value="">-- Seleccione primero un torneo --</option>
+                    </select>
+                    <span asp-validation-for="Input.EquipoLocalId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.EquipoVisitanteId" class="required"></label>
+                    <select asp-for="Input.EquipoVisitanteId" class="form-control" id="equipoVisitanteSelect">
+                        <option value="">-- Seleccione primero un torneo --</option>
+                    </select>
+                    <span asp-validation-for="Input.EquipoVisitanteId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.Fecha" class="required"></label>
+                    <input asp-for="Input.Fecha" class="form-control"
+                           type="datetime-local"
+                           value="@Model.Input.Fecha.ToString("yyyy-MM-ddTHH:mm")" />
+                    <span asp-validation-for="Input.Fecha" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.Sede"></label>
+                    <input asp-for="Input.Sede" class="form-control"
+                           placeholder="Ej: Estadio Nacional, Cancha 3" />
+                    <span asp-validation-for="Input.Sede" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.ArbitroId"></label>
+                    <select asp-for="Input.ArbitroId" class="form-control">
+                        <option value="">-- Sin árbitro asignado --</option>
+                        @foreach (var a in Model.Arbitros)
+                        {
+                            <option value="@a.Id">@a.NombreCompleto</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Crear Partido</button>
+                <a asp-page="/Admin/Partidos/Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const equiposPorTorneo = @Html.Raw(Model.EquiposPorTorneoJson);
+
+        const torneoSelect = document.getElementById('torneoSelect');
+        const localSelect = document.getElementById('equipoLocalSelect');
+        const visitanteSelect = document.getElementById('equipoVisitanteSelect');
+
+        // Restore selected values after POST validation failure
+        const selectedTorneo = '@Model.Input.TorneoId';
+        const selectedLocal = '@Model.Input.EquipoLocalId';
+        const selectedVisitante = '@Model.Input.EquipoVisitanteId';
+
+        function poblarEquipos(torneoId) {
+            const equipos = equiposPorTorneo[torneoId] || [];
+
+            [localSelect, visitanteSelect].forEach(sel => {
+                sel.innerHTML = '<option value="">-- Seleccionar equipo --</option>';
+                equipos.forEach(e => {
+                    const opt = document.createElement('option');
+                    opt.value = e.id;
+                    opt.textContent = e.nombre;
+                    sel.appendChild(opt);
+                });
+            });
+
+            // Restore selections if coming back from validation error
+            if (selectedLocal) localSelect.value = selectedLocal;
+            if (selectedVisitante) visitanteSelect.value = selectedVisitante;
+        }
+
+        torneoSelect.addEventListener('change', function () {
+            poblarEquipos(this.value);
+        });
+
+        // Initialize on load if torneo was already selected (validation error scenario)
+        if (selectedTorneo && equiposPorTorneo[selectedTorneo]) {
+            torneoSelect.value = selectedTorneo;
+            poblarEquipos(selectedTorneo);
+        }
+    </script>
+}

@@ -1,0 +1,221 @@
+@page
+@model DashboardModel
+@{
+    ViewData["Title"] = "Mi Dashboard - Jugador";
+    Layout = "_Layout";
+}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Mi Dashboard de Jugador</h1>
+        <p class="dashboard-subtitle">Bienvenido, @Model.NombreCompleto</p>
+    </div>
+
+    @* Sprint 2: Banner de inscripción en torneo activo (HU-21 — búsqueda de equipos y solicitudes)
+    @if (!Model.TieneEquipoEnTorneoActivo)
+    {
+        @if (Model.TieneSolicitudPendiente)
+        {
+            <div style="border:1px solid rgba(234,179,8,0.4);border-radius:12px;background:rgba(234,179,8,0.07);
+                        padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                <div style="font-size:1.6rem;">⏳</div>
+                <div style="flex:1;min-width:180px;">
+                    <div style="font-weight:700;font-size:0.95rem;color:#eab308;margin-bottom:4px;">
+                        Solicitudes en espera
+                    </div>
+                    <div style="font-size:0.85rem;opacity:0.8;">
+                        @if (Model.InvitacionesPendientesCount > 0)
+                        {
+                            <span>Tienes <strong>@Model.InvitacionesPendientesCount</strong>
+                            invitaci@(Model.InvitacionesPendientesCount == 1 ? "ón" : "ones") de equipo pendiente@(Model.InvitacionesPendientesCount == 1 ? "" : "s").</span>
+                        }
+                        @if (Model.SolicitudesPendientesCount > 0)
+                        {
+                            <span> @(Model.InvitacionesPendientesCount > 0 ? "Además, tienes" : "Tienes") <strong>@Model.SolicitudesPendientesCount</strong>
+                            solicitud@(Model.SolicitudesPendientesCount == 1 ? "" : "es") enviada@(Model.SolicitudesPendientesCount == 1 ? "" : "s") esperando respuesta.</span>
+                        }
+                        <span style="display:block;margin-top:4px;opacity:0.6;font-size:0.78rem;">
+                            Aún no estás activo en ningún torneo. Acepta una invitación para participar.
+                        </span>
+                    </div>
+                </div>
+                <a asp-page="/Jugador/Solicitudes"
+                   style="white-space:nowrap;padding:8px 16px;border-radius:8px;font-size:0.85rem;font-weight:600;
+                          background:rgba(234,179,8,0.15);color:#eab308;border:1px solid rgba(234,179,8,0.35);text-decoration:none;">
+                    Ver Solicitudes
+                </a>
+            </div>
+        }
+        else
+        {
+            <div style="border:1px solid rgba(239,68,68,0.35);border-radius:12px;background:rgba(239,68,68,0.06);
+                        padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                <div style="font-size:1.6rem;">⚽</div>
+                <div style="flex:1;min-width:180px;">
+                    <div style="font-weight:700;font-size:0.95rem;color:#ef4444;margin-bottom:4px;">
+                        No estás inscrito en ningún torneo activo
+                    </div>
+                    <div style="font-size:0.85rem;opacity:0.75;">
+                        Para participar en torneos necesitas unirte a un equipo que esté compitiendo.
+                        Busca un equipo y envía una solicitud, o espera una invitación de un entrenador.
+                    </div>
+                </div>
+                <a asp-page="/Jugador/BuscarEquipos"
+                   style="white-space:nowrap;padding:8px 16px;border-radius:8px;font-size:0.85rem;font-weight:600;
+                          background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3);text-decoration:none;">
+                    Buscar Equipos
+                </a>
+            </div>
+        }
+    }
+    *@
+
+    <div class="player-info-card">
+        <div class="player-avatar">
+            <span class="avatar-icon">J</span>
+        </div>
+        <div class="player-details">
+            <h2>@Model.NombreCompleto</h2>
+            @if (!string.IsNullOrEmpty(Model.EquipoActual))
+            {
+                <p class="team-name">
+                    <strong>Equipo:</strong> @Model.EquipoActual
+                    @if (Model.TieneEquipoEnTorneoActivo)
+                    {
+                        <span style="margin-left:8px;padding:2px 8px;border-radius:10px;font-size:0.72rem;font-weight:600;
+                                     background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.25);">
+                            Activo
+                        </span>
+                    }
+                </p>
+                @if (!string.IsNullOrEmpty(Model.TorneoActual))
+                {
+                    <p class="tournament-name">
+                        <strong>Torneo:</strong> @Model.TorneoActual
+                    </p>
+                }
+                <div style="display:flex;gap:16px;margin-top:6px;flex-wrap:wrap;">
+                    @if (!string.IsNullOrEmpty(Model.PosicionActual))
+                    {
+                        <span style="font-size:0.82rem;opacity:0.7;">
+                            <strong>Posición:</strong> @Model.PosicionActual
+                        </span>
+                    }
+                    @if (Model.NumeroCamisetaActual.HasValue)
+                    {
+                        <span style="font-size:0.82rem;opacity:0.7;">
+                            <strong>Camiseta #:</strong> @Model.NumeroCamisetaActual
+                        </span>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="no-team">Sin equipo asignado</p>
+            }
+        </div>
+    </div>
+
+    @* Sprint 2: Estadísticas individuales del jugador (HU-17)
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-content">
+                <h3>@Model.PartidosJugados</h3>
+                <p>Partidos Jugados</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-success">
+            <div class="stat-content">
+                <h3>@Model.Goles</h3>
+                <p>Goles</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <h3>@Model.Asistencias</h3>
+                <p>Asistencias</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-warning">
+            <div class="stat-content">
+                <h3>@Model.TarjetasAmarillas</h3>
+                <p>Tarjetas Amarillas</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-danger">
+            <div class="stat-content">
+                <h3>@Model.TarjetasRojas</h3>
+                <p>Tarjetas Rojas</p>
+            </div>
+        </div>
+    </div>
+    *@
+
+    <div class="dashboard-actions">
+        <h2>Acciones Rápidas</h2>
+        <div class="action-cards">
+            <a asp-page="/Jugador/Perfil" class="action-card">
+                <h3>Mi Perfil</h3>
+                <p>Editar información personal</p>
+            </a>
+
+            @* Sprint 2: Solicitudes, partidos y búsqueda de equipos (HU-20, HU-21)
+            <a asp-page="/Jugador/Solicitudes" class="action-card @(Model.TieneSolicitudPendiente ? "action-highlight" : "")">
+                <h3>
+                    Mis Solicitudes
+                    @if (Model.InvitacionesPendientesCount > 0)
+                    {
+                        <span style="margin-left:6px;padding:1px 7px;border-radius:10px;font-size:0.7rem;font-weight:700;
+                                     background:#eab308;color:#000;vertical-align:middle;">
+                            @Model.InvitacionesPendientesCount
+                        </span>
+                    }
+                </h3>
+                <p>Invitaciones recibidas y solicitudes enviadas</p>
+            </a>
+
+            <a asp-page="/Jugador/Partidos/Index"
+               class="action-card @(Model.TieneEquipoEnTorneoActivo ? "" : "action-disabled")"
+               style="@(Model.TieneEquipoEnTorneoActivo ? "" : "pointer-events:none;opacity:0.45;")">
+                <h3>Mis Partidos</h3>
+                <p>Calendario y resultados de tu equipo</p>
+            </a>
+
+            @if (!Model.TieneEquipoEnTorneoActivo)
+            {
+                <a asp-page="/Jugador/BuscarEquipos" class="action-card action-highlight">
+                    <h3>Buscar Equipos</h3>
+                    <p>Encuentra un equipo para unirte</p>
+                </a>
+            }
+            *@
+        </div>
+    </div>
+
+    @* Sprint 2: Próximos partidos del jugador (HU-20)
+    @if (Model.ProximosPartidos.Any())
+    {
+        <div class="upcoming-matches">
+            <h2>Próximos Partidos</h2>
+            <div class="matches-list">
+                @foreach (var partido in Model.ProximosPartidos)
+                {
+                    <div class="match-card">
+                        <p class="match-info">@partido</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Model.EquipoActual))
+    {
+        <div class="empty-state">
+            <p>No hay partidos programados próximamente</p>
+        </div>
+    }
+    *@
+</div>

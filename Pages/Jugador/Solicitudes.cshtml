@@ -1,0 +1,183 @@
+@page
+@model ControlTorneosFutbol.Pages.Jugador.SolicitudesModel
+@{
+    ViewData["Title"] = "Mis Solicitudes";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Jugador/Dashboard" class="back-link">← Volver al Dashboard</a>
+            <h1>Mis Solicitudes</h1>
+            <p class="page-subtitle">Invitaciones recibidas y solicitudes enviadas</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    <!-- INVITACIONES RECIBIDAS -->
+    <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">
+            <h3 style="margin:0;">
+                Invitaciones Recibidas
+                @if (Model.InvitacionesRecibidas.Any())
+                {
+                    <span class="badge" style="background:rgba(163,255,18,0.2);color:var(--accent);margin-left:8px;">@Model.InvitacionesRecibidas.Count pendiente(s)</span>
+                }
+            </h3>
+        </div>
+        <div class="card-body">
+            @if (Model.InvitacionesRecibidas.Any())
+            {
+                @foreach (var inv in Model.InvitacionesRecibidas)
+                {
+                    <div style="border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:16px;margin-bottom:16px;">
+                        <!-- Header del equipo -->
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                            <div style="display:flex;align-items:center;gap:14px;">
+                                <!-- Escudo / Color -->
+                                <div style="width:48px;height:48px;border-radius:8px;flex-shrink:0;overflow:hidden;
+                                            display:flex;align-items:center;justify-content:center;
+                                            background:@(string.IsNullOrEmpty(inv.ColorPrimario) ? "rgba(255,255,255,0.07)" : inv.ColorPrimario + "22");">
+                                    @if (!string.IsNullOrEmpty(inv.Logo))
+                                    {
+                                        <img src="@inv.Logo" style="width:42px;height:42px;object-fit:contain;" alt="@inv.NombreEquipo" />
+                                    }
+                                    else if (!string.IsNullOrEmpty(inv.Abreviacion))
+                                    {
+                                        <span style="font-weight:700;font-size:0.82rem;color:@(inv.ColorPrimario ?? "rgba(255,255,255,0.6)");">@inv.Abreviacion</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="font-size:1.6rem;opacity:0.25;">⚽</span>
+                                    }
+                                </div>
+                                <div>
+                                    <strong style="font-size:1.05rem;">@inv.NombreEquipo</strong>
+                                    @if (!string.IsNullOrEmpty(inv.Abreviacion))
+                                    {
+                                        <span style="font-size:0.72rem;opacity:0.4;margin-left:6px;font-family:monospace;">[@inv.Abreviacion]</span>
+                                    }
+                                    <div style="font-size:0.82rem;opacity:0.6;margin-top:2px;">
+                                        Torneo: @inv.NombreTorneo · @inv.FechaSolicitud.ToString("dd/MM/yyyy")
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="badge" style="background:rgba(163,255,18,0.15);color:var(--accent);">Pendiente</span>
+                        </div>
+
+                        <!-- Detalles del equipo -->
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;">
+                            @if (!string.IsNullOrEmpty(inv.NombreEntrenador))
+                            {
+                                <div>
+                                    <div style="font-size:0.65rem;opacity:0.45;letter-spacing:0.06em;margin-bottom:2px;">ENTRENADOR</div>
+                                    <div style="font-size:0.82rem;">@inv.NombreEntrenador</div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(inv.Sede))
+                            {
+                                <div>
+                                    <div style="font-size:0.65rem;opacity:0.45;letter-spacing:0.06em;margin-bottom:2px;">SEDE</div>
+                                    <div style="font-size:0.82rem;">@inv.Sede</div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(inv.Mensaje))
+                        {
+                            <div style="font-size:0.85rem;font-style:italic;opacity:0.7;margin-bottom:12px;padding-left:4px;border-left:2px solid rgba(163,255,18,0.3);">"@inv.Mensaje"</div>
+                        }
+
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <form method="post" asp-page-handler="AceptarInvitacion" style="display:flex;gap:6px;align-items:center;">
+                                <input type="hidden" name="id" value="@inv.Id" />
+                                <input type="number" name="numeroCamiseta" placeholder="Nº camiseta"
+                                       min="1" max="99" class="form-control" style="width:110px;" required
+                                       title="Número de camiseta (1-99)" />
+                                <button type="submit" class="btn btn-primary btn-sm">Aceptar</button>
+                            </form>
+                            <form method="post" asp-page-handler="RechazarInvitacion" style="display:inline;">
+                                <input type="hidden" name="id" value="@inv.Id" />
+                                <button type="submit" class="btn btn-secondary btn-sm"
+                                        onclick="return confirm('¿Estás seguro de rechazar esta invitación?')">
+                                    Rechazar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p style="opacity:0.6;">No tienes invitaciones pendientes.</p>
+            }
+        </div>
+    </div>
+
+    <!-- MIS SOLICITUDES -->
+    <div class="card">
+        <div class="card-header">
+            <h3 style="margin:0;">Mis Solicitudes Enviadas</h3>
+        </div>
+        <div class="card-body" style="padding:0;">
+            @if (Model.MisSolicitudes.Any())
+            {
+                @foreach (var s in Model.MisSolicitudes)
+                {
+                    <div style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+                                padding:12px 20px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <!-- Escudo -->
+                        <div style="width:38px;height:38px;border-radius:6px;flex-shrink:0;overflow:hidden;
+                                    display:flex;align-items:center;justify-content:center;
+                                    background:@(string.IsNullOrEmpty(s.ColorPrimario) ? "rgba(255,255,255,0.07)" : s.ColorPrimario + "22");">
+                            @if (!string.IsNullOrEmpty(s.Logo))
+                            {
+                                <img src="@s.Logo" style="width:34px;height:34px;object-fit:contain;" alt="@s.NombreEquipo" />
+                            }
+                            else if (!string.IsNullOrEmpty(s.Abreviacion))
+                            {
+                                <span style="font-weight:700;font-size:0.72rem;color:@(s.ColorPrimario ?? "rgba(255,255,255,0.5)");">@s.Abreviacion</span>
+                            }
+                            else
+                            {
+                                <span style="opacity:0.2;font-size:1.1rem;">⚽</span>
+                            }
+                        </div>
+                        <!-- Info -->
+                        <div>
+                            <strong style="font-size:0.9rem;">@s.NombreEquipo</strong>
+                            @if (!string.IsNullOrEmpty(s.NombreEntrenador))
+                            {
+                                <span style="font-size:0.75rem;opacity:0.45;margin-left:8px;">/ @s.NombreEntrenador</span>
+                            }
+                            <div style="font-size:0.78rem;opacity:0.5;margin-top:1px;">
+                                @s.NombreTorneo · @s.FechaSolicitud.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+                        <!-- Estado -->
+                        <span class="@(s.Estado == "Aceptada" ? "badge badge-activo" : "badge")"
+                              style="@(s.Estado switch { "Pendiente" => "background:rgba(163,255,18,0.15);color:var(--accent);", "Rechazada" => "background:rgba(239,68,68,0.15);color:#ef4444;", _ => "background:rgba(255,255,255,0.1);" });white-space:nowrap;">
+                            @s.Estado
+                        </span>
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="padding:24px;">
+                    <p style="opacity:0.6;">No has enviado solicitudes todavía.</p>
+                    <a asp-page="/Jugador/BuscarEquipos" class="btn btn-primary btn-sm">Buscar Equipos</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

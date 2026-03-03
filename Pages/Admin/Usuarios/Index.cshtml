@@ -1,0 +1,160 @@
+@page
+@model ControlTorneosFutbol.Pages.Admin.Usuarios.IndexModel
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Gestión de Usuarios</h1>
+        <p class="page-subtitle">Administra todos los usuarios del sistema</p>
+    </div>
+    <div class="header-actions">
+        <form method="post" asp-page-handler="ExportarPDF" style="display: inline;">
+            <button type="submit" class="btn btn-secondary">📄 Exportar a PDF</button>
+        </form>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success">@Model.SuccessMessage</div>
+}
+
+<div class="filters-section">
+    <form method="get" class="filters-form">
+        <div class="filter-group">
+            <label>Rol:</label>
+            <select name="rol" class="form-control" onchange="this.form.submit()">
+                <option value="">Todos</option>
+                <option value="Administrador" selected="@(Model.FiltroRol == "Administrador")">Administrador</option>
+                <option value="Jugador" selected="@(Model.FiltroRol == "Jugador")">Jugador</option>
+                <option value="Entrenador" selected="@(Model.FiltroRol == "Entrenador")">Entrenador</option>
+                <option value="Arbitro" selected="@(Model.FiltroRol == "Arbitro")">Árbitro</option>
+                <option value="Espectador" selected="@(Model.FiltroRol == "Espectador")">Espectador</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Estado:</label>
+            <select name="activo" class="form-control" onchange="this.form.submit()">
+                <option value="">Todos</option>
+                <option value="true" selected="@(Model.FiltroActivo == true)">Activos</option>
+                <option value="false" selected="@(Model.FiltroActivo == false)">Inactivos</option>
+            </select>
+        </div>
+
+        <a asp-page="/Admin/Usuarios/Index" class="btn btn-link">Limpiar Filtros</a>
+    </form>
+</div>
+
+@if (Model.Usuarios.Any())
+{
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Seguridad</th>
+                    <th>Fecha Registro</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var usuario in Model.Usuarios)
+                {
+                    <tr>
+                        <td><strong>@usuario.NombreCompleto</strong></td>
+                        <td>@usuario.Email</td>
+                        <td>
+                            <span class="badge badge-@usuario.Rol.ToLower()">@usuario.Rol</span>
+                        </td>
+                        <td>
+                            @if (usuario.Activo)
+                            {
+                                <span class="badge badge-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-inactive">Inactivo</span>
+                            }
+                        </td>
+                        <td>
+                            @if (usuario.EstaBloqueado)
+                            {
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span class="badge badge-error">🔒 Bloqueado</span>
+                                    <small style="color: var(--color-text-secondary); font-size: 11px;">
+                                        hasta @usuario.FechaBloqueoFin?.ToString("dd/MM HH:mm")
+                                    </small>
+                                    <small style="color: var(--color-error); font-size: 11px;">
+                                        @usuario.ContadorAccesosFallidos intento(s) fallido(s)
+                                    </small>
+                                </div>
+                            }
+                            else if (usuario.ContadorAccesosFallidos > 0)
+                            {
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span class="badge badge-warning">⚠️ @usuario.ContadorAccesosFallidos intento(s)</span>
+                                    <small style="color: var(--color-text-secondary); font-size: 11px;">
+                                        @(5 - usuario.ContadorAccesosFallidos) restante(s)
+                                    </small>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="badge badge-success">✓ OK</span>
+                            }
+                        </td>
+                        <td>@usuario.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                        <td class="actions-cell">
+                            <a asp-page="/Admin/Usuarios/Details" asp-route-id="@usuario.UsuarioId" class="btn-action btn-view" title="Ver Detalles">
+                                Ver
+                            </a>
+                            
+                            @if (usuario.EstaBloqueado)
+                            {
+                                <form method="post" asp-page-handler="Desbloquear" asp-route-id="@usuario.UsuarioId" style="display: inline;">
+                                    <button type="submit" class="btn-action btn-success" title="Desbloquear cuenta">
+                                        🔓 Desbloquear
+                                    </button>
+                                </form>
+                            }
+                            
+                            @if (usuario.Activo)
+                            {
+                                <form method="post" asp-page-handler="Desactivar" asp-route-id="@usuario.UsuarioId" style="display: inline;" 
+                                      onsubmit="return confirm('¿Está seguro de desactivar este usuario?');">
+                                    <button type="submit" class="btn-action btn-delete" title="Desactivar">
+                                        Desactivar
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" asp-page-handler="Activar" asp-route-id="@usuario.UsuarioId" style="display: inline;">
+                                    <button type="submit" class="btn-action btn-view" title="Activar">
+                                        Activar
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-summary">
+        <p>Mostrando @Model.Usuarios.Count usuario(s)</p>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <p>No se encontraron usuarios con los filtros seleccionados</p>
+    </div>
+}

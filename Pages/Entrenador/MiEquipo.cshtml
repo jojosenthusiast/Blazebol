@@ -1,0 +1,162 @@
+@page
+@model ControlTorneosFutbol.Pages.Entrenador.MiEquipoModel
+@{
+    ViewData["Title"] = "Mi Equipo";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Entrenador/Dashboard" class="back-link">← Volver al Dashboard</a>
+            <h1>Mi Equipo</h1>
+            @if (!string.IsNullOrEmpty(Model.NombreEquipo))
+            {
+                <p class="page-subtitle">@Model.NombreEquipo</p>
+            }
+        </div>
+        @if (!string.IsNullOrEmpty(Model.NombreEquipo))
+        {
+            <div class="header-actions">
+                <a asp-page="/Entrenador/Plantilla/Index" class="btn btn-primary">Ver Plantilla</a>
+            </div>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+    else
+    {
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+
+            <!-- Información del equipo -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 style="margin:0">Información del Equipo</h3>
+                </div>
+                <div class="card-body">
+                    <div style="display:flex;flex-direction:column;gap:16px;">
+                        <div>
+                            <span style="font-size:0.75rem;opacity:0.5;letter-spacing:0.06em;display:block;margin-bottom:2px;">NOMBRE DEL EQUIPO</span>
+                            <span style="font-size:1.15rem;font-weight:700;">@Model.NombreEquipo</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Sede))
+                        {
+                            <div>
+                                <span style="font-size:0.75rem;opacity:0.5;letter-spacing:0.06em;display:block;margin-bottom:2px;">SEDE</span>
+                                <span>@Model.Sede</span>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.ColorPrimario))
+                        {
+                            <div>
+                                <span style="font-size:0.75rem;opacity:0.5;letter-spacing:0.06em;display:block;margin-bottom:4px;">COLORES</span>
+                                <div style="display:flex;gap:12px;align-items:center;">
+                                    <div style="display:flex;gap:6px;align-items:center;">
+                                        <span style="display:inline-block;width:28px;height:28px;border-radius:6px;background:@Model.ColorPrimario;border:1px solid rgba(255,255,255,0.2);" title="Color primario"></span>
+                                        <span style="font-size:0.8rem;opacity:0.7;">@Model.ColorPrimario</span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(Model.ColorSecundario))
+                                    {
+                                        <div style="display:flex;gap:6px;align-items:center;">
+                                            <span style="display:inline-block;width:28px;height:28px;border-radius:6px;background:@Model.ColorSecundario;border:1px solid rgba(255,255,255,0.2);" title="Color secundario"></span>
+                                            <span style="font-size:0.8rem;opacity:0.7;">@Model.ColorSecundario</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cuerpo técnico -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 style="margin:0">Cuerpo Técnico</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.CuerpoTecnico.Any())
+                    {
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Rol</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var t in Model.CuerpoTecnico)
+                                {
+                                    <tr>
+                                        <td>
+                                            @t.NombreCompleto
+                                            @if (t.EsPropietario)
+                                            {
+                                                <span class="badge badge-activo" style="margin-left:6px;font-size:0.7rem;">Propietario</span>
+                                            }
+                                        </td>
+                                        <td>@t.Rol</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p style="opacity:0.6;">Sin cuerpo técnico registrado</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Torneos -->
+        <div class="card">
+            <div class="card-header">
+                <h3 style="margin:0">Torneos del Equipo</h3>
+            </div>
+            <div class="card-body" style="padding:0;">
+                @if (Model.Torneos.Any())
+                {
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Torneo</th>
+                                <th>Estado</th>
+                                <th>Inscripción</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in Model.Torneos)
+                            {
+                                <tr>
+                                    <td><strong>@t.NombreTorneo</strong></td>
+                                    <td>
+                                        <span class="badge badge-@t.EstadoTorneo.ToLower()">@t.EstadoTorneo</span>
+                                    </td>
+                                    <td>@t.FechaInscripcion.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <a asp-page="/Entrenador/Plantilla/Index"
+                                           asp-route-torneoId="@t.TorneoId"
+                                           class="btn btn-primary btn-sm">
+                                            Ver Plantilla
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div style="padding:24px;">
+                        <p style="opacity:0.6;margin:0;">El equipo no está inscrito en ningún torneo aún.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

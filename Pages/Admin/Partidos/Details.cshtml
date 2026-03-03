@@ -1,0 +1,280 @@
+@page "{id:int}"
+@model ControlTorneosFutbol.Pages.Admin.Partidos.DetailsModel
+@{
+    ViewData["Title"] = $"Partido: {Model.Partido.NombreLocal} vs {Model.Partido.NombreVisitante}";
+    Layout = "_Layout";
+    var p = Model.Partido;
+    string estadoColor = p.Estado switch {
+        "Finalizado" => "var(--accent)",
+        "EnCurso" => "#f59e0b",
+        "Cancelado" => "#ef4444",
+        _ => "rgba(255,255,255,0.5)"
+    };
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Admin/Partidos/Index" class="back-link">← Volver a Partidos</a>
+            <h1>Detalle del Partido</h1>
+            <span class="badge" style="background:rgba(255,255,255,0.1);color:@estadoColor;font-size:0.85rem;">@p.Estado</span>
+        </div>
+        <div class="header-actions">
+            <a asp-page="/Admin/Partidos/Editar" asp-route-id="@p.Id" class="btn btn-primary">
+                Editar Partido
+            </a>
+            <a asp-page="/Admin/Torneos/Details" asp-route-id="@p.TorneoId" class="btn btn-secondary">
+                Ver Torneo
+            </a>
+        </div>
+    </div>
+
+    <!-- ENCABEZADO DEL PARTIDO -->
+    <div class="card" style="margin-bottom:24px;background:linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));">
+        <div class="card-body" style="padding:32px;">
+            <!-- Equipos y resultado -->
+            <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;text-align:center;">
+                <!-- Equipo Local -->
+                <div>
+                    <div style="font-size:1.6rem;font-weight:800;margin-bottom:4px;">@p.NombreLocal</div>
+                    <div style="font-size:0.8rem;opacity:0.5;">Local</div>
+                </div>
+
+                <!-- Resultado / vs -->
+                <div style="text-align:center;">
+                    @if (p.Estado == "Finalizado" && p.GolesLocal.HasValue && p.GolesVisitante.HasValue)
+                    {
+                        <div style="font-size:3rem;font-weight:900;letter-spacing:-2px;color:var(--accent);">
+                            @p.GolesLocal <span style="opacity:0.5;font-size:2rem;">-</span> @p.GolesVisitante
+                        </div>
+                        @if (p.GanadorNombre != null)
+                        {
+                            <div style="font-size:0.78rem;opacity:0.6;">Ganador: @p.GanadorNombre</div>
+                        }
+                        else
+                        {
+                            <div style="font-size:0.78rem;opacity:0.6;">Empate</div>
+                        }
+                    }
+                    else if (p.Estado == "EnCurso")
+                    {
+                        <div style="font-size:2.5rem;font-weight:900;color:#f59e0b;">En Curso</div>
+                    }
+                    else
+                    {
+                        <div style="font-size:2rem;font-weight:700;opacity:0.4;">vs</div>
+                        <div style="font-size:0.8rem;opacity:0.5;">@p.Fecha.ToString("dd/MM/yyyy · HH:mm")</div>
+                    }
+                </div>
+
+                <!-- Equipo Visitante -->
+                <div>
+                    <div style="font-size:1.6rem;font-weight:800;margin-bottom:4px;">@p.NombreVisitante</div>
+                    <div style="font-size:0.8rem;opacity:0.5;">Visitante</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INFO GENERAL + ÁRBITRO -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+        <div class="card">
+            <div class="card-header"><h3 style="margin:0;">Información del Partido</h3></div>
+            <div class="card-body">
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <div>
+                        <span style="font-size:0.72rem;opacity:0.45;display:block;">TORNEO</span>
+                        <span>@p.NombreTorneo</span>
+                        @if (!string.IsNullOrEmpty(p.NombreGrupo))
+                        {
+                            <span class="badge" style="background:rgba(255,255,255,0.08);font-size:0.7rem;margin-left:6px;">@p.NombreGrupo</span>
+                        }
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;opacity:0.45;display:block;">FECHA Y HORA</span>
+                        <span>@p.Fecha.ToString("dddd dd 'de' MMMM yyyy, HH:mm", new System.Globalization.CultureInfo("es-ES"))</span>
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;opacity:0.45;display:block;">SEDE</span>
+                        <span>@(p.Sede ?? "Sin sede asignada")</span>
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;opacity:0.45;display:block;">FORMATO</span>
+                        <span>@(p.FormatoTorneo switch {
+                            "TodosContraTodos" => "Todos contra Todos (Liga)",
+                            "EliminacionDirecta" => "Eliminación Directa",
+                            "GruposYEliminacion" => "Grupos + Eliminación",
+                            _ => p.FormatoTorneo })</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3 style="margin:0;">Árbitro</h3></div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(p.NombreArbitro))
+                {
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:48px;height:48px;border-radius:50%;background:rgba(163,255,18,0.15);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:var(--accent);">
+                            @p.NombreArbitro[0]
+                        </div>
+                        <div>
+                            <strong style="font-size:1rem;">@p.NombreArbitro</strong>
+                            <div style="font-size:0.8rem;opacity:0.5;margin-top:2px;">Árbitro Principal</div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div style="opacity:0.5;font-style:italic;">No hay árbitro asignado</div>
+                    <a asp-page="/Admin/Partidos/Index" class="btn btn-secondary btn-sm" style="margin-top:12px;">Asignar Árbitro</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- PLANTILLAS DE AMBOS EQUIPOS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+        <!-- Local -->
+        <div class="card">
+            <div class="card-header">
+                <h3 style="margin:0;">@p.NombreLocal</h3>
+                <span style="font-size:0.78rem;opacity:0.5;">@Model.JugadoresLocal.Count jugadores inscritos</span>
+            </div>
+            <div class="card-body" style="padding:0;">
+                @if (Model.JugadoresLocal.Any())
+                {
+                    <table class="data-table" style="font-size:0.88rem;">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">#</th>
+                                <th>Jugador</th>
+                                <th>Posición</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var j in Model.JugadoresLocal)
+                            {
+                                <tr>
+                                    <td style="opacity:0.6;font-weight:700;">@j.NumeroCamiseta</td>
+                                    <td>@j.NombreCompleto</td>
+                                    <td style="opacity:0.6;font-size:0.8rem;">@j.Posicion</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div style="padding:16px;opacity:0.5;font-size:0.85rem;">Sin jugadores inscritos en este torneo.</div>
+                }
+            </div>
+        </div>
+
+        <!-- Visitante -->
+        <div class="card">
+            <div class="card-header">
+                <h3 style="margin:0;">@p.NombreVisitante</h3>
+                <span style="font-size:0.78rem;opacity:0.5;">@Model.JugadoresVisitante.Count jugadores inscritos</span>
+            </div>
+            <div class="card-body" style="padding:0;">
+                @if (Model.JugadoresVisitante.Any())
+                {
+                    <table class="data-table" style="font-size:0.88rem;">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">#</th>
+                                <th>Jugador</th>
+                                <th>Posición</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var j in Model.JugadoresVisitante)
+                            {
+                                <tr>
+                                    <td style="opacity:0.6;font-weight:700;">@j.NumeroCamiseta</td>
+                                    <td>@j.NombreCompleto</td>
+                                    <td style="opacity:0.6;font-size:0.8rem;">@j.Posicion</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div style="padding:16px;opacity:0.5;font-size:0.85rem;">Sin jugadores inscritos en este torneo.</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- CLASIFICACIÓN DEL TORNEO -->
+    @if (Model.Clasificacion.Any())
+    {
+        <div class="card">
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="margin:0;">Clasificación del Torneo</h3>
+                <span style="font-size:0.78rem;opacity:0.5;">@Model.Clasificacion.Count equipos · @Model.Partido.NombreTorneo</span>
+            </div>
+            <div class="card-body" style="padding:0;overflow-x:auto;">
+                <table class="data-table" style="min-width:600px;">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">Pos</th>
+                            <th>Equipo</th>
+                            <th title="Partidos Jugados" style="width:40px;">PJ</th>
+                            <th title="Ganados" style="width:40px;">G</th>
+                            <th title="Empates" style="width:40px;">E</th>
+                            <th title="Perdidos" style="width:40px;">P</th>
+                            <th title="Goles a Favor" style="width:40px;">GF</th>
+                            <th title="Goles en Contra" style="width:40px;">GC</th>
+                            <th title="Diferencia de Goles" style="width:40px;">DG</th>
+                            <th title="Puntos" style="width:50px;color:var(--accent);">Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Clasificacion)
+                        {
+                            bool esLocal = c.EquipoId == Model.Partido.EquipoLocalId;
+                            bool esVisitante = c.EquipoId == Model.Partido.EquipoVisitanteId;
+                            string rowStyle = esLocal || esVisitante
+                                ? "background:rgba(163,255,18,0.06);"
+                                : "";
+
+                            <tr style="@rowStyle">
+                                <td style="font-weight:700;opacity:@(c.Posicion <= 3 ? "1" : "0.6");">
+                                    @if (c.Posicion == 1) { <span style="color:var(--accent);">@c.Posicion</span> }
+                                    else if (c.Posicion == 2) { <span style="color:#c0c0c0;">@c.Posicion</span> }
+                                    else if (c.Posicion == 3) { <span style="color:#cd7f32;">@c.Posicion</span> }
+                                    else { <span>@c.Posicion</span> }
+                                </td>
+                                <td>
+                                    <strong>@c.NombreEquipo</strong>
+                                    @if (esLocal)
+                                    {
+                                        <span class="badge" style="background:rgba(255,255,255,0.08);font-size:0.68rem;margin-left:6px;">Local</span>
+                                    }
+                                    else if (esVisitante)
+                                    {
+                                        <span class="badge" style="background:rgba(255,255,255,0.08);font-size:0.68rem;margin-left:6px;">Visitante</span>
+                                    }
+                                </td>
+                                <td style="text-align:center;opacity:0.8;">@c.PJ</td>
+                                <td style="text-align:center;">@c.PG</td>
+                                <td style="text-align:center;opacity:0.7;">@c.PE</td>
+                                <td style="text-align:center;opacity:0.7;">@c.PP</td>
+                                <td style="text-align:center;">@c.GF</td>
+                                <td style="text-align:center;opacity:0.7;">@c.GC</td>
+                                <td style="text-align:center;color:@(c.DG > 0 ? "var(--accent)" : c.DG < 0 ? "#ef4444" : "inherit");">
+                                    @(c.DG > 0 ? "+" : "")@c.DG
+                                </td>
+                                <td style="text-align:center;font-weight:800;font-size:1rem;color:var(--accent);">@c.Pts</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

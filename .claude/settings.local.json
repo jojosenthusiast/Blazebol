@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -lh \"c:/Users/frenzied/Desktop/ControlTorneosFutbol/ControlTorneosFutbol/Pages/Shared/_Layout\"*.cshtml)",
+      "Bash(dotnet build --no-restore)",
+      "Bash(dotnet ef database update)",
+      "Bash(dotnet ef database update --no-build)",
+      "Bash(where psql)",
+      "Bash(dotnet build)",
+      "Bash(dotnet ef migrations script --output migration_supabase.sql --idempotent)"
+    ]
+  }
+}

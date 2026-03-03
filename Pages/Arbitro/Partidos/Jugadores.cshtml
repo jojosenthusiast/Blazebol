@@ -1,0 +1,123 @@
+@page "{id:int}"
+@model ControlTorneosFutbol.Pages.Arbitro.Partidos.JugadoresModel
+@{
+    ViewData["Title"] = "Lista de Jugadores";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Arbitro/Partidos/Index" class="back-link">← Volver a Mis Partidos</a>
+            <h1>Lista de Jugadores</h1>
+            <p class="page-subtitle">
+                @Model.NombreLocal vs @Model.NombreVisitante —
+                @Model.FechaPartido.ToString("dd/MM/yyyy HH:mm")
+            </p>
+        </div>
+        <div class="header-actions">
+            <span class="badge badge-@Model.Estado.ToLower()">@Model.Estado</span>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+        <!-- EQUIPO LOCAL -->
+        <div class="card">
+            <div class="card-header">
+                <h2 style="margin: 0; font-size: 1.1rem;">
+                    @Model.NombreLocal
+                    <span style="font-size: 0.8rem; opacity: 0.6;">(Local · @Model.JugadoresLocal.Count jugadores)</span>
+                </h2>
+            </div>
+            <div class="card-body">
+                @if (Model.JugadoresLocal.Any())
+                {
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nombre</th>
+                                <th>Posición</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var j in Model.JugadoresLocal)
+                            {
+                                <tr>
+                                    <td><strong>@j.NumeroCamiseta</strong></td>
+                                    <td>@j.NombreCompleto</td>
+                                    <td>@j.Posicion</td>
+                                    <td>
+                                        <span class="badge badge-@(j.Estado == "Activo" ? "activo" : "baja")">
+                                            @j.Estado
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p style="opacity: 0.6;">Sin jugadores inscritos</p>
+                }
+            </div>
+        </div>
+
+        <!-- EQUIPO VISITANTE -->
+        <div class="card">
+            <div class="card-header">
+                <h2 style="margin: 0; font-size: 1.1rem;">
+                    @Model.NombreVisitante
+                    <span style="font-size: 0.8rem; opacity: 0.6;">(Visitante · @Model.JugadoresVisitante.Count jugadores)</span>
+                </h2>
+            </div>
+            <div class="card-body">
+                @if (Model.JugadoresVisitante.Any())
+                {
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nombre</th>
+                                <th>Posición</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var j in Model.JugadoresVisitante)
+                            {
+                                <tr>
+                                    <td><strong>@j.NumeroCamiseta</strong></td>
+                                    <td>@j.NombreCompleto</td>
+                                    <td>@j.Posicion</td>
+                                    <td>
+                                        <span class="badge badge-@(j.Estado == "Activo" ? "activo" : "baja")">
+                                            @j.Estado
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p style="opacity: 0.6;">Sin jugadores inscritos</p>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <div style="margin-top: 24px; display: flex; gap: 12px;">
+        @if (Model.Estado == "Programado")
+        {
+            <a asp-page="/Arbitro/Partidos/Verificacion" asp-route-id="@Model.PartidoId"
+               class="btn btn-secondary">Verificar Identidades</a>
+        }
+        <a asp-page="/Arbitro/Partidos/Index" class="btn btn-link">Volver</a>
+    </div>
+</div>

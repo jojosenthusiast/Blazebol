@@ -1,0 +1,145 @@
+@page
+@model CreateModel
+@{
+    ViewData["Title"] = "Crear Torneo";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Admin/Torneos/Index" class="back-link">← Volver a Torneos</a>
+            <h1>Crear Nuevo Torneo</h1>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    <div class="form-container">
+        <form method="post" class="form-horizontal">
+            <div class="form-section">
+                <h3 class="form-section-title">Información Básica</h3>
+
+                <div class="form-group">
+                    <label asp-for="Input.Nombre" class="required"></label>
+                    <input asp-for="Input.Nombre" class="form-control" placeholder="Ej: Torneo Apertura 2026" />
+                    <span asp-validation-for="Input.Nombre" class="text-danger"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.LigaId" class="required"></label>
+                        <select asp-for="Input.LigaId" class="form-control">
+                            <option value="">Seleccione una liga</option>
+                            @foreach (var liga in Model.Ligas)
+                            {
+                                <option value="@liga.Id">@liga.Nombre</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.LigaId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.TemporadaId" class="required"></label>
+                        <select asp-for="Input.TemporadaId" class="form-control">
+                            <option value="">Seleccione una temporada</option>
+                            @foreach (var temporada in Model.Temporadas)
+                            {
+                                <option value="@temporada.Id">@temporada.Nombre (@temporada.Anio)</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.TemporadaId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.CategoriaId" class="required"></label>
+                        <select asp-for="Input.CategoriaId" class="form-control">
+                            <option value="">Seleccione una categoría</option>
+                            @foreach (var categoria in Model.Categorias)
+                            {
+                                <option value="@categoria.Id">@categoria.Nombre</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.CategoriaId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Formato" class="required"></label>
+                        <select asp-for="Input.Formato" class="form-control">
+                            <option value="">Seleccione un formato</option>
+                            <option value="TodosContraTodos">Todos contra Todos (Liga)</option>
+                            <option value="EliminacionDirecta">Eliminación Directa</option>
+                            <option value="GruposYEliminacion">Grupos + Eliminación</option>
+                        </select>
+                        <span asp-validation-for="Input.Formato" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Fechas del Torneo</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.FechaInicio" class="required"></label>
+                        <input asp-for="Input.FechaInicio" class="form-control" type="date" />
+                        <span asp-validation-for="Input.FechaInicio" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.FechaFin" class="required"></label>
+                        <input asp-for="Input.FechaFin" class="form-control" type="date" />
+                        <span asp-validation-for="Input.FechaFin" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Configuración de Equipos</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.NumeroEquiposMinimo" class="required"></label>
+                        <input asp-for="Input.NumeroEquiposMinimo" class="form-control" type="number" min="2" max="100" />
+                        <span asp-validation-for="Input.NumeroEquiposMinimo" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.NumeroEquiposMaximo"></label>
+                        <input asp-for="Input.NumeroEquiposMaximo" class="form-control" type="number" min="2" max="100" />
+                        <span asp-validation-for="Input.NumeroEquiposMaximo" class="text-danger"></span>
+                        <small class="form-text">Dejar en blanco si no hay límite</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Estado Inicial</h3>
+
+                <div class="form-group">
+                    <label asp-for="Input.Estado" class="required"></label>
+                    <select asp-for="Input.Estado" class="form-control">
+                        <option value="Borrador">Borrador</option>
+                        <option value="Activo">Activo</option>
+                    </select>
+                    <span asp-validation-for="Input.Estado" class="text-danger"></span>
+                    <small class="form-text">Los torneos en "Borrador" no son visibles públicamente</small>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Crear Torneo</button>
+                <a asp-page="/Admin/Torneos/Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

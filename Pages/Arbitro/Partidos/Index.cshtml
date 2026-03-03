@@ -1,0 +1,87 @@
+@page
+@model ControlTorneosFutbol.Pages.Arbitro.Partidos.IndexModel
+@{
+    ViewData["Title"] = "Mis Partidos";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>Mis Partidos</h1>
+            <p class="page-subtitle">@Model.NombreCompleto</p>
+        </div>
+    </div>
+
+    @if (Model.EstadoAprobacion != "Aprobado")
+    {
+        <div class="alert alert-error">
+            Tu cuenta de árbitro está en estado <strong>@Model.EstadoAprobacion</strong>.
+            No puedes acceder a los partidos hasta que tu cuenta sea aprobada por un administrador.
+        </div>
+    }
+    else if (!Model.Partidos.Any())
+    {
+        <div class="empty-state">
+            <p>No tienes partidos asignados en este momento.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Torneo</th>
+                        <th>Partido</th>
+                        <th>Resultado</th>
+                        <th>Sede</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var partido in Model.Partidos)
+                    {
+                        <tr>
+                            <td>@partido.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@partido.NombreTorneo</td>
+                            <td>
+                                <strong>@partido.NombreLocal</strong>
+                                <span style="margin: 0 6px; opacity: 0.6;">vs</span>
+                                <strong>@partido.NombreVisitante</strong>
+                            </td>
+                            <td>@partido.Resultado</td>
+                            <td>@(partido.Sede ?? "—")</td>
+                            <td>
+                                <span class="badge badge-@partido.Estado.ToLower()">
+                                    @partido.Estado
+                                </span>
+                            </td>
+                            <td class="actions-cell">
+                                <a asp-page="/Arbitro/Partidos/Jugadores"
+                                   asp-route-id="@partido.Id"
+                                   class="btn btn-sm btn-secondary" style="margin-right:4px;">
+                                    Ver Jugadores
+                                </a>
+                                @if (partido.EsProgramado)
+                                {
+                                    <a asp-page="/Arbitro/Partidos/Verificacion"
+                                       asp-route-id="@partido.Id"
+                                       class="btn btn-sm btn-primary">
+                                        Verificar
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-summary">
+            <p>@Model.Partidos.Count partido(s) asignado(s)</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,160 @@
+@page
+@model ControlTorneosFutbol.Pages.Entrenador.Partidos.IndexModel
+@{
+    ViewData["Title"] = "Partidos de Mi Equipo";
+    Layout = "_Layout";
+}
+
+@functions {
+    string EscudoHtml(string? logo, string? abrev, string? color, int size = 44)
+    {
+        string bg = string.IsNullOrEmpty(color) ? "rgba(255,255,255,0.08)" : color + "22";
+        string inner;
+        if (!string.IsNullOrEmpty(logo))
+            inner = $"<img src=\"{logo}\" style=\"width:{size - 6}px;height:{size - 6}px;object-fit:contain;\" />";
+        else if (!string.IsNullOrEmpty(abrev))
+            inner = $"<span style=\"font-weight:700;font-size:0.75rem;color:{(string.IsNullOrEmpty(color) ? "rgba(255,255,255,0.6)" : color)};\">{abrev}</span>";
+        else
+            inner = "<span style=\"opacity:0.25;font-size:1.1rem;\">⚽</span>";
+        return $"<div style=\"width:{size}px;height:{size}px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:{bg};flex-shrink:0;\">{inner}</div>";
+    }
+
+    Microsoft.AspNetCore.Html.IHtmlContent MatchCard(ControlTorneosFutbol.Pages.Entrenador.Partidos.PartidoEntrenadorViewModel p)
+    {
+        var sb = new System.Text.StringBuilder();
+        string borderColor = p.Estado switch {
+            "EnCurso" => "#f59e0b",
+            "Finalizado" => "rgba(163,255,18,0.2)",
+            _ => "rgba(255,255,255,0.08)"
+        };
+
+        sb.Append($"<div style=\"border:1px solid {borderColor};border-radius:12px;overflow:hidden;\">");
+
+        // Header: torneo + estado
+        sb.Append("<div style=\"padding:10px 16px;background:rgba(255,255,255,0.03);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);\">");
+        string torneoText = p.NombreTorneo;
+        if (!string.IsNullOrEmpty(p.NombreGrupo)) torneoText += $" · {p.NombreGrupo}";
+        sb.Append($"<span style=\"font-size:0.72rem;opacity:0.45;\">{torneoText}</span>");
+        string estadoStyle = p.Estado switch {
+            "EnCurso" => "background:rgba(245,158,11,0.2);color:#f59e0b;",
+            "Finalizado" => "background:rgba(163,255,18,0.15);color:var(--accent);",
+            _ => "background:rgba(255,255,255,0.08);"
+        };
+        sb.Append($"<span class=\"badge\" style=\"{estadoStyle}\">{p.Estado}</span>");
+        sb.Append("</div>");
+
+        // Match body
+        sb.Append("<div style=\"padding:16px 20px;\">");
+        sb.Append("<div style=\"display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;\">");
+
+        // Local
+        string localHighlight = p.EsMiEquipoLocal ? "color:var(--accent);" : "";
+        sb.Append($"<div style=\"display:flex;align-items:center;gap:10px;\">");
+        sb.Append(EscudoHtml(p.LogoLocal, p.AbrevLocal, p.ColorLocal));
+        sb.Append($"<div><div style=\"font-size:0.9rem;font-weight:600;{localHighlight}\">{p.NombreLocal}</div>");
+        if (!string.IsNullOrEmpty(p.AbrevLocal)) sb.Append($"<div style=\"font-size:0.68rem;opacity:0.35;\">[{p.AbrevLocal}]</div>");
+        sb.Append("</div></div>");
+
+        // Centro: resultado o hora
+        if (p.Estado == "Finalizado" && p.GolesLocal.HasValue)
+        {
+            string ganadorStyle = p.EsMiEquipoLocal
+                ? (p.GolesLocal > p.GolesVisitante ? "color:var(--accent);" : p.GolesLocal < p.GolesVisitante ? "color:#ef4444;" : "")
+                : (p.GolesVisitante > p.GolesLocal ? "color:var(--accent);" : p.GolesVisitante < p.GolesLocal ? "color:#ef4444;" : "");
+            sb.Append($"<div style=\"text-align:center;\"><div style=\"font-size:2rem;font-weight:900;letter-spacing:-1px;{ganadorStyle}\">{p.GolesLocal}<span style=\"opacity:0.35;font-size:1.3rem;margin:0 2px;\">–</span>{p.GolesVisitante}</div></div>");
+        }
+        else
+        {
+            sb.Append($"<div style=\"text-align:center;\"><div style=\"font-size:0.9rem;font-weight:700;opacity:0.4;\">vs</div><div style=\"font-size:0.75rem;opacity:0.5;\">{p.Fecha:dd/MM/yyyy}</div><div style=\"font-size:0.72rem;opacity:0.4;\">{p.Fecha:HH:mm}h</div></div>");
+        }
+
+        // Visitante
+        string visitHighlight = !p.EsMiEquipoLocal ? "color:var(--accent);" : "";
+        sb.Append($"<div style=\"display:flex;align-items:center;gap:10px;justify-content:flex-end;\">");
+        sb.Append($"<div style=\"text-align:right;\"><div style=\"font-size:0.9rem;font-weight:600;{visitHighlight}\">{p.NombreVisitante}</div>");
+        if (!string.IsNullOrEmpty(p.AbrevVisitante)) sb.Append($"<div style=\"font-size:0.68rem;opacity:0.35;\">[{p.AbrevVisitante}]</div>");
+        sb.Append("</div>");
+        sb.Append(EscudoHtml(p.LogoVisitante, p.AbrevVisitante, p.ColorVisitante));
+        sb.Append("</div>");
+
+        sb.Append("</div>"); // grid
+
+        // Footer: sede + árbitro + convocatoria btn
+        sb.Append("<div style=\"display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px;\">");
+        sb.Append("<div style=\"font-size:0.75rem;opacity:0.45;display:flex;gap:12px;flex-wrap:wrap;\">");
+        if (!string.IsNullOrEmpty(p.Sede)) sb.Append($"<span>📍 {p.Sede}</span>");
+        if (!string.IsNullOrEmpty(p.NombreArbitro)) sb.Append($"<span>👤 {p.NombreArbitro}</span>");
+        sb.Append("</div>");
+        sb.Append($"<a href=\"/Entrenador/Partidos/Convocatoria/{p.Id}\" class=\"btn btn-secondary btn-sm\">Ver Convocatoria</a>");
+        sb.Append("</div>");
+
+        sb.Append("</div>"); // padding div
+        sb.Append("</div>"); // card
+        return new Microsoft.AspNetCore.Html.HtmlString(sb.ToString());
+    }
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Entrenador/Dashboard" class="back-link">← Volver al Dashboard</a>
+            <h1>Partidos de Mi Equipo</h1>
+            <p class="page-subtitle">@Model.NombreEquipo</p>
+        </div>
+    </div>
+
+    @if (!Model.PartidosEnCurso.Any() && !Model.ProximosPartidos.Any() && !Model.PartidosPasados.Any())
+    {
+        <div class="empty-state">
+            <p>Tu equipo no tiene partidos programados todavía.</p>
+            <p style="opacity:0.5;font-size:0.85rem;">El administrador debe programar los partidos del torneo.</p>
+        </div>
+    }
+    else
+    {
+        @if (Model.PartidosEnCurso.Any())
+        {
+            <div style="margin-bottom:32px;">
+                <h2 style="font-size:1rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+                    EN CURSO <span style="color:#f59e0b;margin-left:6px;">●</span>
+                </h2>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    @foreach (var p in Model.PartidosEnCurso)
+                    {
+                        @MatchCard(p)
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model.ProximosPartidos.Any())
+        {
+            <div style="margin-bottom:32px;">
+                <h2 style="font-size:1rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+                    PRÓXIMOS PARTIDOS
+                </h2>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    @foreach (var p in Model.ProximosPartidos)
+                    {
+                        @MatchCard(p)
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model.PartidosPasados.Any())
+        {
+            <div>
+                <h2 style="font-size:1rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+                    RESULTADOS
+                </h2>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    @foreach (var p in Model.PartidosPasados)
+                    {
+                        @MatchCard(p)
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>

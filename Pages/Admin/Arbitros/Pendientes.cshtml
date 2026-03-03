@@ -1,0 +1,70 @@
+@page
+@model ControlTorneosFutbol.Pages.Admin.Arbitros.PendientesModel
+@{
+    ViewData["Title"] = "Árbitros Pendientes de Aprobación";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Árbitros Pendientes de Aprobación</h1>
+        <p class="page-subtitle">Revisa y aprueba nuevos árbitros</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success">@Model.SuccessMessage</div>
+}
+
+@if (Model.ArbitrosPendientes.Any())
+{
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Número Licencia</th>
+                    <th>Categorías</th>
+                    <th>Fecha Solicitud</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var arbitro in Model.ArbitrosPendientes)
+                {
+                    <tr>
+                        <td><strong>@arbitro.NombreCompleto</strong></td>
+                        <td>@arbitro.Email</td>
+                        <td><code>@arbitro.NumeroLicencia</code></td>
+                        <td>@arbitro.CategoriasArbitra</td>
+                        <td>@arbitro.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+                        <td class="actions-cell">
+                            <form method="post" asp-page-handler="Aprobar" asp-route-id="@arbitro.ArbitroId" style="display: inline;">
+                                <button type="submit" class="btn-action btn-success" title="Aprobar">
+                                    Aprobar
+                                </button>
+                            </form>
+                            <form method="post" asp-page-handler="Rechazar" asp-route-id="@arbitro.ArbitroId" style="display: inline;"
+                                  onsubmit="return confirm('¿Está seguro de rechazar este árbitro?');">
+                                <button type="submit" class="btn-action btn-delete" title="Rechazar">
+                                    Rechazar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-summary">
+        <p>@Model.ArbitrosPendientes.Count árbitro(s) pendiente(s) de aprobación</p>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <p>No hay árbitros pendientes de aprobación</p>
+    </div>
+}
