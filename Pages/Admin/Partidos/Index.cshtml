@@ -50,7 +50,11 @@
                 </select>
             </div>
 
-            <a asp-page="/Admin/Partidos/Index" class="btn btn-link">Limpiar</a>
+            <div class="filter-actions">
+                <a asp-page="/Admin/Partidos/Index" class="btn btn-link btn-sm btn-icon">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+            </div>
         </form>
     </div>
 
@@ -89,9 +93,15 @@
                                     @partido.Estado
                                 </span>
                             </td>
-                            <td style="display:flex;gap:6px;">
-                                <a asp-page="/Admin/Partidos/Details" asp-route-id="@partido.Id" class="btn btn-secondary btn-sm">Ver</a>
-                                <a asp-page="/Admin/Partidos/Editar" asp-route-id="@partido.Id" class="btn btn-primary btn-sm">Editar</a>
+                            <td class="actions-cell">
+                                <a asp-page="/Admin/Partidos/Details" asp-route-id="@partido.Id"
+                                   class="btn btn-sm btn-info btn-icon">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
+                                <a asp-page="/Admin/Partidos/Editar" asp-route-id="@partido.Id"
+                                   class="btn btn-sm btn-warning btn-icon">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
                             </td>
                         </tr>
                     }

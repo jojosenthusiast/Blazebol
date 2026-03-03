@@ -62,15 +62,15 @@
                             <td class="actions-cell">
                                 <a asp-page="/Arbitro/Partidos/Jugadores"
                                    asp-route-id="@partido.Id"
-                                   class="btn btn-sm btn-secondary" style="margin-right:4px;">
-                                    Ver Jugadores
+                                   class="btn btn-sm btn-info btn-icon">
+                                    <i class="bi bi-people"></i> Ver Jugadores
                                 </a>
                                 @if (partido.EsProgramado)
                                 {
                                     <a asp-page="/Arbitro/Partidos/Verificacion"
                                        asp-route-id="@partido.Id"
-                                       class="btn btn-sm btn-primary">
-                                        Verificar
+                                       class="btn btn-sm btn-primary btn-icon">
+                                        <i class="bi bi-clipboard-check"></i> Verificar
                                     </a>
                                 }
                             </td>

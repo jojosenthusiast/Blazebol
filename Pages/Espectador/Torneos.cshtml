@@ -25,7 +25,11 @@
                     <option value="Finalizado" selected="@(Model.FiltroEstado == "Finalizado")">Finalizados</option>
                 </select>
             </div>
-            <a asp-page="/Espectador/Torneos" class="btn btn-secondary">Limpiar</a>
+            <div class="filter-actions">
+                <a asp-page="/Espectador/Torneos" class="btn btn-link btn-sm btn-icon">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+            </div>
         </form>
     </div>
 

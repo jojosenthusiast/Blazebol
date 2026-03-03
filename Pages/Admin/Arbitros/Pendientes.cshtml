@@ -40,15 +40,15 @@
                         <td>@arbitro.CategoriasArbitra</td>
                         <td>@arbitro.FechaSolicitud.ToString("dd/MM/yyyy")</td>
                         <td class="actions-cell">
-                            <form method="post" asp-page-handler="Aprobar" asp-route-id="@arbitro.ArbitroId" style="display: inline;">
-                                <button type="submit" class="btn-action btn-success" title="Aprobar">
-                                    Aprobar
+                            <form method="post" asp-page-handler="Aprobar" asp-route-id="@arbitro.ArbitroId" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-success btn-icon">
+                                    <i class="bi bi-check-lg"></i> Aprobar
                                 </button>
                             </form>
-                            <form method="post" asp-page-handler="Rechazar" asp-route-id="@arbitro.ArbitroId" style="display: inline;"
-                                  onsubmit="return confirm('¿Está seguro de rechazar este árbitro?');">
-                                <button type="submit" class="btn-action btn-delete" title="Rechazar">
-                                    Rechazar
+                            <form method="post" asp-page-handler="Rechazar" asp-route-id="@arbitro.ArbitroId" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger btn-icon"
+                                        onclick="ctConfirmForm(event, this, '¿Rechazar a este árbitro?')">
+                                    <i class="bi bi-x-lg"></i> Rechazar
                                 </button>
                             </form>
                         </td>

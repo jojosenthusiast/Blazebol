@@ -23,30 +23,31 @@
         <div class="alert alert-error">@Model.ErrorMessage</div>
     }
 
-    <div class="form-container" style="max-width:600px;margin-bottom:24px;">
-        <form method="get" class="form-horizontal">
-            <div class="form-section">
-                <h3 class="form-section-title">Filtros de Búsqueda</h3>
-                <div class="form-group">
-                    <label>Nombre del equipo</label>
-                    <input type="text" name="buscar" class="form-control"
-                           value="@Model.BuscarTerm"
-                           placeholder="Ej: Deportivo FC" />
-                </div>
-                <div class="form-group">
-                    <label>Torneo</label>
-                    <select name="torneoId" class="form-control">
-                        <option value="">-- Todos los torneos --</option>
-                        @foreach (var t in Model.TorneosActivos)
-                        {
-                            <option value="@t.Id" selected="@(Model.TorneoFiltro == t.Id)">@t.Nombre</option>
-                        }
-                    </select>
-                </div>
+    <div class="filters-section">
+        <form method="get" class="filters-form">
+            <div class="filter-group">
+                <label>Nombre del equipo:</label>
+                <input type="text" name="buscar" class="form-control"
+                       value="@Model.BuscarTerm"
+                       placeholder="Ej: Deportivo FC" />
             </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Buscar</button>
-                <a asp-page="/Jugador/BuscarEquipos" class="btn btn-secondary">Limpiar</a>
+            <div class="filter-group">
+                <label>Torneo:</label>
+                <select name="torneoId" class="form-control">
+                    <option value="">-- Todos los torneos --</option>
+                    @foreach (var t in Model.TorneosActivos)
+                    {
+                        <option value="@t.Id" selected="@(Model.TorneoFiltro == t.Id)">@t.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-secondary btn-sm btn-icon">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+                <a asp-page="/Jugador/BuscarEquipos" class="btn btn-link btn-sm btn-icon">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
             </div>
         </form>
     </div>
@@ -139,7 +140,9 @@
                                     {
                                         <input type="hidden" name="torneoId" value="@Model.TorneoFiltro" />
                                     }
-                                    <button type="submit" class="btn btn-primary btn-sm">Solicitar Unirme</button>
+                                    <button type="submit" class="btn btn-primary btn-sm btn-icon">
+                                    <i class="bi bi-person-plus"></i> Solicitar Unirme
+                                </button>
                                 </form>
                             }
                         </div>

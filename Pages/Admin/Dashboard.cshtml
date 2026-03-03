@@ -13,6 +13,7 @@
 
     <div class="stats-grid">
         <div class="stat-card">
+            <i class="bi bi-trophy-fill stat-icon" style="color:var(--color-accent);"></i>
             <div class="stat-content">
                 <h3>@Model.TotalTorneos</h3>
                 <p>Torneos Totales</p>
@@ -20,6 +21,7 @@
         </div>
 
         <div class="stat-card stat-active">
+            <i class="bi bi-play-circle-fill stat-icon" style="color:var(--color-success);"></i>
             <div class="stat-content">
                 <h3>@Model.TorneosActivos</h3>
                 <p>Torneos Activos</p>
@@ -27,6 +29,7 @@
         </div>
 
         <div class="stat-card">
+            <i class="bi bi-shield-fill stat-icon" style="color:var(--color-info);"></i>
             <div class="stat-content">
                 <h3>@Model.TotalEquipos</h3>
                 <p>Equipos Registrados</p>
@@ -34,6 +37,7 @@
         </div>
 
         <div class="stat-card">
+            <i class="bi bi-person-fill stat-icon" style="color:var(--color-accent);"></i>
             <div class="stat-content">
                 <h3>@Model.TotalJugadores</h3>
                 <p>Jugadores</p>
@@ -41,6 +45,7 @@
         </div>
 
         <div class="stat-card">
+            <i class="bi bi-clipboard2-check-fill stat-icon" style="color:var(--color-warning);"></i>
             <div class="stat-content">
                 <h3>@Model.TotalArbitros</h3>
                 <p>Árbitros</p>
@@ -48,45 +53,62 @@
         </div>
 
         <div class="stat-card stat-warning">
+            <i class="bi bi-person-exclamation stat-icon" style="color:var(--color-warning);"></i>
             <div class="stat-content">
                 <h3>@Model.ArbitrosPendientesAprobacion</h3>
                 <p>Árbitros Pendientes</p>
             </div>
         </div>
+
         <div class="stat-card">
-        <div class="stat-label">Accesos Hoy</div>
-        <div class="stat-value">@Model.AccesosHoy</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-label">Intentos Fallidos</div>
-        <div class="stat-value" style="color: var(--color-error);">@Model.IntentosFallidos</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-label">Usuarios Bloqueados</div>
-        <div class="stat-value" style="color: var(--color-error);">@Model.UsuariosBloqueados</div>
-    </div>
+            <i class="bi bi-clock-history stat-icon" style="color:var(--color-info);"></i>
+            <div class="stat-content">
+                <h3>@Model.AccesosHoy</h3>
+                <p>Accesos Hoy</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-danger">
+            <i class="bi bi-exclamation-triangle-fill stat-icon" style="color:var(--color-error);"></i>
+            <div class="stat-content">
+                <h3>@Model.IntentosFallidos</h3>
+                <p>Intentos Fallidos</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-danger">
+            <i class="bi bi-lock-fill stat-icon" style="color:var(--color-error);"></i>
+            <div class="stat-content">
+                <h3>@Model.UsuariosBloqueados</h3>
+                <p>Usuarios Bloqueados</p>
+            </div>
+        </div>
     </div>
 
     <div class="dashboard-actions">
         <h2>Acciones Rápidas</h2>
         <div class="action-cards">
             <a asp-page="/Admin/Torneos/Create" class="action-card">
+                <i class="bi bi-plus-circle action-icon" style="color:var(--color-accent);"></i>
                 <h3>Crear Torneo</h3>
                 <p>Inicia un nuevo torneo</p>
             </a>
 
             <a asp-page="/Admin/Torneos/Index" class="action-card">
+                <i class="bi bi-trophy-fill action-icon" style="color:var(--color-accent);"></i>
                 <h3>Gestionar Torneos</h3>
                 <p>Ver y editar torneos</p>
             </a>
 
             @* Sprint 2: Gestión de equipos y usuarios
             <a asp-page="/Admin/Equipos/Index" class="action-card">
+                <i class="bi bi-shield action-icon"></i>
                 <h3>Gestionar Equipos</h3>
                 <p>Administrar equipos</p>
             </a>
 
             <a asp-page="/Admin/Usuarios/Index" class="action-card">
+                <i class="bi bi-people-fill action-icon"></i>
                 <h3>Gestionar Usuarios</h3>
                 <p>Ver jugadores, entrenadores y árbitros</p>
             </a>
@@ -95,6 +117,7 @@
             @if (Model.ArbitrosPendientesAprobacion > 0)
             {
                 <a asp-page="/Admin/Arbitros/Pendientes" class="action-card action-alert">
+                    <i class="bi bi-person-check action-icon" style="color:var(--color-warning);"></i>
                     <h3>Aprobar Árbitros</h3>
                     <p>@Model.ArbitrosPendientesAprobacion pendientes de aprobación</p>
                 </a>
@@ -131,11 +154,17 @@
                                     </span>
                                 </td>
                                 <td>@torneo.FechaInicio.ToString("dd/MM/yyyy")</td>
-                                <td>
-                                    <a asp-page="/Admin/Torneos/Details" asp-route-id="@torneo.Id" class="btn-link">Ver</a>
+                                <td class="actions-cell">
+                                    <a asp-page="/Admin/Torneos/Details" asp-route-id="@torneo.Id"
+                                       class="btn btn-sm btn-info btn-icon">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
                                     @if (torneo.PuedeEditar)
                                     {
-                                        <a asp-page="/Admin/Torneos/Edit" asp-route-id="@torneo.Id" class="btn-link">Editar</a>
+                                        <a asp-page="/Admin/Torneos/Edit" asp-route-id="@torneo.Id"
+                                           class="btn btn-sm btn-warning btn-icon">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
                                     }
                                 </td>
                             </tr>

@@ -11,35 +11,40 @@
         <p class="dashboard-subtitle">Bienvenido, @Model.NombreCompleto</p>
     </div>
 
-    <div class="referee-status-card">
-        <h3>Estado de Cuenta</h3>
-        <div class="status-badge status-@Model.EstadoAprobacion.ToLower()">
-            @Model.EstadoAprobacion
+    <div class="referee-status-card" style="display:flex;align-items:center;gap:16px;background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:12px;padding:24px;margin-bottom:24px;">
+        <i class="bi bi-clipboard2-check-fill" style="font-size:3rem;color:var(--color-accent);flex-shrink:0;"></i>
+        <div>
+            <h3 style="margin:0 0 8px;">Estado de Cuenta</h3>
+            @if (Model.EstadoAprobacion == "Aprobado")
+            {
+                <span class="badge badge-activo"><i class="bi bi-check-circle"></i> @Model.EstadoAprobacion</span>
+                <p class="status-message" style="margin-top:8px;color:var(--color-text-secondary);">Tu cuenta ha sido aprobada. Ya puedes arbitrar partidos.</p>
+            }
+            else if (Model.EstadoAprobacion == "Pendiente")
+            {
+                <span class="badge badge-warning"><i class="bi bi-clock"></i> @Model.EstadoAprobacion</span>
+                <p class="status-message" style="margin-top:8px;color:var(--color-text-secondary);">Tu cuenta está siendo revisada por un administrador.</p>
+            }
+            else
+            {
+                <span class="badge badge-danger"><i class="bi bi-x-circle"></i> @Model.EstadoAprobacion</span>
+                <p class="status-message" style="margin-top:8px;color:var(--color-text-secondary);">Tu solicitud ha sido rechazada. Contacta al administrador para más información.</p>
+            }
         </div>
-        @if (Model.EstadoAprobacion == "Pendiente")
-        {
-            <p class="status-message">Tu cuenta está siendo revisada por un administrador.</p>
-        }
-        else if (Model.EstadoAprobacion == "Aprobado")
-        {
-            <p class="status-message">Tu cuenta ha sido aprobada. Ya puedes arbitrar partidos.</p>
-        }
-        else if (Model.EstadoAprobacion == "Rechazado")
-        {
-            <p class="status-message">Tu solicitud ha sido rechazada. Contacta al administrador para más información.</p>
-        }
     </div>
 
     @if (Model.EstadoAprobacion == "Aprobado")
     {
         <div class="stats-grid">
             <div class="stat-card">
+                <i class="bi bi-calendar-check-fill stat-icon" style="color:var(--color-info);"></i>
                 <div class="stat-content">
                     <h3>@Model.PartidosArbitrados</h3>
                     <p>Partidos Arbitrados</p>
                 </div>
             </div>
             <div class="stat-card stat-active">
+                <i class="bi bi-calendar-event stat-icon" style="color:var(--color-success);"></i>
                 <div class="stat-content">
                     <h3>@Model.ProximosPartidos.Count</h3>
                     <p>Próximos Asignados</p>
@@ -51,6 +56,7 @@
             <h2>Acciones Rápidas</h2>
             <div class="action-cards">
                 <a asp-page="/Arbitro/Partidos/Index" class="action-card">
+                    <i class="bi bi-calendar-event action-icon" style="color:var(--color-accent);"></i>
                     <h3>Mis Partidos</h3>
                     <p>Ver todos los partidos asignados</p>
                 </a>
@@ -82,7 +88,9 @@
                                         <td><strong>@p.NombreLocal</strong> vs <strong>@p.NombreVisitante</strong></td>
                                         <td style="font-size:0.85rem;opacity:0.8;">@(p.Sede ?? "—")</td>
                                         <td>
-                                            <a asp-page="/Arbitro/Partidos/Index" class="btn btn-primary btn-sm">Ver lista</a>
+                                            <a asp-page="/Arbitro/Partidos/Index" class="btn btn-sm btn-info btn-icon">
+                                            <i class="bi bi-eye"></i> Ver
+                                        </a>
                                         </td>
                                     </tr>
                                 }

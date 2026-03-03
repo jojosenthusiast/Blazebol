@@ -103,13 +103,15 @@
                                 <input type="number" name="numeroCamiseta" placeholder="Nº camiseta"
                                        min="1" max="99" class="form-control" style="width:110px;" required
                                        title="Número de camiseta (1-99)" />
-                                <button type="submit" class="btn btn-primary btn-sm">Aceptar</button>
+                                <button type="submit" class="btn btn-sm btn-success btn-icon">
+                                    <i class="bi bi-check-lg"></i> Aceptar
+                                </button>
                             </form>
                             <form method="post" asp-page-handler="RechazarInvitacion" style="display:inline;">
                                 <input type="hidden" name="id" value="@inv.Id" />
-                                <button type="submit" class="btn btn-secondary btn-sm"
-                                        onclick="return confirm('¿Estás seguro de rechazar esta invitación?')">
-                                    Rechazar
+                                <button type="submit" class="btn btn-sm btn-danger btn-icon"
+                                        onclick="ctConfirmForm(event, this, '¿Rechazar esta invitación?')">
+                                    <i class="bi bi-x-lg"></i> Rechazar
                                 </button>
                             </form>
                         </div>

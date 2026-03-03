@@ -41,8 +41,16 @@
                 <label asp-for="Input.RememberMe">Recordarme</label>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+            <button type="submit" class="btn btn-primary btn-block btn-icon" id="loginBtn">
+                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+            </button>
         </form>
+
+        <!-- Overlay de carga (se muestra al hacer submit) -->
+        <div class="login-overlay" id="loginOverlay">
+            <div class="spinner-lg"></div>
+            <p>Iniciando sesión...</p>
+        </div>
 
         <div class="auth-footer">
             <p>¿No tienes una cuenta? <a asp-page="/Account/Register">Regístrate aquí</a></p>
@@ -52,4 +60,13 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelector('.auth-form').addEventListener('submit', function (e) {
+            var email = document.querySelector('#Input_Email').value.trim();
+            var password = document.querySelector('#Input_Password').value.trim();
+            if (email && password) {
+                document.getElementById('loginOverlay').style.display = 'flex';
+            }
+        });
+    </script>
 }

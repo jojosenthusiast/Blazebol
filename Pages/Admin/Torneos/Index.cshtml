@@ -14,9 +14,13 @@
 
         <div class="header-actions">
         <form method="post" asp-page-handler="ExportarPDF" style="display: inline; margin-right: 8px;">
-            <button type="submit" class="btn btn-secondary">Exportar PDF</button>
+            <button type="submit" class="btn btn-secondary btn-icon">
+                <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+            </button>
         </form>
-        <a asp-page="/Admin/Torneos/Create" class="btn btn-primary">Crear Torneo</a>
+        <a asp-page="/Admin/Torneos/Create" class="btn btn-primary btn-icon">
+            <i class="bi bi-plus-lg"></i> Crear Torneo
+        </a>
     </div>
     </div>
 
@@ -64,8 +68,14 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-secondary">Filtrar</button>
-            <a asp-page="/Admin/Torneos/Index" class="btn btn-link">Limpiar Filtros</a>
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-secondary btn-sm btn-icon">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+                <a asp-page="/Admin/Torneos/Index" class="btn btn-link btn-sm btn-icon">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+            </div>
         </form>
     </div>
 
@@ -122,22 +132,24 @@
                             </td>
                             <td>@torneo.FechaInicio.ToString("dd/MM/yyyy")</td>
                             <td>@torneo.FechaFin.ToString("dd/MM/yyyy")</td>
-                            <td class="actions-cell" style="white-space:nowrap;">
+                            <td class="actions-cell">
                                 <a asp-page="/Admin/Torneos/Details" asp-route-id="@torneo.Id"
-                                   class="btn btn-sm btn-secondary" style="margin-right:4px;">Ver</a>
+                                   class="btn btn-sm btn-info btn-icon">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
                                 @if (torneo.PuedeEditar)
                                 {
                                     <a asp-page="/Admin/Torneos/Edit" asp-route-id="@torneo.Id"
-                                       class="btn btn-sm btn-primary" style="margin-right:4px;">Editar</a>
+                                       class="btn btn-sm btn-warning btn-icon">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
                                 }
                                 @if (torneo.Estado != "Finalizado")
                                 {
-                                    <form method="post" asp-page-handler="Desactivar" asp-route-id="@torneo.Id"
-                                          style="display:inline;"
-                                          onsubmit="return confirm('¿Finalizar este torneo? Esta acción no se puede deshacer.');">
-                                        <button type="submit" class="btn btn-sm"
-                                                style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);">
-                                            Finalizar
+                                    <form method="post" asp-page-handler="Desactivar" asp-route-id="@torneo.Id" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger btn-icon"
+                                                onclick="ctConfirmForm(event, this, '¿Finalizar este torneo? Esta acción no se puede deshacer.')">
+                                            <i class="bi bi-x-lg"></i> Finalizar
                                         </button>
                                     </form>
                                 }

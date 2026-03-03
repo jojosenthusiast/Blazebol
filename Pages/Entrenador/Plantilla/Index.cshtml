@@ -16,8 +16,9 @@
         </div>
         @if (Model.EquipoId > 0 && Model.TorneoSeleccionado.HasValue)
         {
-            <a asp-page="/Entrenador/Plantilla/Agregar" asp-route-torneoId="@Model.TorneoSeleccionado" class="btn btn-primary">
-                + Agregar Jugador
+            <a asp-page="/Entrenador/Plantilla/Agregar" asp-route-torneoId="@Model.TorneoSeleccionado"
+               class="btn btn-primary btn-icon">
+                <i class="bi bi-plus-lg"></i> Agregar Jugador
             </a>
         }
     </div>
@@ -47,10 +48,10 @@
     else
     {
         <!-- Selector de Torneo -->
-        <div class="filter-bar">
-            <form method="get" class="filter-form">
-                <div class="form-group">
-                    <label>Torneo</label>
+        <div class="filters-section">
+            <form method="get" class="filters-form">
+                <div class="filter-group">
+                    <label>Torneo:</label>
                     <select name="torneoId" class="form-control" onchange="this.form.submit()">
                         @foreach (var torneo in Model.TorneosDisponibles)
                         {
@@ -113,18 +114,21 @@
                                 </td>
                                 <td>@jugador.FechaInscripcion.ToString("dd/MM/yyyy")</td>
                                 <td>
-                                    <div class="action-group">
+                                    <div class="actions-cell">
                                         @if (jugador.Activo)
                                         {
                                             <a asp-page="/Entrenador/Plantilla/Editar"
                                                asp-route-id="@jugador.Id"
-                                               class="btn btn-sm btn-secondary">Editar</a>
-                                            <form method="post" asp-page-handler="Desactivar"
-                                                  style="display:inline"
-                                                  onsubmit="return confirm('¿Dar de baja a este jugador?')">
+                                               class="btn btn-sm btn-warning btn-icon">
+                                                <i class="bi bi-pencil"></i> Editar
+                                            </a>
+                                            <form method="post" asp-page-handler="Desactivar" style="display:inline">
                                                 <input type="hidden" name="id" value="@jugador.Id" />
                                                 <input type="hidden" name="torneoId" value="@Model.TorneoSeleccionado" />
-                                                <button type="submit" class="btn btn-sm btn-danger">Dar de Baja</button>
+                                                <button type="submit" class="btn btn-sm btn-danger btn-icon"
+                                                        onclick="ctConfirmForm(event, this, '¿Dar de baja a este jugador?')">
+                                                    <i class="bi bi-trash"></i> Dar de Baja
+                                                </button>
                                             </form>
                                         }
                                     </div>

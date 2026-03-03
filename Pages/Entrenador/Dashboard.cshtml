@@ -12,7 +12,9 @@
     </div>
 
     <div class="coach-info-card">
-        <div class="coach-details">
+        <div class="coach-details" style="display:flex;align-items:center;gap:16px;">
+            <i class="bi bi-person-badge-fill" style="font-size:3rem;color:var(--color-accent);flex-shrink:0;"></i>
+            <div>
             <h2>@Model.NombreCompleto</h2>
             @if (!string.IsNullOrEmpty(Model.NombreEquipo))
             {
@@ -24,6 +26,7 @@
             {
                 <p class="no-team">Sin equipo asignado</p>
             }
+            </div>
         </div>
     </div>
 
@@ -70,8 +73,9 @@
         <h2>Acciones Rápidas</h2>
         <div class="action-cards">
             <a asp-page="/Entrenador/Plantilla/Index" class="action-card">
+                <i class="bi bi-people-fill action-icon" style="color:var(--color-accent);"></i>
                 <h3>Gestionar Plantilla</h3>
-                <p>Agregar, editar o eliminar jugadores</p>
+                <p>Agregar, editar o dar de baja jugadores</p>
             </a>
 
             @* Sprint 2: Solicitudes de jugadores, equipo, partidos y estadísticas (HU-22, HU-23, HU-25 ext.)

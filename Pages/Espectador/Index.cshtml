@@ -17,18 +17,27 @@
     </div>
 
     <!-- STATS -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px;">
-        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:18px 20px;">
-            <div style="font-size:0.7rem;opacity:0.45;letter-spacing:0.09em;margin-bottom:6px;">TORNEOS ACTIVOS</div>
-            <div style="font-size:2.2rem;font-weight:800;color:var(--accent);">@Model.TorneosActivos</div>
+    <div class="stats-grid" style="margin-bottom:32px;">
+        <div class="stat-card stat-active">
+            <i class="bi bi-trophy-fill stat-icon" style="color:var(--color-accent);"></i>
+            <div class="stat-content">
+                <h3>@Model.TorneosActivos</h3>
+                <p>Torneos Activos</p>
+            </div>
         </div>
-        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:18px 20px;">
-            <div style="font-size:0.7rem;opacity:0.45;letter-spacing:0.09em;margin-bottom:6px;">EQUIPOS PARTICIPANTES</div>
-            <div style="font-size:2.2rem;font-weight:800;">@Model.TotalEquipos</div>
+        <div class="stat-card">
+            <i class="bi bi-shield-fill stat-icon" style="color:var(--color-info);"></i>
+            <div class="stat-content">
+                <h3>@Model.TotalEquipos</h3>
+                <p>Equipos Participantes</p>
+            </div>
         </div>
-        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:18px 20px;">
-            <div style="font-size:0.7rem;opacity:0.45;letter-spacing:0.09em;margin-bottom:6px;">PRÓXIMOS PARTIDOS</div>
-            <div style="font-size:2.2rem;font-weight:800;">@Model.ProximosPartidos</div>
+        <div class="stat-card">
+            <i class="bi bi-calendar-event stat-icon" style="color:var(--color-warning);"></i>
+            <div class="stat-content">
+                <h3>@Model.ProximosPartidos</h3>
+                <p>Próximos Partidos</p>
+            </div>
         </div>
     </div>
 
@@ -224,17 +233,17 @@
     }
 
     <!-- ACCIONES RÁPIDAS -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:20px;">
-            <div style="font-weight:700;margin-bottom:6px;">Mis Preferencias</div>
-            <p style="font-size:0.82rem;opacity:0.5;margin:0 0 14px;">Elige tu equipo favorito y ajusta notificaciones.</p>
-            <a asp-page="/Espectador/Preferencias" class="btn btn-primary btn-sm">Configurar</a>
-        </div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:20px;">
-            <div style="font-weight:700;margin-bottom:6px;">Explorar Torneos</div>
-            <p style="font-size:0.82rem;opacity:0.5;margin:0 0 14px;">Descubre todos los torneos y sus clasificaciones.</p>
-            <a asp-page="/Espectador/Torneos" class="btn btn-secondary btn-sm">Ver Torneos</a>
-        </div>
+    <div class="action-cards" style="margin-top:8px;">
+        <a asp-page="/Espectador/Preferencias" class="action-card">
+            <i class="bi bi-sliders action-icon" style="color:var(--color-accent);"></i>
+            <h3>Mis Preferencias</h3>
+            <p>Elige tu equipo favorito y ajusta notificaciones.</p>
+        </a>
+        <a asp-page="/Espectador/Torneos" class="action-card">
+            <i class="bi bi-eye-fill action-icon" style="color:var(--color-info);"></i>
+            <h3>Explorar Torneos</h3>
+            <p>Descubre todos los torneos y sus clasificaciones.</p>
+        </a>
     </div>
 
 </div>
