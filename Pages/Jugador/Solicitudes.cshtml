@@ -57,7 +57,7 @@
                                     }
                                     else
                                     {
-                                        <span style="font-size:1.6rem;opacity:0.25;">⚽</span>
+                                        <i class="bi bi-dribbble" style="font-size:1.6rem;opacity:0.25;"></i>
                                     }
                                 </div>
                                 <div>
@@ -151,7 +151,7 @@
                             }
                             else
                             {
-                                <span style="opacity:0.2;font-size:1.1rem;">⚽</span>
+                                <i class="bi bi-dribbble" style="opacity:0.2;font-size:1.1rem;"></i>
                             }
                         </div>
                         <!-- Info -->
@@ -166,18 +166,18 @@
                             </div>
                         </div>
                         <!-- Estado -->
-                        <span class="@(s.Estado == "Aceptada" ? "badge badge-activo" : "badge")"
-                              style="@(s.Estado switch { "Pendiente" => "background:rgba(163,255,18,0.15);color:var(--accent);", "Rechazada" => "background:rgba(239,68,68,0.15);color:#ef4444;", _ => "background:rgba(255,255,255,0.1);" });white-space:nowrap;">
-                            @s.Estado
-                        </span>
+                        <span class="badge badge-@s.Estado.ToLower()">@s.Estado</span>
                     </div>
                 }
             }
             else
             {
-                <div style="padding:24px;">
-                    <p style="opacity:0.6;">No has enviado solicitudes todavía.</p>
-                    <a asp-page="/Jugador/BuscarEquipos" class="btn btn-primary btn-sm">Buscar Equipos</a>
+                <div class="empty-state">
+                    <i class="bi bi-search empty-icon"></i>
+                    <p>No has enviado solicitudes todavía.</p>
+                    <a asp-page="/Jugador/BuscarEquipos" class="btn btn-primary btn-sm btn-icon">
+                        <i class="bi bi-search"></i> Buscar Equipos
+                    </a>
                 </div>
             }
         </div>

@@ -81,7 +81,7 @@
                 string borderC = c.ColorPrimario ?? "rgba(163,255,18,0.4)";
 
                 <div style="border:2px solid @borderC;border-radius:16px;background:@bgC;padding:32px;text-align:center;margin-bottom:28px;">
-                    <div style="font-size:0.72rem;opacity:0.5;letter-spacing:0.12em;margin-bottom:14px;">🏆 CAMPEÓN DEL TORNEO</div>
+                    <div style="font-size:0.72rem;opacity:0.5;letter-spacing:0.12em;margin-bottom:14px;"><i class="bi bi-trophy-fill"></i> CAMPEÓN DEL TORNEO</div>
 
                     <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
                         @{
@@ -98,7 +98,7 @@
                             }
                             else
                             {
-                                <span style="font-size:2rem;opacity:0.3;">⚽</span>
+                                <i class="bi bi-dribbble" style="font-size:2rem;opacity:0.3;"></i>
                             }
                         </div>
                         <div style="font-size:2rem;font-weight:900;color:@accentC;">@c.NombreEquipo</div>
@@ -167,14 +167,13 @@
                                     string posStyle = row.Posicion == 1 ? "color:#FFD700;font-weight:700;" :
                                                       row.Posicion == 2 ? "color:#C0C0C0;font-weight:700;" :
                                                       row.Posicion == 3 ? "color:#CD7F32;font-weight:700;" : "opacity:0.6;";
-                                    string medal = row.Posicion == 1 ? "🥇" : row.Posicion == 2 ? "🥈" : row.Posicion == 3 ? "🥉" : "";
                                     string escudoHtml = !string.IsNullOrEmpty(row.Logo)
                                         ? $"<img src='{System.Net.WebUtility.HtmlEncode(row.Logo)}' style='width:22px;height:22px;object-fit:contain;border-radius:3px;flex-shrink:0;'/>"
                                         : !string.IsNullOrEmpty(row.ColorPrimario)
                                             ? $"<span style='display:inline-block;width:12px;height:12px;border-radius:2px;background:{row.ColorPrimario};flex-shrink:0;'></span>"
                                             : "";
                                     <tr>
-                                        <td style="text-align:center;@posStyle">@(medal != "" ? medal : row.Posicion.ToString())</td>
+                                        <td style="text-align:center;@posStyle">@row.Posicion</td>
                                         <td>
                                             <div style="display:flex;align-items:center;gap:8px;">
                                                 @Html.Raw(escudoHtml)

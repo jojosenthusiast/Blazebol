@@ -67,7 +67,7 @@
                     }
                     else
                     {
-                        <span style="font-size:1.6rem;opacity:0.3;">⚽</span>
+                        <i class="bi bi-dribbble" style="font-size:1.6rem;opacity:0.3;"></i>
                     }
                 </div>
                 <div style="flex:1;min-width:0;">
@@ -109,7 +109,7 @@
                         </div>
                         @if (!string.IsNullOrEmpty(pp.Sede))
                         {
-                            <div style="font-size:0.72rem;opacity:0.4;margin-top:3px;">📍 @pp.Sede</div>
+                            <div style="font-size:0.72rem;opacity:0.4;margin-top:3px;"><i class="bi bi-geo-alt"></i> @pp.Sede</div>
                         }
                         <div style="margin-top:6px;">
                             <span class="badge" style="background:rgba(255,255,255,0.08);font-size:0.7rem;">
@@ -150,8 +150,8 @@
             @if (ef.TorneoActivoId.HasValue)
             {
                 <div style="padding:12px 24px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:flex-end;">
-                    <a asp-page="/Espectador/TorneoDetalle" asp-route-id="@ef.TorneoActivoId" class="btn btn-secondary btn-sm">
-                        Ver Torneo Completo →
+                    <a asp-page="/Espectador/TorneoDetalle" asp-route-id="@ef.TorneoActivoId" class="btn btn-info btn-sm btn-icon">
+                        <i class="bi bi-eye"></i> Ver Torneo Completo
                     </a>
                 </div>
             }
@@ -227,6 +227,7 @@
     else
     {
         <div class="empty-state">
+            <i class="bi bi-trophy empty-icon"></i>
             <p>No hay torneos activos en este momento.</p>
             <p style="opacity:0.5;font-size:0.85rem;">Pronto habrá torneos disponibles.</p>
         </div>

@@ -11,7 +11,9 @@
     </div>
     <div class="header-actions">
         <form method="post" asp-page-handler="ExportarPDF" style="display: inline;">
-            <button type="submit" class="btn btn-secondary">📄 Exportar a PDF</button>
+            <button type="submit" class="btn btn-info btn-icon">
+                <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+            </button>
         </form>
     </div>
 </div>
@@ -45,6 +47,9 @@
         </div>
 
         <div class="filter-actions">
+            <button type="submit" class="btn btn-secondary btn-sm btn-icon">
+                <i class="bi bi-search"></i> Filtrar
+            </button>
             <a asp-page="/Admin/Usuarios/Index" class="btn btn-link btn-sm btn-icon">
                 <i class="bi bi-x-circle"></i> Limpiar
             </a>
@@ -89,28 +94,28 @@
                         <td>
                             @if (usuario.EstaBloqueado)
                             {
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span class="badge badge-error">🔒 Bloqueado</span>
-                                    <small style="color: var(--color-text-secondary); font-size: 11px;">
-                                        hasta @usuario.FechaBloqueoFin?.ToString("dd/MM HH:mm")
-                                    </small>
-                                    <small style="color: var(--color-error); font-size: 11px;">
-                                        @usuario.ContadorAccesosFallidos intento(s) fallido(s)
-                                    </small>
+                                <div class="security-status">
+                                    <span class="badge badge-danger">
+                                        <i class="bi bi-lock-fill"></i> Bloqueado
+                                    </span>
+                                    <small class="text-muted">hasta @usuario.FechaBloqueoFin?.ToString("dd/MM HH:mm")</small>
+                                    <small class="text-error">@usuario.ContadorAccesosFallidos intento(s) fallido(s)</small>
                                 </div>
                             }
                             else if (usuario.ContadorAccesosFallidos > 0)
                             {
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span class="badge badge-warning">⚠️ @usuario.ContadorAccesosFallidos intento(s)</span>
-                                    <small style="color: var(--color-text-secondary); font-size: 11px;">
-                                        @(5 - usuario.ContadorAccesosFallidos) restante(s)
-                                    </small>
+                                <div class="security-status">
+                                    <span class="badge badge-warning">
+                                        <i class="bi bi-exclamation-triangle"></i> @usuario.ContadorAccesosFallidos intento(s)
+                                    </span>
+                                    <small class="text-muted">@(5 - usuario.ContadorAccesosFallidos) restante(s)</small>
                                 </div>
                             }
                             else
                             {
-                                <span class="badge badge-success">✓ OK</span>
+                                <span class="badge badge-success">
+                                    <i class="bi bi-check-circle"></i> OK
+                                </span>
                             }
                         </td>
                         <td>@usuario.FechaCreacion.ToString("dd/MM/yyyy")</td>
@@ -123,7 +128,8 @@
                             @if (usuario.EstaBloqueado)
                             {
                                 <form method="post" asp-page-handler="Desbloquear" asp-route-id="@usuario.UsuarioId" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-success btn-icon">
+                                    <button type="submit" class="btn btn-sm btn-info btn-icon"
+                                            onclick="ctConfirmForm(event, this, '¿Desbloquear este usuario?', {title:'Desbloquear', confirmColor:'#5ac8fa', confirmText:'Sí, desbloquear'})">
                                         <i class="bi bi-unlock"></i> Desbloquear
                                     </button>
                                 </form>
@@ -141,7 +147,8 @@
                             else
                             {
                                 <form method="post" asp-page-handler="Activar" asp-route-id="@usuario.UsuarioId" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-success btn-icon">
+                                    <button type="submit" class="btn btn-sm btn-success btn-icon"
+                                            onclick="ctConfirmForm(event, this, '¿Reactivar este usuario?', {title:'Activar usuario', confirmColor:'#34c759', confirmText:'Sí, activar'})">
                                         <i class="bi bi-person-check"></i> Activar
                                     </button>
                                 </form>

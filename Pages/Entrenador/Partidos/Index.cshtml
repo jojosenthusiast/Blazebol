@@ -82,10 +82,10 @@
         // Footer: sede + árbitro + convocatoria btn
         sb.Append("<div style=\"display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px;\">");
         sb.Append("<div style=\"font-size:0.75rem;opacity:0.45;display:flex;gap:12px;flex-wrap:wrap;\">");
-        if (!string.IsNullOrEmpty(p.Sede)) sb.Append($"<span>📍 {p.Sede}</span>");
-        if (!string.IsNullOrEmpty(p.NombreArbitro)) sb.Append($"<span>👤 {p.NombreArbitro}</span>");
+        if (!string.IsNullOrEmpty(p.Sede)) sb.Append($"<span><i class=\"bi bi-geo-alt\"></i> {p.Sede}</span>");
+        if (!string.IsNullOrEmpty(p.NombreArbitro)) sb.Append($"<span><i class=\"bi bi-person\"></i> {p.NombreArbitro}</span>");
         sb.Append("</div>");
-        sb.Append($"<a href=\"/Entrenador/Partidos/Convocatoria/{p.Id}\" class=\"btn btn-secondary btn-sm\">Ver Convocatoria</a>");
+        sb.Append($"<a href=\"/Entrenador/Partidos/Convocatoria/{p.Id}\" class=\"btn btn-info btn-sm btn-icon\"><i class=\"bi bi-clipboard2-check\"></i> Ver Convocatoria</a>");
         sb.Append("</div>");
 
         sb.Append("</div>"); // padding div
@@ -106,8 +106,9 @@
     @if (!Model.PartidosEnCurso.Any() && !Model.ProximosPartidos.Any() && !Model.PartidosPasados.Any())
     {
         <div class="empty-state">
+            <i class="bi bi-calendar-x empty-icon"></i>
             <p>Tu equipo no tiene partidos programados todavía.</p>
-            <p style="opacity:0.5;font-size:0.85rem;">El administrador debe programar los partidos del torneo.</p>
+            <p class="text-muted" style="font-size:0.85rem;">El administrador debe programar los partidos del torneo.</p>
         </div>
     }
     else
@@ -115,7 +116,7 @@
         @if (Model.PartidosEnCurso.Any())
         {
             <div style="margin-bottom:32px;">
-                <h2 style="font-size:1rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+                <h2 class="section-header">
                     EN CURSO <span style="color:#f59e0b;margin-left:6px;">●</span>
                 </h2>
                 <div style="display:flex;flex-direction:column;gap:12px;">
@@ -130,7 +131,7 @@
         @if (Model.ProximosPartidos.Any())
         {
             <div style="margin-bottom:32px;">
-                <h2 style="font-size:1rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+                <h2 class="section-header">
                     PRÓXIMOS PARTIDOS
                 </h2>
                 <div style="display:flex;flex-direction:column;gap:12px;">
@@ -145,7 +146,7 @@
         @if (Model.PartidosPasados.Any())
         {
             <div>
-                <h2 style="font-size:1rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+                <h2 class="section-header">
                     RESULTADOS
                 </h2>
                 <div style="display:flex;flex-direction:column;gap:12px;">

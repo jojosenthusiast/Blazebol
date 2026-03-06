@@ -23,6 +23,7 @@
     else if (!Model.Partidos.Any())
     {
         <div class="empty-state">
+            <i class="bi bi-calendar-x empty-icon"></i>
             <p>No tienes partidos asignados en este momento.</p>
         </div>
     }
@@ -69,7 +70,7 @@
                                 {
                                     <a asp-page="/Arbitro/Partidos/Verificacion"
                                        asp-route-id="@partido.Id"
-                                       class="btn btn-sm btn-primary btn-icon">
+                                       class="btn btn-sm btn-warning btn-icon">
                                         <i class="bi bi-clipboard-check"></i> Verificar
                                     </a>
                                 }

@@ -1858,3 +1858,95 @@ input[type="checkbox"] {
     color: var(--color-text-secondary);
     font-size: 1rem;
 }
+
+/* === BADGES DE ESTADO — PARTIDOS === */
+.badge-programado {
+    background-color: rgba(90, 200, 250, 0.15);
+    color: #5ac8fa;
+    border: 1px solid rgba(90, 200, 250, 0.3);
+}
+.badge-encurso {
+    background-color: rgba(255, 149, 0, 0.15);
+    color: #ff9500;
+    border: 1px solid rgba(255, 149, 0, 0.3);
+}
+.badge-cancelado {
+    background-color: rgba(102, 102, 102, 0.15);
+    color: #909090;
+    border: 1px solid rgba(102, 102, 102, 0.3);
+}
+.badge-pendiente {
+    background-color: rgba(255, 214, 10, 0.15);
+    color: #ffd60a;
+    border: 1px solid rgba(255, 214, 10, 0.3);
+}
+.badge-aprobado {
+    background-color: rgba(52, 199, 89, 0.15);
+    color: #34c759;
+    border: 1px solid rgba(52, 199, 89, 0.3);
+}
+.badge-rechazado {
+    background-color: rgba(255, 59, 48, 0.15);
+    color: #ff3b30;
+    border: 1px solid rgba(255, 59, 48, 0.3);
+}
+.badge-aceptada {
+    background-color: rgba(52, 199, 89, 0.15);
+    color: #34c759;
+    border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+/* === ACTION CARD DISABLED === */
+.action-card-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.action-card-disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* === UTILIDADES DE COLOR PARA STATS === */
+.text-success { color: #34c759 !important; }
+.text-error   { color: #ff3b30 !important; }
+.text-warning { color: #ff9500 !important; }
+.text-info    { color: #5ac8fa !important; }
+.text-muted   { color: var(--color-text-muted) !important; }
+.text-accent  { color: var(--color-accent) !important; }
+
+/* === EMPTY STATE ICON === */
+.empty-icon {
+    font-size: 3rem;
+    color: var(--color-text-muted);
+    margin-bottom: 16px;
+    display: block;
+}
+
+/* === SECTION HEADER (subtítulos de sección) === */
+.section-header {
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* === INPUT PEQUEÑO (ej: número de goles) === */
+.input-sm {
+    width: 100px !important;
+    display: inline-block;
+}
+
+/* === SECURITY STATUS (columna seguridad en tabla usuarios) === */
+.security-status {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.security-status small {
+    font-size: 11px;
+}

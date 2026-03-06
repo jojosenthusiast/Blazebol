@@ -15,7 +15,7 @@
         else if (!string.IsNullOrEmpty(abrev))
             inner = $"<span style=\"font-weight:700;font-size:0.75rem;color:{(string.IsNullOrEmpty(color) ? "rgba(255,255,255,0.6)" : color)};\">{abrev}</span>";
         else
-            inner = "<span style=\"opacity:0.25;font-size:1.1rem;\">⚽</span>";
+            inner = "<i class=\"bi bi-dribbble\" style=\"opacity:0.25;font-size:1.1rem;\"></i>";
         return $"<div style=\"width:{size}px;height:{size}px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:{bg};flex-shrink:0;\">{inner}</div>";
     }
 
@@ -75,8 +75,8 @@
 
         // Sede + árbitro
         sb.Append("<div style=\"font-size:0.75rem;opacity:0.45;display:flex;gap:14px;flex-wrap:wrap;\">");
-        if (!string.IsNullOrEmpty(p.Sede)) sb.Append($"<span>📍 {p.Sede}</span>");
-        if (!string.IsNullOrEmpty(p.NombreArbitro)) sb.Append($"<span>👤 {p.NombreArbitro}</span>");
+        if (!string.IsNullOrEmpty(p.Sede)) sb.Append($"<span><i class=\"bi bi-geo-alt\"></i> {p.Sede}</span>");
+        if (!string.IsNullOrEmpty(p.NombreArbitro)) sb.Append($"<span><i class=\"bi bi-person\"></i> {p.NombreArbitro}</span>");
         sb.Append("</div>");
 
         sb.Append("</div>"); // card
@@ -99,10 +99,13 @@
     @if (!Model.PartidosEnCurso.Any() && !Model.ProximosPartidos.Any() && !Model.PartidosPasados.Any())
     {
         <div class="empty-state">
+            <i class="bi bi-calendar-x empty-icon"></i>
             @if (string.IsNullOrEmpty(Model.NombreEquipo))
             {
                 <p>Aún no perteneces a ningún equipo.</p>
-                <a asp-page="/Jugador/BuscarEquipos" class="btn btn-primary">Buscar Equipos</a>
+                <a asp-page="/Jugador/BuscarEquipos" class="btn btn-primary btn-icon">
+                    <i class="bi bi-search"></i> Buscar Equipos
+                </a>
             }
             else
             {
@@ -116,7 +119,7 @@
         @if (Model.PartidosEnCurso.Any())
         {
             <div style="margin-bottom:32px;">
-                <h2 style="font-size:1rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+                <h2 class="section-header">
                     EN CURSO <span style="color:#f59e0b;margin-left:6px;">●</span>
                 </h2>
                 <div style="display:flex;flex-direction:column;gap:12px;">
@@ -132,7 +135,7 @@
         @if (Model.ProximosPartidos.Any())
         {
             <div style="margin-bottom:32px;">
-                <h2 style="font-size:1rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+                <h2 class="section-header">
                     PRÓXIMOS PARTIDOS
                 </h2>
                 <div style="display:flex;flex-direction:column;gap:12px;">
@@ -148,7 +151,7 @@
         @if (Model.PartidosPasados.Any())
         {
             <div>
-                <h2 style="font-size:1rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+                <h2 class="section-header">
                     RESULTADOS
                 </h2>
                 <div style="display:flex;flex-direction:column;gap:12px;">

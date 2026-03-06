@@ -12,7 +12,9 @@
             <p class="page-subtitle">Gestiona todos los partidos del torneo</p>
         </div>
         <div class="header-actions">
-            <a asp-page="/Admin/Partidos/Crear" class="btn btn-primary">Crear Partido</a>
+            <a asp-page="/Admin/Partidos/Crear" class="btn btn-primary btn-icon">
+                <i class="bi bi-plus-lg"></i> Crear Partido
+            </a>
         </div>
     </div>
 
@@ -51,6 +53,9 @@
             </div>
 
             <div class="filter-actions">
+                <button type="submit" class="btn btn-secondary btn-sm btn-icon">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
                 <a asp-page="/Admin/Partidos/Index" class="btn btn-link btn-sm btn-icon">
                     <i class="bi bi-x-circle"></i> Limpiar
                 </a>
@@ -71,7 +76,7 @@
                         <th>Árbitro</th>
                         <th>Sede</th>
                         <th>Estado</th>
-                        <th></th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,8 +121,11 @@
     else
     {
         <div class="empty-state">
+            <i class="bi bi-calendar-x empty-icon"></i>
             <p>No se encontraron partidos con los filtros seleccionados</p>
-            <a asp-page="/Admin/Partidos/Crear" class="btn btn-primary">Crear Primer Partido</a>
+            <a asp-page="/Admin/Partidos/Crear" class="btn btn-primary btn-icon">
+                <i class="bi bi-plus-lg"></i> Crear Primer Partido
+            </a>
         </div>
     }
 </div>

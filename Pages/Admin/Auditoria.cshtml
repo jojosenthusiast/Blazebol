@@ -13,20 +13,32 @@
 
 <div class="stats-grid" style="margin-bottom: 24px;">
     <div class="stat-card">
-        <div class="stat-label">Total Accesos Hoy</div>
-        <div class="stat-value">@Model.AccesosHoy</div>
+        <i class="bi bi-shield-check stat-icon text-info"></i>
+        <div class="stat-content">
+            <h3>@Model.AccesosHoy</h3>
+            <p>Accesos Hoy</p>
+        </div>
     </div>
     <div class="stat-card">
-        <div class="stat-label">Intentos Fallidos Hoy</div>
-        <div class="stat-value" style="color: var(--color-error);">@Model.FallidosHoy</div>
+        <i class="bi bi-shield-x stat-icon text-error"></i>
+        <div class="stat-content">
+            <h3 class="text-error">@Model.FallidosHoy</h3>
+            <p>Intentos Fallidos</p>
+        </div>
     </div>
     <div class="stat-card">
-        <div class="stat-label">Usuarios Bloqueados</div>
-        <div class="stat-value" style="color: var(--color-error);">@Model.UsuariosBloqueados</div>
+        <i class="bi bi-person-slash stat-icon text-error"></i>
+        <div class="stat-content">
+            <h3 class="text-error">@Model.UsuariosBloqueados</h3>
+            <p>Usuarios Bloqueados</p>
+        </div>
     </div>
     <div class="stat-card">
-        <div class="stat-label">Accesos Exitosos</div>
-        <div class="stat-value" style="color: var(--color-success);">@Model.ExitososHoy</div>
+        <i class="bi bi-check-circle stat-icon text-success"></i>
+        <div class="stat-content">
+            <h3 class="text-success">@Model.ExitososHoy</h3>
+            <p>Accesos Exitosos</p>
+        </div>
     </div>
 </div>
 
@@ -51,7 +63,14 @@
             </select>
         </div>
 
-        <a asp-page="/Admin/Auditoria" class="btn btn-link">Limpiar Filtros</a>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-secondary btn-sm btn-icon">
+                <i class="bi bi-search"></i> Filtrar
+            </button>
+            <a asp-page="/Admin/Auditoria" class="btn btn-link btn-sm btn-icon">
+                <i class="bi bi-x-circle"></i> Limpiar
+            </a>
+        </div>
     </form>
 </div>
 
@@ -81,10 +100,10 @@
                             <strong>@registro.Email</strong>
                         </td>
                         <td>
-                            <code style="font-size: 12px;">@registro.DireccionIP</code>
+                            <small class="text-muted">@registro.DireccionIP</small>
                         </td>
                         <td>
-                            <small style="color: var(--color-text-secondary);">
+                            <small class="text-muted">
                                 @(registro.UserAgent?.Length > 50 ? registro.UserAgent.Substring(0, 50) + "..." : registro.UserAgent)
                             </small>
                         </td>
@@ -101,11 +120,11 @@
                         <td>
                             @if (!registro.Exitoso)
                             {
-                                <small style="color: var(--color-error);">@registro.MotivoFallo</small>
+                                <small class="text-error">@registro.MotivoFallo</small>
                             }
                             else
                             {
-                                <small style="color: var(--color-text-secondary);">-</small>
+                                <small class="text-muted">—</small>
                             }
                         </td>
                     </tr>

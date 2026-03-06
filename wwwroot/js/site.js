@@ -58,23 +58,30 @@ function ctLoadingBtn(btn, loadingText) {
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof Swal === 'undefined') return;
 
-    var successAlert = document.querySelector('.alert-success');
-    if (successAlert) {
-        var msg = successAlert.textContent.trim();
-        if (msg) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: msg,
-                showConfirmButton: false,
-                timer: 4000,
-                timerProgressBar: true,
-                background: '#1a1a1a',
-                color: '#34c759',
-                iconColor: '#34c759'
-            });
-            successAlert.style.display = 'none';
-        }
-    }
+    var alertConfigs = [
+        { selector: '.alert-success', icon: 'success', color: '#34c759' },
+        { selector: '.alert-error',   icon: 'error',   color: '#ff3b30' },
+        { selector: '.alert-warning', icon: 'warning', color: '#ff9500' },
+        { selector: '.alert-info',    icon: 'info',    color: '#5ac8fa' }
+    ];
+
+    alertConfigs.forEach(function (cfg) {
+        var el = document.querySelector(cfg.selector);
+        if (!el) return;
+        var msg = el.textContent.trim();
+        if (!msg) return;
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: cfg.icon,
+            title: msg,
+            showConfirmButton: false,
+            timer: 4500,
+            timerProgressBar: true,
+            background: '#1a1a1a',
+            color: cfg.color,
+            iconColor: cfg.color
+        });
+        el.style.display = 'none';
+    });
 });

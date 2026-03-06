@@ -125,10 +125,10 @@
         </div>
     </div>
 
+    <div class="recent-section">
+        <h2>Torneos Recientes</h2>
     @if (Model.UltimosTorneos.Any())
     {
-        <div class="recent-section">
-            <h2>Torneos Recientes</h2>
             <div class="table-responsive">
                 <table class="data-table">
                     <thead>
@@ -172,6 +172,16 @@
                     </tbody>
                 </table>
             </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="bi bi-trophy empty-icon"></i>
+            <p>No hay torneos creados aún</p>
+            <a asp-page="/Admin/Torneos/Create" class="btn btn-primary btn-icon">
+                <i class="bi bi-plus-lg"></i> Crear Primer Torneo
+            </a>
         </div>
     }
+    </div>
 </div>
