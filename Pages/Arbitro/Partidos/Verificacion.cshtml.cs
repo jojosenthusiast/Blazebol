@@ -30,6 +30,10 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
         public List<ParticipanteViewModel> EntrenadoresLocal { get; set; } = new();
         public List<ParticipanteViewModel> EntrenadoresVisitante { get; set; } = new();
 
+        public List<CheckPrePartidoViewModel> Checks { get; set; } = new();
+        public bool PuedeProceeder => Checks.All(c => c.Pasa);
+        public int MinimoJugadores { get; set; } = 11;
+
         public async Task<IActionResult> OnGetAsync(int id)
         {
             if (!HttpContext.Session.IsAuthenticated() || !HttpContext.Session.IsInRole("Arbitro"))
@@ -138,6 +142,60 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
                 })
                 .ToListAsync();
 
+            // Cargar configuración del torneo para obtener mínimo de jugadores
+            var config = await _context.ConfiguracionesTorneo
+                .FirstOrDefaultAsync(c => c.TorneoId == partido.TorneoId);
+
+            MinimoJugadores = config?.MinimoJugadoresTitulares ?? 11;
+
+            // Calcular checks pre-partido
+            bool cuorumLocal = JugadoresLocal.Count >= MinimoJugadores;
+            bool cuorumVisitante = JugadoresVisitante.Count >= MinimoJugadores;
+            bool entrenadorLocal = EntrenadoresLocal.Any();
+            bool entrenadorVisitante = EntrenadoresVisitante.Any();
+
+            Checks = new List<CheckPrePartidoViewModel>
+            {
+                new()
+                {
+                    Nombre = "Estado del partido",
+                    Pasa = true,
+                    Descripcion = "El partido está en estado Programado y aún no ha iniciado"
+                },
+                new()
+                {
+                    Nombre = $"Cuórum equipo local — {NombreLocal}",
+                    Pasa = cuorumLocal,
+                    Descripcion = cuorumLocal
+                        ? $"{JugadoresLocal.Count} jugadores activos inscritos (mínimo requerido: {MinimoJugadores})"
+                        : $"Solo {JugadoresLocal.Count} jugadores activos inscritos — se requieren al menos {MinimoJugadores}"
+                },
+                new()
+                {
+                    Nombre = $"Cuórum equipo visitante — {NombreVisitante}",
+                    Pasa = cuorumVisitante,
+                    Descripcion = cuorumVisitante
+                        ? $"{JugadoresVisitante.Count} jugadores activos inscritos (mínimo requerido: {MinimoJugadores})"
+                        : $"Solo {JugadoresVisitante.Count} jugadores activos inscritos — se requieren al menos {MinimoJugadores}"
+                },
+                new()
+                {
+                    Nombre = $"Cuerpo técnico local — {NombreLocal}",
+                    Pasa = entrenadorLocal,
+                    Descripcion = entrenadorLocal
+                        ? $"{EntrenadoresLocal.Count} entrenador(es) asignado(s)"
+                        : "Sin entrenador asignado — el equipo no puede participar sin cuerpo técnico"
+                },
+                new()
+                {
+                    Nombre = $"Cuerpo técnico visitante — {NombreVisitante}",
+                    Pasa = entrenadorVisitante,
+                    Descripcion = entrenadorVisitante
+                        ? $"{EntrenadoresVisitante.Count} entrenador(es) asignado(s)"
+                        : "Sin entrenador asignado — el equipo no puede participar sin cuerpo técnico"
+                }
+            };
+
             return Page();
         }
     }
@@ -148,5 +206,12 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
         public int? NumeroCamiseta { get; set; }
         public string Rol { get; set; } = string.Empty;
         public bool Activo { get; set; }
+    }
+
+    public class CheckPrePartidoViewModel
+    {
+        public string Nombre { get; set; } = string.Empty;
+        public bool Pasa { get; set; }
+        public string Descripcion { get; set; } = string.Empty;
     }
 }

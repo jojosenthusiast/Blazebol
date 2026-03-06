@@ -27,6 +27,57 @@
     }
     else
     {
+        <!-- PANEL DE VERIFICACIÓN PRE-PARTIDO -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header" style="display:flex;align-items:center;gap:10px;">
+                <i class="bi bi-clipboard2-check" style="font-size:1.1rem;"></i>
+                <h3 style="margin:0;">Verificación Pre-Partido</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                @foreach (var check in Model.Checks)
+                {
+                    <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 20px;border-bottom:1px solid var(--color-border);">
+                        @if (check.Pasa)
+                        {
+                            <i class="bi bi-check-circle-fill" style="font-size:1.2rem;color:#34c759;flex-shrink:0;margin-top:2px;"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-x-circle-fill" style="font-size:1.2rem;color:#ff3b30;flex-shrink:0;margin-top:2px;"></i>
+                        }
+                        <div>
+                            <div style="font-weight:600;font-size:0.9rem;">@check.Nombre</div>
+                            <div style="font-size:0.8rem;opacity:0.65;margin-top:2px;">@check.Descripcion</div>
+                        </div>
+                    </div>
+                }
+
+                <!-- VEREDICTO FINAL -->
+                @if (Model.PuedeProceeder)
+                {
+                    <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;background:rgba(52,199,89,0.08);border-top:2px solid rgba(52,199,89,0.3);">
+                        <i class="bi bi-shield-check-fill" style="font-size:1.5rem;color:#34c759;flex-shrink:0;"></i>
+                        <div>
+                            <div style="font-weight:700;color:#34c759;">El partido puede proceder</div>
+                            <div style="font-size:0.8rem;opacity:0.7;margin-top:2px;">Todos los requisitos previos están cumplidos</div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;background:rgba(255,59,48,0.08);border-top:2px solid rgba(255,59,48,0.3);">
+                        <i class="bi bi-shield-x-fill" style="font-size:1.5rem;color:#ff3b30;flex-shrink:0;"></i>
+                        <div>
+                            <div style="font-weight:700;color:#ff3b30;">El partido NO puede proceder</div>
+                            <div style="font-size:0.8rem;opacity:0.7;margin-top:2px;">
+                                @Model.Checks.Count(c => !c.Pasa) condición(es) sin cumplir — ver detalle arriba
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
 
             <!-- EQUIPO LOCAL -->
@@ -151,8 +202,12 @@
 
         <div style="margin-top: 24px; display: flex; gap: 12px;">
             <a asp-page="/Arbitro/Partidos/Jugadores" asp-route-id="@Model.PartidoId"
-               class="btn btn-secondary">Ver Lista de Jugadores</a>
-            <a asp-page="/Arbitro/Partidos/Index" class="btn btn-link">Volver</a>
+               class="btn btn-info btn-icon">
+                <i class="bi bi-people"></i> Ver Lista de Jugadores
+            </a>
+            <a asp-page="/Arbitro/Partidos/Index" class="btn btn-link btn-icon">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
         </div>
     }
 </div>
