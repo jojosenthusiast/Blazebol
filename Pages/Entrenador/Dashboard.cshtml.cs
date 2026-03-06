@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ControlTorneosFutbol.Data;
+using ControlTorneosFutbol.Data.Entities;
 using ControlTorneosFutbol.Helpers;
+using ControlTorneosFutbol.Pages.Calendario;
 
 namespace ControlTorneosFutbol.Pages.Entrenador
 {
@@ -22,7 +24,10 @@ namespace ControlTorneosFutbol.Pages.Entrenador
         public int Victorias { get; set; }
         public int Empates { get; set; }
         public int Derrotas { get; set; }
-        public List<string> ProximosPartidos { get; set; } = new();
+        public List<ProximoPartidoDashVM> ProximosPartidos { get; set; } = new();
+
+        private static readonly string[] _torneoColors = { "#a3ff12", "#5ac8fa", "#ff9500", "#bf5af2", "#ff2d55", "#34c759", "#ffd60a" };
+        private static string GetTorneoColor(int id) => _torneoColors[Math.Abs(id) % _torneoColors.Length];
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -76,7 +81,38 @@ namespace ControlTorneosFutbol.Pages.Entrenador
             Empates = 0;
             Derrotas = 0;
 
-            ProximosPartidos = new List<string>();
+            // Próximos partidos del equipo
+            if (equipoEntrenador != null)
+            {
+                var miEquipoId = equipoEntrenador.EquipoId;
+                ProximosPartidos = await _context.Partidos
+                    .Include(p => p.Torneo)
+                    .Include(p => p.EquipoLocal)
+                    .Include(p => p.EquipoVisitante)
+                    .Where(p => (p.EquipoLocalId == miEquipoId || p.EquipoVisitanteId == miEquipoId)
+                             && p.Estado == EstadosPartido.Programado
+                             && p.Fecha >= DateTime.UtcNow)
+                    .OrderBy(p => p.Fecha)
+                    .Take(5)
+                    .Select(p => new ProximoPartidoDashVM
+                    {
+                        Id = p.Id,
+                        Fecha = p.Fecha,
+                        NombreTorneo = p.Torneo.Nombre,
+                        TorneoId = p.TorneoId,
+                        NombreLocal = p.EquipoLocal.Nombre,
+                        NombreVisitante = p.EquipoVisitante.Nombre,
+                        AbrevLocal = p.EquipoLocal.Abreviacion ?? p.EquipoLocal.Nombre.Substring(0, Math.Min(3, p.EquipoLocal.Nombre.Length)).ToUpper(),
+                        AbrevVisitante = p.EquipoVisitante.Abreviacion ?? p.EquipoVisitante.Nombre.Substring(0, Math.Min(3, p.EquipoVisitante.Nombre.Length)).ToUpper(),
+                        Estado = p.Estado,
+                        Sede = p.Sede,
+                        EsMiPartido = true
+                    })
+                    .ToListAsync();
+
+                foreach (var p in ProximosPartidos)
+                    p.ColorTorneo = GetTorneoColor(p.TorneoId);
+            }
 
             return Page();
         }

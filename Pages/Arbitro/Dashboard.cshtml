@@ -60,6 +60,11 @@
                     <h3>Mis Partidos</h3>
                     <p>Ver todos los partidos asignados</p>
                 </a>
+                <a asp-page="/Calendario/Index" class="action-card">
+                    <i class="bi bi-calendar3 action-icon" style="color:var(--color-info);"></i>
+                    <h3>Calendario</h3>
+                    <p>Vista mensual de todos los partidos</p>
+                </a>
             </div>
         </div>
 
@@ -103,6 +108,7 @@
         else
         {
             <div class="empty-state" style="margin-top:24px;">
+                <i class="bi bi-calendar-x empty-icon"></i>
                 <p>No tienes partidos asignados próximamente.</p>
                 <p style="font-size:0.85rem;opacity:0.6;">Los partidos que te asigne el administrador aparecerán aquí.</p>
             </div>

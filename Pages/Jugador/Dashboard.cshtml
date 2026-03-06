@@ -90,6 +90,40 @@
         </div>
     </div>
 
+    @if (Model.TieneEquipoEnTorneoActivo || Model.ProximosPartidos.Any())
+    {
+        <div class="recent-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <h2 style="margin:0;">Próximos Partidos</h2>
+                <a asp-page="/Calendario/Index" class="btn btn-sm btn-info btn-icon">
+                    <i class="bi bi-calendar3"></i> Ver Calendario
+                </a>
+            </div>
+            @if (Model.ProximosPartidos.Any())
+            {
+                <div class="match-mini-list">
+                    @foreach (var p in Model.ProximosPartidos)
+                    {
+                        <div class="match-mini-card">
+                            <div class="match-mini-dot" style="background:@p.ColorTorneo;"></div>
+                            <div class="match-mini-body">
+                                <div class="match-mini-teams"><strong>@p.AbrevLocal</strong> vs <strong>@p.AbrevVisitante</strong></div>
+                                <div class="match-mini-meta">@p.Fecha.ToString("dd/MM HH:mm") · @p.NombreTorneo@(p.Sede != null ? " · " + p.Sede : "")</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state" style="padding:16px;">
+                    <i class="bi bi-calendar-x empty-icon"></i>
+                    <p>No tienes partidos próximos programados</p>
+                </div>
+            }
+        </div>
+    }
+
     <div class="dashboard-actions">
         <h2>Acciones Rápidas</h2>
         <div class="action-cards">

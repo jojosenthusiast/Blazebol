@@ -55,6 +55,10 @@
                     <i class="bi bi-journal-text nav-icon"></i>
                     <span class="nav-text">Auditoría</span>
                 </a>
+                <a asp-page="/Calendario/Index" class="nav-item @(currentPath.Contains("/calendario") ? "active" : "")">
+                    <i class="bi bi-calendar3 nav-icon"></i>
+                    <span class="nav-text">Calendario</span>
+                </a>
             </div>
         }
         else if (userRole == "Jugador")
@@ -79,6 +83,10 @@
                 <i class="bi bi-envelope-check nav-icon"></i>
                 <span class="nav-text">Mis Solicitudes</span>
             </a>
+            <a asp-page="/Calendario/Index" class="nav-item @(currentPath.Contains("/calendario") ? "active" : "")">
+                <i class="bi bi-calendar3 nav-icon"></i>
+                <span class="nav-text">Calendario</span>
+            </a>
         }
         else if (userRole == "Entrenador")
         {
@@ -102,6 +110,10 @@
                 <i class="bi bi-envelope-check nav-icon"></i>
                 <span class="nav-text">Solicitudes</span>
             </a>
+            <a asp-page="/Calendario/Index" class="nav-item @(currentPath.Contains("/calendario") ? "active" : "")">
+                <i class="bi bi-calendar3 nav-icon"></i>
+                <span class="nav-text">Calendario</span>
+            </a>
         }
         else if (userRole == "Arbitro")
         {
@@ -112,6 +124,10 @@
             <a asp-page="/Arbitro/Partidos/Index" class="nav-item @(currentPath.Contains("/arbitro/partidos") ? "active" : "")">
                 <i class="bi bi-calendar-event nav-icon"></i>
                 <span class="nav-text">Mis Partidos</span>
+            </a>
+            <a asp-page="/Calendario/Index" class="nav-item @(currentPath.Contains("/calendario") ? "active" : "")">
+                <i class="bi bi-calendar3 nav-icon"></i>
+                <span class="nav-text">Calendario</span>
             </a>
         }
         else if (userRole == "Espectador")

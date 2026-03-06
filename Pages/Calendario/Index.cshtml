@@ -1,0 +1,560 @@
+@page
+@model ControlTorneosFutbol.Pages.Calendario.IndexModel
+@using ControlTorneosFutbol.Pages.Calendario
+@{
+    ViewData["Title"] = "Calendario";
+    Layout = "_Layout";
+
+    var hoy = DateTime.UtcNow.Date;
+    var mesActual = Model.MesActual;
+    var mesSiguiente = Model.MesSiguiente;
+
+    string[] nombresMes = { "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                              "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" };
+    string[] diasSemana = { "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom" };
+
+    // Navegación de meses
+    var mesPrevio = mesActual.AddMonths(-1);
+    var mesSig = mesActual.AddMonths(1);
+
+    bool mostrarMisPartidos = Model.UserRole is "Jugador" or "Entrenador" or "Arbitro";
+}
+
+<style>
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .cal-month-title { font-size: 1rem; font-weight: 700; }
+
+    .cal-grid-wrapper { margin-bottom: 28px; }
+    .cal-day-headers { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 4px; }
+    .cal-day-header { text-align: center; font-size: 0.68rem; font-weight: 600;
+                      opacity: 0.45; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 0; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+
+    .cal-day {
+        min-height: 72px; background: rgba(255,255,255,0.03); border-radius: 8px;
+        padding: 6px 5px 4px; cursor: pointer;
+        border: 1px solid transparent;
+        transition: background 0.12s, border-color 0.12s;
+        position: relative;
+    }
+    .cal-day:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.1); }
+    .cal-day.other-month { opacity: 0.25; pointer-events: none; }
+    .cal-day.today { border-color: var(--color-accent) !important; background: rgba(163,255,18,0.05); }
+    .cal-day.has-mi-partido { box-shadow: inset 0 0 0 1px rgba(163,255,18,0.25); }
+    .cal-day.selected { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.25) !important; }
+    .cal-day.current-week { background: rgba(255,255,255,0.045); }
+
+    .cal-day-num {
+        font-size: 0.78rem; font-weight: 700; line-height: 1;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .cal-today-badge {
+        font-size: 0.55rem; background: var(--color-accent); color: #000;
+        border-radius: 4px; padding: 1px 4px; font-weight: 800; letter-spacing: 0.04em;
+    }
+    .cal-mi-partido-badge {
+        width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent);
+        display: inline-block;
+    }
+
+    .cal-dots { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 4px; }
+    .cal-dot {
+        width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    .cal-dot.is-mine {
+        width: 9px; height: 9px;
+        box-shadow: 0 0 0 2px rgba(255,255,255,0.25);
+    }
+    .cal-more { font-size: 0.58rem; opacity: 0.5; align-self: flex-end; margin-left: 1px; }
+
+    /* Panel lateral */
+    .cal-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+    .cal-side { position: sticky; top: 80px; }
+
+    .cal-side-section { background: var(--color-bg-card); border: 1px solid var(--color-border);
+        border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+    .cal-side-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.08em; opacity: 0.5; margin-bottom: 12px; }
+
+    .match-card-cal {
+        border-left: 3px solid var(--color-border);
+        background: rgba(255,255,255,0.03); border-radius: 0 8px 8px 0;
+        padding: 10px 12px; margin-bottom: 8px; cursor: pointer;
+        transition: background 0.12s;
+    }
+    .match-card-cal:hover { background: rgba(255,255,255,0.07); }
+    .match-card-cal.is-mine { background: rgba(163,255,18,0.05); }
+
+    .match-vs { font-size: 0.88rem; font-weight: 700; }
+    .match-meta { font-size: 0.72rem; opacity: 0.55; margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .match-score { font-size: 1.1rem; font-weight: 900; letter-spacing: -1px; }
+
+    /* Stats bar */
+    .cal-stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .cal-stat-item {
+        background: var(--color-bg-card); border: 1px solid var(--color-border);
+        border-radius: 10px; padding: 12px 18px; flex: 1; min-width: 120px;
+    }
+    .cal-stat-label { font-size: 0.65rem; opacity: 0.45; text-transform: uppercase; letter-spacing: 0.07em; }
+    .cal-stat-value { font-size: 1.4rem; font-weight: 800; margin-top: 2px; }
+
+    /* Legend */
+    .cal-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; opacity: 0.7; }
+    .cal-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Countdown */
+    .countdown-banner {
+        background: rgba(163,255,18,0.07); border: 1px solid rgba(163,255,18,0.2);
+        border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+        display: flex; align-items: center; gap: 12px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 900px) {
+        .cal-layout { grid-template-columns: 1fr; }
+        .cal-side { position: static; }
+        .cal-day { min-height: 56px; }
+    }
+</style>
+
+<div class="page-container">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1>Calendario de Partidos</h1>
+            <p class="page-subtitle">
+                @nombresMes[Model.Mes] @Model.Anio
+                @if (Model.TorneoFiltroId.HasValue)
+                {
+                    var t = Model.TorneosDisponibles.FirstOrDefault(x => x.Id == Model.TorneoFiltroId);
+                    if (t != null) { <span>· @t.Nombre</span> }
+                }
+            </p>
+        </div>
+    </div>
+
+    <!-- Filtros + Navegación -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+        <!-- Navegación meses -->
+        <div style="display:flex;gap:4px;">
+            <a asp-page="/Calendario/Index"
+               asp-route-mes="@mesPrevio.Month" asp-route-anio="@mesPrevio.Year"
+               asp-route-torneoFiltroId="@Model.TorneoFiltroId"
+               class="btn btn-secondary btn-sm btn-icon" title="Mes anterior">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <a asp-page="/Calendario/Index"
+               asp-route-mes="@hoy.Month" asp-route-anio="@hoy.Year"
+               asp-route-torneoFiltroId="@Model.TorneoFiltroId"
+               class="btn btn-secondary btn-sm btn-icon">
+                <i class="bi bi-calendar-check"></i> Hoy
+            </a>
+            <a asp-page="/Calendario/Index"
+               asp-route-mes="@mesSig.Month" asp-route-anio="@mesSig.Year"
+               asp-route-torneoFiltroId="@Model.TorneoFiltroId"
+               class="btn btn-secondary btn-sm btn-icon" title="Mes siguiente">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+
+        <!-- Filtro torneo -->
+        <form method="get" style="display:flex;gap:8px;align-items:center;flex:1;max-width:400px;">
+            <input type="hidden" name="mes" value="@Model.Mes" />
+            <input type="hidden" name="anio" value="@Model.Anio" />
+            <select name="torneoFiltroId" class="form-control" style="font-size:0.85rem;">
+                <option value="">— Todos los torneos —</option>
+                @foreach (var t in Model.TorneosDisponibles)
+                {
+                    <option value="@t.Id" selected="@(Model.TorneoFiltroId == t.Id)">
+                        @t.Nombre @(t.Estado != "Activo" ? $"({t.Estado})" : "")
+                    </option>
+                }
+            </select>
+            <button type="submit" class="btn btn-primary btn-sm btn-icon">
+                <i class="bi bi-funnel"></i> Filtrar
+            </button>
+            @if (Model.TorneoFiltroId.HasValue)
+            {
+                <a asp-page="/Calendario/Index" asp-route-mes="@Model.Mes" asp-route-anio="@Model.Anio"
+                   class="btn btn-link btn-sm" title="Quitar filtro">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            }
+        </form>
+    </div>
+
+    <!-- Countdown mi próximo partido -->
+    @if (mostrarMisPartidos && Model.ProximoMiPartido != null)
+    {
+        var diff = Model.ProximoMiPartido.Fecha.Date - hoy;
+        string diffStr = diff.Days == 0 ? "¡HOY!" : diff.Days == 1 ? "mañana" : $"en {diff.Days} días";
+        <div class="countdown-banner">
+            <i class="bi bi-alarm" style="font-size:1.4rem;color:var(--color-accent);flex-shrink:0;"></i>
+            <div>
+                <div style="font-weight:700;font-size:0.9rem;">
+                    Tu próximo partido es <strong style="color:var(--color-accent);">@diffStr</strong>
+                </div>
+                <div style="font-size:0.78rem;opacity:0.65;margin-top:2px;">
+                    @Model.ProximoMiPartido.NombreLocal vs @Model.ProximoMiPartido.NombreVisitante
+                    · @Model.ProximoMiPartido.Fecha.ToString("dd/MM HH:mm")
+                    @if (!string.IsNullOrEmpty(Model.ProximoMiPartido.Sede))
+                    {
+                        <span>· <i class="bi bi-geo-alt"></i> @Model.ProximoMiPartido.Sede</span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Stats bar -->
+    <div class="cal-stats">
+        <div class="cal-stat-item">
+            <div class="cal-stat-label">Partidos en @nombresMes[Model.Mes]</div>
+            <div class="cal-stat-value">@Model.TotalPartidosMes</div>
+        </div>
+        @if (mostrarMisPartidos)
+        {
+            <div class="cal-stat-item" style="border-color:rgba(163,255,18,0.25);">
+                <div class="cal-stat-label">Mis partidos</div>
+                <div class="cal-stat-value" style="color:var(--color-accent);">@Model.TotalMisPartidosMes</div>
+            </div>
+        }
+        @if (Model.PartidosHoy.Any())
+        {
+            <div class="cal-stat-item" style="border-color:rgba(245,158,11,0.35);background:rgba(245,158,11,0.05);">
+                <div class="cal-stat-label">Partidos hoy</div>
+                <div class="cal-stat-value" style="color:#f59e0b;">@Model.PartidosHoy.Count</div>
+            </div>
+        }
+        <div class="cal-stat-item">
+            <div class="cal-stat-label">Próximos (7 días)</div>
+            <div class="cal-stat-value">@Model.ProximosSietePartidos.Count</div>
+        </div>
+    </div>
+
+    <!-- Layout principal -->
+    <div class="cal-layout">
+
+        <!-- Columna izquierda: grids de 2 meses -->
+        <div>
+
+            @* Renderiza el grid de un mes dado *@
+            @{
+                void RenderMesGrid(DateTime mes)
+                {
+                    int primerDia = (int)mes.DayOfWeek; // 0=Dom, 1=Lun...
+                    int offsetLunes = primerDia == 0 ? 6 : primerDia - 1; // ajuste a Lun=0
+                    int diasEnMes = DateTime.DaysInMonth(mes.Year, mes.Month);
+                    int semanaActualLunes = hoy.DayOfWeek == DayOfWeek.Sunday ? (int)hoy.AddDays(-6).Date.DayOfYear : (int)hoy.AddDays(-(int)hoy.DayOfWeek + 1).Date.DayOfYear;
+                }
+            }
+
+            @for (int m = 0; m < 2; m++)
+            {
+                var mes = mesActual.AddMonths(m);
+                int primerDia = (int)mes.DayOfWeek;
+                int offsetLunes = primerDia == 0 ? 6 : primerDia - 1;
+                int diasEnMes = DateTime.DaysInMonth(mes.Year, mes.Month);
+
+                <div class="cal-grid-wrapper">
+                    <div class="cal-header">
+                        <div class="cal-month-title">
+                            <i class="bi bi-calendar3" style="margin-right:6px;opacity:0.6;"></i>
+                            @nombresMes[mes.Month] @mes.Year
+                        </div>
+                        @{
+                            int totalPartidosMesLoop = Model.Partidos.Count(p => p.Fecha.Month == mes.Month && p.Fecha.Year == mes.Year);
+                        }
+                        @if (totalPartidosMesLoop > 0)
+                        {
+                            <span style="font-size:0.75rem;opacity:0.5;">@totalPartidosMesLoop partido(s)</span>
+                        }
+                    </div>
+
+                    <div class="cal-day-headers">
+                        @foreach (var d in diasSemana)
+                        {
+                            <div class="cal-day-header">@d</div>
+                        }
+                    </div>
+
+                    <div class="cal-grid" id="grid-@mes.Year-@mes.Month">
+                        @* Celdas vacías al inicio *@
+                        @for (int i = 0; i < offsetLunes; i++)
+                        {
+                            <div class="cal-day other-month"></div>
+                        }
+                        @for (int dia = 1; dia <= diasEnMes; dia++)
+                        {
+                            var fecha = new DateTime(mes.Year, mes.Month, dia);
+                            bool esHoy = fecha == hoy;
+                            bool esSemanaActual = fecha >= hoy.AddDays(-(int)hoy.DayOfWeek == 0 ? 6 : (int)hoy.DayOfWeek - 1)
+                                               && fecha <= hoy.AddDays(7 - ((int)hoy.DayOfWeek == 0 ? 7 : (int)hoy.DayOfWeek));
+                            var partidosDia = Model.Partidos.Where(p => p.Fecha.Date == fecha).ToList();
+                            bool tieneMiPartido = partidosDia.Any(p => p.EsMiPartido);
+                            string clases = "cal-day";
+                            if (esHoy) clases += " today";
+                            if (tieneMiPartido) clases += " has-mi-partido";
+                            if (esSemanaActual && !esHoy) clases += " current-week";
+
+                            <div class="@clases"
+                                 data-fecha="@fecha.ToString("yyyy-MM-dd")"
+                                 onclick="selectDay('@fecha.ToString("yyyy-MM-dd")')">
+                                <div class="cal-day-num">
+                                    <span>@dia</span>
+                                    @if (esHoy)
+                                    {
+                                        <span class="cal-today-badge">HOY</span>
+                                    }
+                                    else if (tieneMiPartido)
+                                    {
+                                        <span class="cal-mi-partido-badge" title="Tienes un partido este día"></span>
+                                    }
+                                </div>
+                                @if (partidosDia.Any())
+                                {
+                                    <div class="cal-dots">
+                                        @{
+                                            var visible = partidosDia.Take(4).ToList();
+                                            int extras = partidosDia.Count - visible.Count;
+                                        }
+                                        @foreach (var p in visible)
+                                        {
+                                            <span class="cal-dot @(p.EsMiPartido ? "is-mine" : "")"
+                                                  style="background:@p.ColorTorneo"
+                                                  title="@p.NombreLocal vs @p.NombreVisitante · @p.NombreTorneo"></span>
+                                        }
+                                        @if (extras > 0)
+                                        {
+                                            <span class="cal-more">+@extras</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Leyenda de torneos -->
+            @if (Model.Partidos.Any())
+            {
+                var torneosUnicos = Model.Partidos
+                    .GroupBy(p => p.TorneoId)
+                    .Select(g => new { g.First().NombreTorneo, g.First().ColorTorneo, g.First().TorneoId })
+                    .ToList();
+                <div style="margin-top:8px;">
+                    <div class="section-header" style="margin-bottom:8px;">Leyenda de torneos</div>
+                    <div class="cal-legend">
+                        @foreach (var t in torneosUnicos)
+                        {
+                            <div class="cal-legend-item">
+                                <span class="cal-legend-dot" style="background:@t.ColorTorneo;"></span>
+                                @t.NombreTorneo
+                            </div>
+                        }
+                        @if (mostrarMisPartidos)
+                        {
+                            <div class="cal-legend-item">
+                                <span class="cal-legend-dot" style="background:var(--color-accent);box-shadow:0 0 0 2px rgba(255,255,255,0.25);"></span>
+                                Mis partidos (borde)
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state" style="margin-top:16px;">
+                    <i class="bi bi-calendar-x empty-icon"></i>
+                    <p>No hay partidos en este período</p>
+                    @if (Model.TorneoFiltroId.HasValue)
+                    {
+                        <a asp-page="/Calendario/Index" asp-route-mes="@Model.Mes" asp-route-anio="@Model.Anio"
+                           class="btn btn-secondary btn-sm">Quitar filtro de torneo</a>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="cal-side">
+
+            <!-- Partidos hoy -->
+            @if (Model.PartidosHoy.Any())
+            {
+                <div class="cal-side-section" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.04);">
+                    <div class="cal-side-title" style="color:#f59e0b;">
+                        <i class="bi bi-circle-fill" style="font-size:0.5rem;"></i> HOY — @hoy.ToString("dd/MM")
+                    </div>
+                    @foreach (var p in Model.PartidosHoy)
+                    {
+                        <div class="match-card-cal @(p.EsMiPartido ? "is-mine" : "")"
+                             style="border-left-color:@p.ColorTorneo;">
+                            <div class="match-vs">
+                                @p.AbrevLocal <span style="opacity:0.4;font-weight:400;margin:0 4px;">vs</span> @p.AbrevVisitante
+                            </div>
+                            <div class="match-meta">
+                                <span><i class="bi bi-clock"></i> @p.Fecha.ToString("HH:mm")</span>
+                                <span style="opacity:0.7;">@p.NombreTorneo</span>
+                                @if (!string.IsNullOrEmpty(p.Sede)) { <span><i class="bi bi-geo-alt"></i> @p.Sede</span> }
+                            </div>
+                            <span class="badge badge-@p.Estado.ToLower()" style="margin-top:4px;font-size:0.65rem;">@p.Estado</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Día seleccionado (JS) -->
+            <div class="cal-side-section" id="panel-dia" style="display:none;">
+                <div class="cal-side-title" id="panel-dia-titulo"></div>
+                <div id="panel-dia-content"></div>
+            </div>
+
+            <!-- Próximos 7 partidos -->
+            <div class="cal-side-section">
+                <div class="cal-side-title">
+                    <i class="bi bi-calendar-week"></i> Próximos partidos
+                </div>
+                @if (Model.ProximosSietePartidos.Any())
+                {
+                    @foreach (var p in Model.ProximosSietePartidos)
+                    {
+                        bool esHoyPartido = p.Fecha.Date == hoy;
+                        <div class="match-card-cal @(p.EsMiPartido ? "is-mine" : "")"
+                             style="border-left-color:@p.ColorTorneo;">
+                            <div style="font-size:0.68rem;opacity:0.5;margin-bottom:3px;">
+                                @(esHoyPartido ? "HOY" : p.Fecha.ToString("dd MMM")) · @p.Fecha.ToString("HH:mm")
+                            </div>
+                            <div class="match-vs" style="font-size:0.82rem;">
+                                @p.AbrevLocal <span style="opacity:0.4;margin:0 3px;">vs</span> @p.AbrevVisitante
+                            </div>
+                            <div style="font-size:0.68rem;opacity:0.45;margin-top:2px;">
+                                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:@p.ColorTorneo;margin-right:4px;"></span>@p.NombreTorneo
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div style="text-align:center;opacity:0.5;font-size:0.85rem;padding:12px 0;">
+                        No hay partidos próximos
+                    </div>
+                }
+            </div>
+
+            @* Acceso rápido según rol *@
+            @if (Model.UserRole == "Administrador")
+            {
+                <a asp-page="/Admin/Partidos/Crear" class="btn btn-primary btn-icon" style="width:100%;">
+                    <i class="bi bi-plus-lg"></i> Crear Partido
+                </a>
+            }
+            else if (Model.UserRole == "Arbitro")
+            {
+                <a asp-page="/Arbitro/Partidos/Index" class="btn btn-info btn-icon" style="width:100%;">
+                    <i class="bi bi-clipboard2-check"></i> Mis Partidos Asignados
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    const PARTIDOS  = @Html.Raw(Model.PartidosJson);
+    const USER_ROLE = '@Model.UserRole';
+
+    function groupByFecha(arr) {
+        const map = {};
+        arr.forEach(p => {
+            if (!map[p.fecha]) map[p.fecha] = [];
+            map[p.fecha].push(p);
+        });
+        return map;
+    }
+
+    const partidosPorFecha = groupByFecha(PARTIDOS);
+    let selectedDate = null;
+
+    function estadoBadgeClass(estado) {
+        const map = { 'Programado': 'badge-programado', 'EnCurso': 'badge-encurso',
+                      'Finalizado': 'badge-finalizado', 'Cancelado': 'badge-cancelado' };
+        return map[estado] || 'badge-outline';
+    }
+
+    function buildMatchCard(p) {
+        const resultado = p.estado === 'Finalizado'
+            ? `<span style="font-size:1.1rem;font-weight:900;letter-spacing:-1px;">${p.golesLocal ?? 0} – ${p.golesVisitante ?? 0}</span>`
+            : `<span class="badge ${estadoBadgeClass(p.estado)}" style="font-size:0.65rem;">${p.estado}</span>`;
+        const sedeHtml = p.sede ? `<span><i class="bi bi-geo-alt"></i> ${p.sede}</span>` : '';
+        const mineClass = p.esMio ? 'is-mine' : '';
+
+        let verUrl = '';
+        if (USER_ROLE === 'Administrador') verUrl = `/Admin/Partidos/Editar?id=${p.id}`;
+        else if (USER_ROLE === 'Arbitro')    verUrl = `/Arbitro/Partidos/Verificacion?id=${p.id}`;
+        else if (USER_ROLE === 'Entrenador') verUrl = `/Entrenador/Partidos/Convocatoria?id=${p.id}`;
+        else if (USER_ROLE === 'Espectador') verUrl = `/Espectador/TorneoDetalle?id=${p.torneoId}`;
+
+        const verBtn = verUrl
+            ? `<a href="${verUrl}" class="btn btn-sm btn-info btn-icon"
+                  style="margin-top:8px;width:100%;justify-content:center;font-size:0.75rem;text-decoration:none;">
+                  <i class="bi bi-eye"></i>&nbsp;Ver Detalles
+               </a>`
+            : '';
+
+        return `
+            <div class="match-card-cal ${mineClass}" style="border-left-color:${p.color};">
+                <div style="font-size:0.68rem;opacity:0.5;margin-bottom:4px;">${p.hora} · ${p.torneo}</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                    <div style="font-size:0.85rem;font-weight:600;text-align:right;flex:1;">${p.local}</div>
+                    <div style="text-align:center;min-width:50px;">${resultado}</div>
+                    <div style="font-size:0.85rem;font-weight:600;flex:1;">${p.visitante}</div>
+                </div>
+                <div class="match-meta">${sedeHtml}${p.esMio ? '<span style="color:var(--color-accent);font-weight:700;">★ Mi partido</span>' : ''}</div>
+                ${verBtn}
+            </div>`;
+    }
+
+    function selectDay(dateStr) {
+        // Desmarcar anterior
+        document.querySelectorAll('.cal-day.selected').forEach(d => d.classList.remove('selected'));
+
+        // Marcar seleccionado
+        const el = document.querySelector(`.cal-day[data-fecha="${dateStr}"]`);
+        if (el) el.classList.add('selected');
+
+        selectedDate = dateStr;
+        const panel = document.getElementById('panel-dia');
+        const titulo = document.getElementById('panel-dia-titulo');
+        const content = document.getElementById('panel-dia-content');
+
+        const matches = partidosPorFecha[dateStr] || [];
+        const [anio, mes, dia] = dateStr.split('-');
+        const dateObj = new Date(+anio, +mes - 1, +dia);
+        const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
+        titulo.textContent = dateObj.toLocaleDateString('es-ES', opciones);
+
+        if (matches.length === 0) {
+            content.innerHTML = '<div style="text-align:center;opacity:0.45;font-size:0.85rem;padding:8px 0;">Sin partidos este día</div>';
+        } else {
+            content.innerHTML = matches.map(buildMatchCard).join('');
+        }
+
+        panel.style.display = 'block';
+    }
+
+    // Auto-seleccionar hoy si tiene partidos, o el próximo día con partidos
+    (function () {
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (partidosPorFecha[todayStr]) {
+            selectDay(todayStr);
+            return;
+        }
+        // Próximo día con partidos
+        const fechas = Object.keys(partidosPorFecha).sort();
+        const futuras = fechas.filter(f => f >= todayStr);
+        if (futuras.length > 0) selectDay(futuras[0]);
+    })();
+</script>
