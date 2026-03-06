@@ -31,29 +31,24 @@
                     <i class="bi bi-plus-circle nav-icon"></i>
                     <span class="nav-text">Crear Nuevo</span>
                 </a>
-                @* Sprint 2: Gestión de partidos (HU-7)
                 <a asp-page="/Admin/Partidos/Index" class="nav-item @(currentPath.Contains("/admin/partidos") ? "active" : "")">
                     <i class="bi bi-calendar-event nav-icon"></i>
                     <span class="nav-text">Partidos</span>
                 </a>
-                *@
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">GESTIÓN</div>
-                @* Sprint 2: Gestión de usuarios
                 <a asp-page="/Admin/Usuarios/Index" class="nav-item @(currentPath.Contains("/usuarios") ? "active" : "")">
                     <i class="bi bi-people-fill nav-icon"></i>
                     <span class="nav-text">Usuarios</span>
                 </a>
-                *@
                 <a asp-page="/Admin/Arbitros/Pendientes" class="nav-item @(currentPath.Contains("/arbitros") ? "active" : "")">
                     <i class="bi bi-person-check nav-icon"></i>
                     <span class="nav-text">Árbitros Pendientes</span>
                 </a>
             </div>
 
-            @* Sprint 2: Auditoría del sistema
             <div class="nav-section">
                 <div class="nav-section-title">SISTEMA</div>
                 <a asp-page="/Admin/Auditoria" class="nav-item @(currentPath.Contains("/auditoria") ? "active" : "")">
@@ -61,7 +56,6 @@
                     <span class="nav-text">Auditoría</span>
                 </a>
             </div>
-            *@
         }
         else if (userRole == "Jugador")
         {
@@ -73,7 +67,6 @@
                 <i class="bi bi-person-circle nav-icon"></i>
                 <span class="nav-text">Mi Perfil</span>
             </a>
-            @* Sprint 2: Partidos, búsqueda de equipos y solicitudes (HU-20, HU-21)
             <a asp-page="/Jugador/Partidos/Index" class="nav-item @(currentPath.Contains("/jugador/partidos") ? "active" : "")">
                 <i class="bi bi-calendar-event nav-icon"></i>
                 <span class="nav-text">Mis Partidos</span>
@@ -86,7 +79,6 @@
                 <i class="bi bi-envelope-check nav-icon"></i>
                 <span class="nav-text">Mis Solicitudes</span>
             </a>
-            *@
         }
         else if (userRole == "Entrenador")
         {
@@ -98,7 +90,6 @@
                 <i class="bi bi-people-fill nav-icon"></i>
                 <span class="nav-text">Plantilla</span>
             </a>
-            @* Sprint 2: Mi Equipo, Partidos y Solicitudes (HU-22, HU-23, HU-25 ext.)
             <a asp-page="/Entrenador/MiEquipo" class="nav-item @(currentPath == "/entrenador/miequipo" ? "active" : "")">
                 <i class="bi bi-shield nav-icon"></i>
                 <span class="nav-text">Mi Equipo</span>
@@ -111,7 +102,6 @@
                 <i class="bi bi-envelope-check nav-icon"></i>
                 <span class="nav-text">Solicitudes</span>
             </a>
-            *@
         }
         else if (userRole == "Arbitro")
         {
