@@ -1,0 +1,211 @@
+@page "{id:int}"
+@model GenerarFixtureModel
+@{
+    ViewData["Title"] = "Generar Fixture";
+    Layout = "_Layout";
+
+    string formatoDisplay = Model.Torneo.Formato switch
+    {
+        "TodosContraTodos"   => "Todos contra Todos (Liga)",
+        "EliminacionDirecta" => "Eliminación Directa",
+        "GruposYEliminacion" => "Grupos + Eliminación",
+        _                    => Model.Torneo.Formato
+    };
+
+    int equiposNecesariosMin = Model.Torneo.Formato == "EliminacionDirecta" ? 2 : 2;
+    bool puedeGenerar = Model.Equipos.Count >= equiposNecesariosMin && string.IsNullOrEmpty(Model.ErrorMessage);
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Admin/Torneos/Details" asp-route-id="@Model.Torneo.Id" class="back-link">← Volver al Torneo</a>
+            <h1>Generar Fixture</h1>
+            <p class="page-subtitle">@Model.Torneo.Nombre · @formatoDisplay</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    <!-- Estado actual del fixture -->
+    @if (Model.TieneFixture)
+    {
+        <div style="border:1px solid rgba(255,159,10,0.3);border-radius:12px;padding:20px;background:rgba(255,159,10,0.07);margin-bottom:24px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <i class="bi bi-exclamation-triangle" style="color:var(--color-warning);font-size:1.2rem;"></i>
+                <strong style="color:var(--color-warning);">Este torneo ya tiene fixture generado (@Model.TotalPartidos partido(s))</strong>
+            </div>
+            <p style="font-size:0.88rem;opacity:0.8;margin:0 0 12px;">
+                Al regenerar el fixture se eliminarán todos los partidos <strong>programados</strong> y se crearán nuevos.
+                Los partidos ya finalizados no se pueden eliminar.
+            </p>
+            <a asp-page="/Admin/Torneos/AsignarDetallesFixture" asp-route-id="@Model.Torneo.Id" class="btn btn-secondary btn-icon btn-sm">
+                <i class="bi bi-calendar-event"></i> Ver / Asignar Detalles
+            </a>
+        </div>
+    }
+
+    <div class="content-grid" style="grid-template-columns:1fr 340px;gap:24px;">
+
+        <!-- Panel izquierdo: resumen y equipos -->
+        <div>
+            <div class="card" style="margin-bottom:20px;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="bi bi-info-circle nav-icon"></i> Resumen del Torneo</h3>
+                </div>
+                <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div>
+                        <div class="stat-label">Formato</div>
+                        <div class="stat-value" style="font-size:1rem;">@formatoDisplay</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Equipos Inscritos</div>
+                        <div class="stat-value" style="font-size:1rem;">@Model.Equipos.Count</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Ida y Vuelta</div>
+                        <div class="stat-value" style="font-size:1rem;">@(Model.Config.IdaYVuelta ? "Sí" : "No")</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Campo Neutral</div>
+                        <div class="stat-value" style="font-size:1rem;">@(Model.Config.CampoNeutral ? "Sí" : "No")</div>
+                    </div>
+                    @if (Model.Torneo.Formato == "GruposYEliminacion")
+                    {
+                        <div>
+                            <div class="stat-label">Número de Grupos</div>
+                            <div class="stat-value" style="font-size:1rem;">@(Model.Config.NumeroGrupos?.ToString() ?? "4")</div>
+                        </div>
+                        <div>
+                            <div class="stat-label">Clasifican por Grupo</div>
+                            <div class="stat-value" style="font-size:1rem;">@(Model.Config.ClasificanPorGrupo?.ToString() ?? "2")</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="bi bi-shield-fill nav-icon"></i> Equipos Participantes (@Model.Equipos.Count)</h3>
+                </div>
+                @if (Model.Equipos.Any())
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Equipo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Equipos.Count; i++)
+                            {
+                                var eq = Model.Equipos[i];
+                                <tr>
+                                    <td style="color:var(--color-text-muted);">@(i + 1)</td>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:8px;">
+                                            @if (!string.IsNullOrEmpty(eq.Logo))
+                                            {
+                                                <img src="@eq.Logo" style="width:28px;height:28px;object-fit:contain;border-radius:4px;" onerror="this.style.display='none'" />
+                                            }
+                                            <span>@eq.Nombre</span>
+                                            @if (!string.IsNullOrEmpty(eq.Abreviacion))
+                                            {
+                                                <span class="badge" style="font-size:0.7rem;">@eq.Abreviacion</span>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="empty-state" style="padding:32px;text-align:center;">
+                        <i class="bi bi-shield-x empty-icon"></i>
+                        <p>No hay equipos inscritos en este torneo.</p>
+                        <p style="font-size:0.85rem;color:var(--color-text-muted);">Inscribe equipos antes de generar el fixture.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Panel derecho: acción -->
+        <div>
+            <div class="card" style="position:sticky;top:90px;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="bi bi-lightning-fill nav-icon"></i> Generar Fixture</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.Equipos.Count < 2)
+                    {
+                        <div style="color:var(--color-text-muted);font-size:0.88rem;margin-bottom:16px;">
+                            <i class="bi bi-exclamation-circle"></i> Se necesitan al menos 2 equipos inscritos.
+                        </div>
+                    }
+                    else
+                    {
+                        <p style="font-size:0.88rem;color:var(--color-text-muted);margin-bottom:20px;">
+                            Se generarán los partidos automáticamente usando el algoritmo de <strong>@formatoDisplay</strong>.
+                            Los equipos se sortearán de forma aleatoria.
+                        </p>
+                    }
+
+                    <form method="post" asp-route-id="@Model.Torneo.Id">
+                        @if (Model.TieneFixture)
+                        {
+                            <button type="button" class="btn btn-warning btn-icon"
+                                    style="width:100%;margin-bottom:12px;"
+                                    onclick="confirmarRegen()"
+                                    @(Model.Equipos.Count < 2 ? "disabled" : "")>
+                                <i class="bi bi-arrow-clockwise"></i> Regenerar Fixture
+                            </button>
+                            <button type="submit" id="btnSubmit" class="btn btn-primary btn-icon"
+                                    style="display:none;width:100%;margin-bottom:12px;">
+                                <i class="bi bi-arrow-clockwise"></i> Confirmar Regeneración
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-primary btn-icon"
+                                    style="width:100%;margin-bottom:12px;"
+                                    @(Model.Equipos.Count < 2 ? "disabled" : "")>
+                                <i class="bi bi-lightning-fill"></i> Generar Fixture
+                            </button>
+                        }
+                    </form>
+
+                    <a asp-page="/Admin/Torneos/Details" asp-route-id="@Model.Torneo.Id"
+                       class="btn btn-secondary btn-icon" style="width:100%;">
+                        <i class="bi bi-arrow-left"></i> Cancelar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmarRegen() {
+            Swal.fire({
+                title: '¿Regenerar fixture?',
+                text: 'Se eliminarán todos los partidos programados y se crearán nuevos. Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, regenerar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#ff9500'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    document.getElementById('btnSubmit').click();
+                }
+            });
+        }
+    </script>
+}

@@ -1,48 +1,476 @@
-﻿@page
+@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Inicio";
+    ViewData["Title"] = "Blazebol";
+    Layout = "_Layout";
 }
 
-<div class="hero-section">
-    <div class="hero-content">
-        <h1>Sistema de Control de Torneos de Fútbol</h1>
-        <p class="hero-subtitle">Gestiona torneos, equipos, jugadores y partidos de manera profesional</p>
-        
-        @if (!Model.IsAuthenticated)
+<!-- ========== NAVBAR PÚBLICA ========== -->
+<nav class="navbar-public-landing" id="mainNavbar">
+    <div class="nav-container">
+        <a href="/" class="brand-logo-link">
+            <img src="~/images/logo.png" alt="Blazebol" class="brand-logo-img"
+                 onerror="this.style.display='none'" />
+            <span class="brand-logo-text">Blaze<span class="accent-dot">bol</span></span>
+        </a>
+
+        <ul class="nav-links-public">
+            <li><a href="#torneos">Torneos</a></li>
+            <li><a href="#como-funciona">Cómo funciona</a></li>
+            <li><a href="#para-quien">Para quién</a></li>
+            <li><a asp-page="/Torneos/Index">Explorar torneos</a></li>
+        </ul>
+
+        <div class="nav-cta-group">
+            @if (Model.IsAuthenticated)
+            {
+                <a asp-page="@Model.DashboardPage" class="btn-nav-dashboard">Mi Dashboard</a>
+            }
+            else
+            {
+                <a asp-page="/Account/Login" class="btn-nav-login">Iniciar sesión</a>
+                <a asp-page="/Account/Register" class="btn-nav-register">Registrarse</a>
+            }
+        </div>
+    </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<section class="hero-section-landing">
+    <div class="hero-container-landing">
+
+        <!-- Texto -->
+        <div class="hero-content-col">
+            <div class="hero-badge">
+                <i class="bi bi-lightning-fill"></i>
+                Plataforma profesional de torneos
+            </div>
+            <h1 class="hero-title-landing">
+                Participa en torneos de fútbol que
+                <span class="accent">todos recordarán</span>
+            </h1>
+            <p class="hero-subtitle-landing">
+                Sistema completo para participar en torneos organizados
+                profesionalmente. Gestiona equipos, sigue resultados en vivo
+                y comparte la pasión del fútbol.
+            </p>
+            <div class="hero-cta-group">
+                @if (Model.IsAuthenticated)
+                {
+                    <a asp-page="@Model.DashboardPage" class="btn-hero-primary">
+                        <i class="bi bi-speedometer2"></i> Ir a mi Dashboard
+                    </a>
+                    <a asp-page="/Torneos/Index" class="btn-hero-secondary">
+                        <i class="bi bi-trophy"></i> Ver Torneos
+                    </a>
+                }
+                else
+                {
+                    <a asp-page="/Account/Register" class="btn-hero-primary">
+                        <i class="bi bi-person-plus-fill"></i> Unirme gratis
+                    </a>
+                    <a asp-page="/Torneos/Index" class="btn-hero-secondary">
+                        <i class="bi bi-search"></i> Explorar torneos
+                    </a>
+                }
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number">@Model.TotalTorneos</span>
+                    <span class="hero-stat-label">Torneos activos</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">@Model.TotalEquipos</span>
+                    <span class="hero-stat-label">Equipos</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">@Model.TotalJugadores</span>
+                    <span class="hero-stat-label">Jugadores</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mockups flotantes -->
+        <div class="hero-visual-landing">
+            <div class="glow-orb"></div>
+
+            <!-- Mockup 1: Resultado de partido -->
+            <div class="mockup-card-floating mockup-m1">
+                <div class="mockup-label">Resultado</div>
+                <div class="mockup-score-row">
+                    <span>Equipo A</span>
+                    <span class="score-num">2 - 1</span>
+                    <span>Equipo B</span>
+                </div>
+            </div>
+
+            <!-- Mockup 2: Calendario -->
+            <div class="mockup-card-floating mockup-m2">
+                <div class="mockup-label">Próximos partidos</div>
+                <div class="mockup-date-item"><i class="bi bi-calendar3" style="color:var(--color-accent);margin-right:6px;"></i>Mar 10 · 8:00 PM</div>
+                <div class="mockup-date-item"><i class="bi bi-calendar3" style="color:var(--color-accent);margin-right:6px;"></i>Jue 12 · 7:30 PM</div>
+            </div>
+
+            <!-- Mockup 3: Clasificación -->
+            <div class="mockup-card-floating mockup-m3">
+                <div class="mockup-label">Clasificación</div>
+                <div class="mockup-table-row"><span>1. Titanes FC</span><span class="pts">18</span></div>
+                <div class="mockup-table-row"><span>2. Real Norte</span><span class="pts">15</span></div>
+                <div class="mockup-table-row"><span>3. Águilas</span><span class="pts">12</span></div>
+            </div>
+
+            <!-- Mockup 4: Alineación (campo) -->
+            <div class="mockup-card-floating mockup-m4">
+                <div class="mockup-label">Alineación</div>
+                <div class="mockup-field">
+                    <div class="player-row"><div class="player-dot"></div></div>
+                    <div class="player-row">
+                        <div class="player-dot"></div>
+                        <div class="player-dot"></div>
+                        <div class="player-dot"></div>
+                        <div class="player-dot"></div>
+                    </div>
+                    <div class="player-row">
+                        <div class="player-dot"></div>
+                        <div class="player-dot"></div>
+                        <div class="player-dot"></div>
+                    </div>
+                    <div class="player-row">
+                        <div class="player-dot" style="background:var(--color-info);box-shadow:0 0 6px var(--color-info);"></div>
+                        <div class="player-dot" style="background:var(--color-info);box-shadow:0 0 6px var(--color-info);"></div>
+                        <div class="player-dot" style="background:var(--color-info);box-shadow:0 0 6px var(--color-info);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ========== TORNEOS DISPONIBLES ========== -->
+<section class="section-landing" id="torneos">
+    <div class="section-container-landing">
+        <div class="section-header-landing">
+            <span class="section-eyebrow">Competencias activas</span>
+            <h2 class="section-title-landing">Torneos disponibles</h2>
+            <p class="section-subtitle-landing">
+                Únete a torneos organizados profesionalmente.
+                Compite con los mejores equipos de tu región.
+            </p>
+        </div>
+
+        @if (Model.TorneosDestacados.Any())
         {
-            <div class="hero-buttons">
-                <a asp-page="/Account/Register" class="btn btn-primary">Crear Cuenta</a>
-                <a asp-page="/Account/Login" class="btn btn-secondary">Iniciar Sesión</a>
+            <div class="torneos-grid-landing">
+                @foreach (var t in Model.TorneosDestacados)
+                {
+                    <a asp-page="/Torneos/Details" asp-route-id="@t.Id" class="torneo-card-landing">
+                        <div class="torneo-card-image">
+                            @if (!string.IsNullOrEmpty(t.ImagenUrl))
+                            {
+                                <img src="@t.ImagenUrl" alt="@t.Nombre" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="torneo-card-image-placeholder">
+                                    <i class="bi bi-trophy"></i>
+                                </div>
+                            }
+                            <span class="torneo-badge-card @t.BadgeClass">@t.EstadoDisplay</span>
+                        </div>
+                        <div class="torneo-card-body">
+                            <div class="torneo-card-nombre">@t.Nombre</div>
+                            <div class="torneo-card-meta">
+                                <div class="torneo-meta-item">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span>@t.FechaInicio.ToString("dd MMM") - @t.FechaFin.ToString("dd MMM yyyy")</span>
+                                </div>
+                                <div class="torneo-meta-item">
+                                    <i class="bi bi-shield-fill"></i>
+                                    <span>@t.LigaNombre</span>
+                                </div>
+                                <div class="torneo-meta-item">
+                                    <i class="bi bi-tag-fill"></i>
+                                    <span>@t.CategoriaNombre</span>
+                                </div>
+                            </div>
+                            @{
+                                bool lleno = t.EquiposMaximo.HasValue && t.EquiposInscritos >= t.EquiposMaximo.Value;
+                                int pctBar = t.EquiposMaximo.HasValue && t.EquiposMaximo.Value > 0
+                                    ? Math.Min(100, (int)((double)t.EquiposInscritos / t.EquiposMaximo.Value * 100)) : 0;
+                            }
+                            <div class="torneo-equipos-bar">
+                                <div class="equipos-bar-label">
+                                    <span>@(lleno ? "Torneo completo" : "Equipos inscritos")</span>
+                                    <span style="@(lleno ? "color:var(--color-accent);font-weight:700;" : "")">
+                                        @t.EquiposInscritos@(t.EquiposMaximo.HasValue ? $" / {t.EquiposMaximo}" : "")
+                                    </span>
+                                </div>
+                                @if (t.EquiposMaximo.HasValue && t.EquiposMaximo.Value > 0)
+                                {
+                                    <div class="equipos-bar-track">
+                                        <div class="equipos-bar-fill" style="width:@pctBar%"></div>
+                                    </div>
+                                }
+                            </div>
+                            <span class="btn-torneo-card">Ver detalles</span>
+                        </div>
+                    </a>
+                }
+            </div>
+            <div class="section-footer-center">
+                <a asp-page="/Torneos/Index" class="btn-outline-accent">
+                    <i class="bi bi-grid-3x3-gap-fill"></i> Ver todos los torneos
+                </a>
             </div>
         }
         else
         {
-            <div class="hero-buttons">
-                <a asp-page="@Model.DashboardPage" class="btn btn-primary">Ir al Dashboard</a>
+            <div style="text-align:center;padding:64px 0;color:var(--color-text-muted);">
+                <i class="bi bi-calendar-x" style="font-size:3rem;display:block;margin-bottom:16px;"></i>
+                <p style="font-size:var(--text-lg);">No hay torneos activos en este momento.</p>
+                <p style="margin-top:8px;">¡Vuelve pronto para ver los próximos eventos!</p>
             </div>
         }
     </div>
-</div>
+</section>
 
-<div class="features-section">
-    <h2>Funcionalidades</h2>
-    <div class="features-grid">
-        <div class="feature-card">
-            <h3>Gestión de Torneos</h3>
-            <p>Crea y administra torneos con diferentes formatos: liga, eliminación directa y más</p>
+<!-- ========== CÓMO FUNCIONA ========== -->
+<section class="section-landing-alt" id="como-funciona">
+    <div class="section-container-landing">
+        <div class="section-header-landing">
+            <span class="section-eyebrow">Simple y rápido</span>
+            <h2 class="section-title-landing">¿Cómo funciona?</h2>
+            <p class="section-subtitle-landing">
+                En pocos pasos puedes estar compitiendo en torneos organizados.
+            </p>
         </div>
-        <div class="feature-card">
-            <h3>Equipos y Jugadores</h3>
-            <p>Registra equipos, gestiona plantillas y realiza seguimiento de estadísticas</p>
-        </div>
-        <div class="feature-card">
-            <h3>Tablas de Posiciones</h3>
-            <p>Visualiza clasificaciones actualizadas automáticamente con criterios de desempate</p>
-        </div>
-        <div class="feature-card">
-            <h3>Calendario de Partidos</h3>
-            <p>Programa encuentros, asigna árbitros y gestiona reprogramaciones</p>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-icon-wrap">
+                    <img src="https://images.unsplash.com/photo-1543326727-cf6a674d60f3?w=160&h=160&fit=crop&crop=center&q=80"
+                         alt="Regístrate" class="step-icon-img"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                    <div class="step-icon-fallback"><i class="bi bi-person-plus-fill"></i></div>
+                </div>
+                <div class="step-title">Regístrate</div>
+                <p class="step-desc">Crea tu cuenta como jugador, entrenador o árbitro en menos de 2 minutos. Es completamente gratuito.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-icon-wrap">
+                    <img src="https://images.unsplash.com/photo-1555862124-6f69e8ec0f3b?w=160&h=160&fit=crop&crop=center&q=80"
+                         alt="Encuentra tu torneo" class="step-icon-img"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                    <div class="step-icon-fallback"><i class="bi bi-trophy-fill"></i></div>
+                </div>
+                <div class="step-title">Encuentra tu torneo</div>
+                <p class="step-desc">Explora los torneos disponibles en tu región y categoría. Filtra por formato, fechas y nivel.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-icon-wrap">
+                    <img src="https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=160&h=160&fit=crop&crop=center&q=80"
+                         alt="Únete a un equipo" class="step-icon-img"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                    <div class="step-icon-fallback"><i class="bi bi-people-fill"></i></div>
+                </div>
+                <div class="step-title">Únete a un equipo</div>
+                <p class="step-desc">Como jugador solicita unirte a un equipo, o como entrenador inscribe tu equipo directamente.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-icon-wrap">
+                    <img src="https://images.unsplash.com/photo-1564164841584-391b5c7b590c?w=160&h=160&fit=crop&crop=center&q=80"
+                         alt="Compite y gana" class="step-icon-img"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                    <div class="step-icon-fallback"><i class="bi bi-trophy-fill"></i></div>
+                </div>
+                <div class="step-title">Compite y gana</div>
+                <p class="step-desc">Sigue los resultados en tiempo real, la tabla de posiciones y el calendario de partidos.</p>
+            </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- ========== PARA QUIÉN ========== -->
+<section class="section-landing" id="para-quien">
+    <div class="section-container-landing">
+        <div class="section-header-landing">
+            <span class="section-eyebrow">Todos tienen un lugar</span>
+            <h2 class="section-title-landing">¿Cuál es tu rol?</h2>
+            <p class="section-subtitle-landing">
+                Blazebol está diseñado para todos los participantes del ecosistema del fútbol amateur.
+            </p>
+        </div>
+        <div class="roles-grid">
+
+            <!-- Jugador -->
+            <div class="role-card" style="--role-color:#a3ff12;--role-bg:rgba(163,255,18,0.08);">
+                <div class="role-icon-wrap">
+                    <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=160&h=160&fit=crop&crop=center&q=80"
+                         alt="Jugador" class="role-icon-img"
+                         onerror="this.style.display='none';this.parentElement.querySelector('.role-icon-fallback').style.display='flex';" />
+                    <div class="role-icon-fallback"><i class="bi bi-person-fill"></i></div>
+                </div>
+                <div class="role-title">Jugador</div>
+                <p class="role-desc">Únete a equipos, participa en torneos y sigue tu trayectoria deportiva.</p>
+                <ul class="role-features">
+                    <li>Busca y solicita unirte a equipos</li>
+                    <li>Ve tus próximos partidos</li>
+                    <li>Sigue la clasificación de tu torneo</li>
+                    <li>Gestiona tu perfil deportivo</li>
+                </ul>
+                <a asp-page="/Account/RegisterJugador" class="role-cta-link">
+                    Regístrate como jugador <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Entrenador -->
+            <div class="role-card" style="--role-color:#5ac8fa;--role-bg:rgba(90,200,250,0.08);">
+                <div class="role-icon-wrap">
+                    <img src="https://images.unsplash.com/photo-1543326727-cf6a674d60f3?w=160&h=160&fit=crop&crop=center&q=80"
+                         alt="Entrenador" class="role-icon-img"
+                         onerror="this.style.display='none';this.parentElement.querySelector('.role-icon-fallback').style.display='flex';" />
+                    <div class="role-icon-fallback"><i class="bi bi-clipboard2-check-fill"></i></div>
+                </div>
+                <div class="role-title">Entrenador</div>
+                <p class="role-desc">Dirige tu equipo, gestiona la plantilla y lleva a tu equipo a la victoria.</p>
+                <ul class="role-features">
+                    <li>Crea y administra tu equipo</li>
+                    <li>Gestiona solicitudes de jugadores</li>
+                    <li>Ve convocatorias detalladas</li>
+                    <li>Inscribe tu equipo a torneos</li>
+                </ul>
+                <a asp-page="/Account/RegisterEntrenador" class="role-cta-link">
+                    Regístrate como entrenador <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Árbitro -->
+            <div class="role-card" style="--role-color:#ff9500;--role-bg:rgba(255,149,0,0.08);">
+                <div class="role-icon-wrap">
+                    <img src="https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=160&h=160&fit=crop&crop=center&q=80"
+                         alt="Árbitro" class="role-icon-img"
+                         onerror="this.style.display='none';this.parentElement.querySelector('.role-icon-fallback').style.display='flex';" />
+                    <div class="role-icon-fallback"><i class="bi bi-shield-fill"></i></div>
+                </div>
+                <div class="role-title">Árbitro</div>
+                <p class="role-desc">Gestiona tus asignaciones, verifica partidos y mantén el juego justo.</p>
+                <ul class="role-features">
+                    <li>Ve tus partidos asignados</li>
+                    <li>Panel de verificación pre-partido</li>
+                    <li>Revisa plantillas de ambos equipos</li>
+                    <li>Calendario personal de arbitrajes</li>
+                </ul>
+                <a asp-page="/Account/RegisterArbitro" class="role-cta-link">
+                    Regístrate como árbitro <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Espectador -->
+            <div class="role-card" style="--role-color:#bf5af2;--role-bg:rgba(191,90,242,0.08);">
+                <div class="role-icon-wrap">
+                    <img src="https://images.unsplash.com/photo-1504016798967-59a258a6b5b4?w=160&h=160&fit=crop&crop=center&q=80"
+                         alt="Espectador" class="role-icon-img"
+                         onerror="this.style.display='none';this.parentElement.querySelector('.role-icon-fallback').style.display='flex';" />
+                    <div class="role-icon-fallback"><i class="bi bi-eye-fill"></i></div>
+                </div>
+                <div class="role-title">Espectador</div>
+                <p class="role-desc">Sigue los torneos, resultados y estadísticas de tus equipos favoritos.</p>
+                <ul class="role-features">
+                    <li>Sigue torneos en tiempo real</li>
+                    <li>Marca tu equipo favorito</li>
+                    <li>Ve resultados y clasificaciones</li>
+                    <li>Calendario de partidos completo</li>
+                </ul>
+                <a asp-page="/Account/Register" class="role-cta-link">
+                    Regístrate como espectador <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ========== CTA FINAL ========== -->
+@if (!Model.IsAuthenticated)
+{
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2 class="cta-title">
+                ¿Listo para entrar al <span class="accent">juego</span>?
+            </h2>
+            <p class="cta-subtitle">
+                Regístrate gratis y comienza a participar en torneos de fútbol organizados profesionalmente.
+            </p>
+            <div class="cta-buttons">
+                <a asp-page="/Account/Register" class="btn-hero-primary">
+                    <i class="bi bi-person-plus-fill"></i> Crear cuenta gratis
+                </a>
+                <a asp-page="/Account/Login" class="btn-hero-secondary">
+                    <i class="bi bi-box-arrow-in-right"></i> Ya tengo cuenta
+                </a>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer-landing">
+    <div class="footer-container">
+        <div class="footer-brand">
+            <span class="brand-logo-text" style="font-size:var(--text-xl);">Blaze<span class="accent-dot">bol</span></span>
+            <p>Sistema profesional para gestión y participación en torneos de fútbol amateur y semiprofesional.</p>
+        </div>
+        <div>
+            <div class="footer-col-title">Torneos</div>
+            <ul class="footer-links">
+                <li><a asp-page="/Torneos/Index">Ver todos</a></li>
+                <li><a asp-page="/Torneos/Index" asp-route-estado="Activo">En curso</a></li>
+                <li><a asp-page="/Torneos/Index" asp-route-estado="Borrador">Próximos</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Participa</div>
+            <ul class="footer-links">
+                <li><a asp-page="/Account/RegisterJugador">Como Jugador</a></li>
+                <li><a asp-page="/Account/RegisterEntrenador">Como Entrenador</a></li>
+                <li><a asp-page="/Account/RegisterArbitro">Como Árbitro</a></li>
+                <li><a asp-page="/Account/Register">Como Espectador</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Acceso</div>
+            <ul class="footer-links">
+                <li><a asp-page="/Account/Login">Iniciar sesión</a></li>
+                <li><a asp-page="/Calendario/Index">Calendario</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        &copy; 2026 Blazebol. Sistema de Control de Torneos de Fútbol.
+    </div>
+</footer>
+
+@section Scripts {
+    <script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('mainNavbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // Smooth scroll para links internos
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+}

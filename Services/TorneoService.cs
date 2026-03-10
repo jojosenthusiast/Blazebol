@@ -79,7 +79,19 @@ namespace ControlTorneosFutbol.Services
                     FechaInicio = model.FechaInicio,
                     FechaFin = model.FechaFin,
                     NumeroEquiposMaximo = model.NumeroEquiposMaximo,
-                    NumeroEquiposMinimo = model.NumeroEquiposMinimo
+                    NumeroEquiposMinimo = model.NumeroEquiposMinimo,
+                    LogoUrl = model.LogoUrl,
+                    ImagenUrl = model.ImagenUrl,
+                    DescripcionCompleta = model.DescripcionCompleta,
+                    Ubicacion = model.Ubicacion,
+                    DireccionSede = model.DireccionSede,
+                    UrlGrupoWhatsApp = model.UrlGrupoWhatsApp,
+                    UrlReglamento = model.UrlReglamento,
+                    ImagenesGaleria = model.ImagenesGaleria,
+                    Patrocinadores = model.Patrocinadores,
+                    Frase1 = model.Frase1,
+                    Frase2 = model.Frase2,
+                    Frase3 = model.Frase3
                 };
 
                 _context.Torneos.Add(torneo);
@@ -98,7 +110,13 @@ namespace ControlTorneosFutbol.Services
                     TarjetasAmarillasParaSuspension = 3,
                     PartidosSuspensionTarjetaRoja = 2,
                     MaximoJugadoresConvocados = 18,
-                    MinimoJugadoresTitulares = 11
+                    MinimoJugadoresTitulares = 11,
+                    IdaYVuelta = model.IdaYVuelta,
+                    CampoNeutral = model.CampoNeutral,
+                    EquilibrioLocalVisitante = model.EquilibrioLocalVisitante,
+                    NumeroGrupos = model.NumeroGrupos,
+                    EquiposPorGrupo = model.EquiposPorGrupo,
+                    ClasificanPorGrupo = model.ClasificanPorGrupo ?? 2
                 };
 
                 _context.ConfiguracionesTorneo.Add(configuracion);
@@ -146,7 +164,31 @@ namespace ControlTorneosFutbol.Services
                 torneo.FechaFin = model.FechaFin;
                 torneo.NumeroEquiposMaximo = model.NumeroEquiposMaximo;
                 torneo.NumeroEquiposMinimo = model.NumeroEquiposMinimo;
+                torneo.LogoUrl = model.LogoUrl;
+                torneo.ImagenUrl = model.ImagenUrl;
+                torneo.DescripcionCompleta = model.DescripcionCompleta;
+                torneo.Ubicacion = model.Ubicacion;
+                torneo.DireccionSede = model.DireccionSede;
+                torneo.UrlGrupoWhatsApp = model.UrlGrupoWhatsApp;
+                torneo.UrlReglamento = model.UrlReglamento;
+                torneo.ImagenesGaleria = model.ImagenesGaleria;
+                torneo.Patrocinadores = model.Patrocinadores;
+                torneo.Frase1 = model.Frase1;
+                torneo.Frase2 = model.Frase2;
+                torneo.Frase3 = model.Frase3;
                 torneo.FechaActualizacion = DateTime.UtcNow;
+
+                // Actualizar configuración de fixture
+                var config = await _context.ConfiguracionesTorneo.FirstOrDefaultAsync(c => c.TorneoId == id);
+                if (config != null)
+                {
+                    config.IdaYVuelta = model.IdaYVuelta;
+                    config.CampoNeutral = model.CampoNeutral;
+                    config.EquilibrioLocalVisitante = model.EquilibrioLocalVisitante;
+                    config.NumeroGrupos = model.NumeroGrupos;
+                    config.EquiposPorGrupo = model.EquiposPorGrupo;
+                    config.ClasificanPorGrupo = model.ClasificanPorGrupo ?? 2;
+                }
 
                 await _context.SaveChangesAsync();
 

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet ef:*)",
+      "Bash(find c:/Users/frenzied/Desktop/ControlTorneosFutbol/ControlTorneosFutbol/Data/Entities -name *.cs)",
+      "Bash(xargs grep:*)"
+    ]
+  }
+}

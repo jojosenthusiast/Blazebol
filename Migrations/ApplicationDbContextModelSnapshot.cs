@@ -163,6 +163,14 @@ namespace ControlTorneosFutbol.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("CampoNeutral")
+                        .HasColumnType("boolean")
+                        .HasColumnName("camponeutral");
+
+                    b.Property<int?>("ClasificanPorGrupo")
+                        .HasColumnType("integer")
+                        .HasColumnName("clasificanporgrupo");
+
                     b.Property<string>("CriterioDesempate1")
                         .IsRequired()
                         .HasColumnType("text")
@@ -180,6 +188,18 @@ namespace ControlTorneosFutbol.Migrations
                         .HasColumnType("text")
                         .HasColumnName("criteriodesempate4");
 
+                    b.Property<bool>("EquilibrioLocalVisitante")
+                        .HasColumnType("boolean")
+                        .HasColumnName("equilibriolocalvisitante");
+
+                    b.Property<int?>("EquiposPorGrupo")
+                        .HasColumnType("integer")
+                        .HasColumnName("equiposporgrupo");
+
+                    b.Property<bool>("IdaYVuelta")
+                        .HasColumnType("boolean")
+                        .HasColumnName("idayvuelta");
+
                     b.Property<int?>("MaximoJugadoresConvocados")
                         .HasColumnType("integer")
                         .HasColumnName("maximojugadoresconvocados");
@@ -187,6 +207,10 @@ namespace ControlTorneosFutbol.Migrations
                     b.Property<int>("MinimoJugadoresTitulares")
                         .HasColumnType("integer")
                         .HasColumnName("minimojugadorestitulares");
+
+                    b.Property<int?>("NumeroGrupos")
+                        .HasColumnType("integer")
+                        .HasColumnName("numerogrupos");
 
                     b.Property<int>("PartidosSuspensionTarjetaRoja")
                         .HasColumnType("integer")
@@ -267,8 +291,7 @@ namespace ControlTorneosFutbol.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Abreviacion")
-                        .HasMaxLength(3)
-                        .HasColumnType("character varying(3)")
+                        .HasColumnType("text")
                         .HasColumnName("abreviacion");
 
                     b.Property<bool>("Activo")
@@ -598,6 +621,10 @@ namespace ControlTorneosFutbol.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("estado");
 
+                    b.Property<string>("Fase")
+                        .HasColumnType("text")
+                        .HasColumnName("fase");
+
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("fecha");
@@ -621,6 +648,10 @@ namespace ControlTorneosFutbol.Migrations
                     b.Property<int?>("GrupoId")
                         .HasColumnType("integer")
                         .HasColumnName("grupoid");
+
+                    b.Property<int?>("Jornada")
+                        .HasColumnType("integer")
+                        .HasColumnName("jornada");
 
                     b.Property<string>("Sede")
                         .HasMaxLength(200)
@@ -975,6 +1006,14 @@ namespace ControlTorneosFutbol.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("categoriaid");
 
+                    b.Property<string>("DescripcionCompleta")
+                        .HasColumnType("text")
+                        .HasColumnName("descripcioncompleta");
+
+                    b.Property<string>("DireccionSede")
+                        .HasColumnType("text")
+                        .HasColumnName("direccionsede");
+
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -1003,9 +1042,33 @@ namespace ControlTorneosFutbol.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("formato");
 
+                    b.Property<string>("Frase1")
+                        .HasColumnType("text")
+                        .HasColumnName("frase1");
+
+                    b.Property<string>("Frase2")
+                        .HasColumnType("text")
+                        .HasColumnName("frase2");
+
+                    b.Property<string>("Frase3")
+                        .HasColumnType("text")
+                        .HasColumnName("frase3");
+
+                    b.Property<string>("ImagenUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("imagenurl");
+
+                    b.Property<string>("ImagenesGaleria")
+                        .HasColumnType("text")
+                        .HasColumnName("imagenesgaleria");
+
                     b.Property<int>("LigaId")
                         .HasColumnType("integer")
                         .HasColumnName("ligaid");
+
+                    b.Property<string>("LogoUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("logourl");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -1021,9 +1084,25 @@ namespace ControlTorneosFutbol.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("numeroequiposminimo");
 
+                    b.Property<string>("Patrocinadores")
+                        .HasColumnType("text")
+                        .HasColumnName("patrocinadores");
+
                     b.Property<int>("TemporadaId")
                         .HasColumnType("integer")
                         .HasColumnName("temporadaid");
+
+                    b.Property<string>("Ubicacion")
+                        .HasColumnType("text")
+                        .HasColumnName("ubicacion");
+
+                    b.Property<string>("UrlGrupoWhatsApp")
+                        .HasColumnType("text")
+                        .HasColumnName("urlgrupowhatsapp");
+
+                    b.Property<string>("UrlReglamento")
+                        .HasColumnType("text")
+                        .HasColumnName("urlreglamento");
 
                     b.HasKey("Id")
                         .HasName("pk_torneos");

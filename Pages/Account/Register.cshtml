@@ -1,100 +1,175 @@
 @page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Registrarse";
-    Layout = "_Layout";
+    ViewData["Title"] = "Crear Cuenta";
+    Layout = null;
+    bool showForm = Model.TipoSeleccionado == "espectador";
 }
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crear Cuenta — Blazebol</title>
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body>
 <div class="auth-container">
-    <div class="auth-card-wide">
-        <h1 class="auth-title">Crear Cuenta</h1>
-        <p class="auth-subtitle">Selecciona el tipo de cuenta que deseas crear</p>
 
-        <div class="register-options">
-            <a asp-page="/Account/Register" asp-route-tipo="espectador" class="register-option-card">
-                <h3>Espectador</h3>
-                <p>Ver resultados y seguir torneos</p>
-            </a>
+    <!-- ── COLUMNA IZQUIERDA ── -->
+    <div class="auth-form-col">
 
-            <a asp-page="/Account/RegisterJugador" class="register-option-card">
-                <h3>Jugador</h3>
-                <p>Únete a equipos y participa en torneos</p>
-            </a>
+        <a href="/" class="auth-brand">
+            <img src="~/images/logoblazebol.png" alt="Blazebol" />
+            <span class="auth-brand-text">Blaze<span>bol</span></span>
+        </a>
 
-            <a asp-page="/Account/RegisterEntrenador" class="register-option-card">
-                <h3>Entrenador</h3>
-                <p>Crea tu equipo y gestiona jugadores</p>
-            </a>
-
-            <a asp-page="/Account/RegisterArbitro" class="register-option-card">
-                <h3>Árbitro</h3>
-                <p>Arbitra partidos y genera reportes</p>
-            </a>
-        </div>
-
-        @if (Model.TipoSeleccionado == "espectador")
+        @if (!showForm)
         {
-            <div class="register-form-container">
-                <h2>Registro de Espectador</h2>
+            <h1 class="auth-heading">Crear Cuenta</h1>
+            <p class="auth-sub">Selecciona el tipo de cuenta que deseas crear</p>
 
-                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                {
-                    <div class="alert alert-error">@Model.ErrorMessage</div>
-                }
-
-                <form method="post" class="auth-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label asp-for="InputEspectador.Nombre"></label>
-                            <input asp-for="InputEspectador.Nombre" class="form-control" />
-                            <span asp-validation-for="InputEspectador.Nombre" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="InputEspectador.ApellidoPaterno"></label>
-                            <input asp-for="InputEspectador.ApellidoPaterno" class="form-control" />
-                            <span asp-validation-for="InputEspectador.ApellidoPaterno" class="text-danger"></span>
-                        </div>
+            <div class="auth-roles-grid">
+                <a asp-page="/Account/Register" asp-route-tipo="espectador" class="auth-role-card">
+                    <div class="auth-role-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
                     </div>
+                    <div class="auth-role-name">Espectador</div>
+                    <div class="auth-role-desc">Ver resultados y seguir torneos</div>
+                </a>
 
-                    <div class="form-group">
-                        <label asp-for="InputEspectador.ApellidoMaterno"></label>
-                        <input asp-for="InputEspectador.ApellidoMaterno" class="form-control" />
-                        <span asp-validation-for="InputEspectador.ApellidoMaterno" class="text-danger"></span>
+                <a asp-page="/Account/RegisterJugador" class="auth-role-card">
+                    <div class="auth-role-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                        </svg>
                     </div>
+                    <div class="auth-role-name">Jugador</div>
+                    <div class="auth-role-desc">Únete a equipos y compite</div>
+                </a>
 
-                    <div class="form-group">
-                        <label asp-for="InputEspectador.Email"></label>
-                        <input asp-for="InputEspectador.Email" class="form-control" type="email" />
-                        <span asp-validation-for="InputEspectador.Email" class="text-danger"></span>
+                <a asp-page="/Account/RegisterEntrenador" class="auth-role-card">
+                    <div class="auth-role-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                        </svg>
                     </div>
+                    <div class="auth-role-name">Entrenador</div>
+                    <div class="auth-role-desc">Crea tu equipo y gestiona jugadores</div>
+                </a>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label asp-for="InputEspectador.Password"></label>
-                            <input asp-for="InputEspectador.Password" class="form-control" type="password" />
-                            <span asp-validation-for="InputEspectador.Password" class="text-danger"></span>
-                            <small class="form-text">Mínimo 8 caracteres, 1 mayúscula, 1 minúscula y 1 número</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="InputEspectador.ConfirmPassword"></label>
-                            <input asp-for="InputEspectador.ConfirmPassword" class="form-control" type="password" />
-                            <span asp-validation-for="InputEspectador.ConfirmPassword" class="text-danger"></span>
-                        </div>
+                <a asp-page="/Account/RegisterArbitro" class="auth-role-card">
+                    <div class="auth-role-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41L9.25 5.35C8.66 5.59 8.12 5.92 7.63 6.29L5.24 5.33c-.22-.08-.47 0-.59.22L2.74 8.87C2.62 9.08 2.66 9.34 2.86 9.48l2.03 1.58C4.84 11.36 4.8 11.69 4.8 12s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                        </svg>
                     </div>
+                    <div class="auth-role-name">Árbitro</div>
+                    <div class="auth-role-desc">Arbitra partidos y genera reportes</div>
+                </a>
+            </div>
 
-                    <button type="submit" class="btn btn-primary btn-block">Crear Cuenta</button>
-                </form>
+            <div class="auth-footer-link">
+                ¿Ya tienes cuenta? <a asp-page="/Account/Login">Inicia sesión aquí</a>
             </div>
         }
+        else
+        {
+            <a asp-page="/Account/Register" class="auth-back">← Cambiar tipo de cuenta</a>
 
-        <div class="auth-footer">
-            <p>¿Ya tienes una cuenta? <a asp-page="/Account/Login">Inicia sesión aquí</a></p>
+            <h1 class="auth-heading">Cuenta de Espectador</h1>
+            <p class="auth-sub">Sigue torneos y ve todos los resultados</p>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="auth-error">@Model.ErrorMessage</div>
+            }
+
+            <form method="post" class="auth-form">
+                <div class="auth-row">
+                    <div class="form-group">
+                        <label asp-for="InputEspectador.Nombre" class="form-label">Nombre</label>
+                        <input asp-for="InputEspectador.Nombre" class="form-control" placeholder="Juan" />
+                        <span asp-validation-for="InputEspectador.Nombre" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="InputEspectador.ApellidoPaterno" class="form-label">Apellido Paterno</label>
+                        <input asp-for="InputEspectador.ApellidoPaterno" class="form-control" placeholder="Pérez" />
+                        <span asp-validation-for="InputEspectador.ApellidoPaterno" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="InputEspectador.ApellidoMaterno" class="form-label">Apellido Materno (opcional)</label>
+                    <input asp-for="InputEspectador.ApellidoMaterno" class="form-control" placeholder="García" />
+                    <span asp-validation-for="InputEspectador.ApellidoMaterno" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="InputEspectador.Email" class="form-label">Correo Electrónico</label>
+                    <input asp-for="InputEspectador.Email" class="form-control" type="email" placeholder="correo@ejemplo.com" />
+                    <span asp-validation-for="InputEspectador.Email" class="text-danger"></span>
+                </div>
+
+                <div class="auth-row">
+                    <div class="form-group">
+                        <label asp-for="InputEspectador.Password" class="form-label">Contraseña</label>
+                        <input asp-for="InputEspectador.Password" class="form-control" type="password" placeholder="••••••••" />
+                        <span asp-validation-for="InputEspectador.Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="InputEspectador.ConfirmPassword" class="form-label">Confirmar</label>
+                        <input asp-for="InputEspectador.ConfirmPassword" class="form-control" type="password" placeholder="••••••••" />
+                        <span asp-validation-for="InputEspectador.ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+                <small class="form-text" style="display:block;margin-bottom:20px;">Mínimo 8 caracteres, 1 mayúscula, 1 minúscula y 1 número</small>
+
+                <button type="submit" class="auth-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Crear Cuenta
+                </button>
+
+                <div class="auth-footer-link">
+                    ¿Ya tienes cuenta? <a asp-page="/Account/Login">Inicia sesión aquí</a>
+                </div>
+            </form>
+        }
+
+    </div>
+
+    <!-- ── COLUMNA DERECHA: IMAGEN + QUOTE ── -->
+    <div class="auth-image-col">
+        <div class="auth-quote-wrap">
+            @if (showForm)
+            {
+                <h2 class="auth-quote">
+                    Vive la <span class="hi">emoción</span> de cada partido
+                </h2>
+                <p class="auth-quote-sub">
+                    Sigue tus equipos favoritos, consulta clasificaciones y no te pierdas ningún resultado
+                </p>
+            }
+            else
+            {
+                <h2 class="auth-quote">
+                    Únete a la <span class="hi">revolución</span> digital del fútbol
+                </h2>
+                <p class="auth-quote-sub">
+                    Miles de jugadores, entrenadores y árbitros ya confían en Blazebol para gestionar sus torneos
+                </p>
+            }
         </div>
     </div>
+
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

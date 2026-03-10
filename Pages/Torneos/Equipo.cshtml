@@ -1,0 +1,161 @@
+@page "{torneoId:int}/{equipoId:int}"
+@model ControlTorneosFutbol.Pages.Torneos.EquipoModel
+@{
+    ViewData["Title"] = Model.Equipo.Nombre;
+    Layout = "_Layout";
+    var eq = Model.Equipo;
+    string colorPri  = string.IsNullOrEmpty(eq.ColorPrimario)   ? "#a3ff12" : eq.ColorPrimario;
+    string colorSec  = string.IsNullOrEmpty(eq.ColorSecundario) ? "#000000" : eq.ColorSecundario;
+}
+
+<!-- NAVBAR -->
+<nav class="navbar-public-landing" id="eqNavbar">
+    <div class="nav-container">
+        <a asp-page="/Torneos/Details" asp-route-id="@Model.TorneoId" class="btn-back-torneo">
+            <i class="bi bi-arrow-left"></i> @Model.TorneoNombre
+        </a>
+        <a href="/" class="brand-logo-link" style="margin:0 auto;">
+            <img src="~/images/logo.png" alt="Blazebol" class="brand-logo-img" onerror="this.style.display='none'" />
+            <span class="brand-logo-text">Blaze<span class="accent-dot">bol</span></span>
+        </a>
+        <div class="nav-cta-group">
+            @if (Model.IsAuthenticated)
+            {
+                <a asp-page="@Model.DashboardPage" class="btn-nav-dashboard">Mi Dashboard</a>
+            }
+            else
+            {
+                <a asp-page="/Account/Login"    class="btn-nav-login">Iniciar sesión</a>
+                <a asp-page="/Account/Register" class="btn-nav-register">Registrarse</a>
+            }
+        </div>
+    </div>
+</nav>
+
+<!-- HERO DEL EQUIPO -->
+<div style="background:linear-gradient(135deg, @colorSec 0%, color-mix(in srgb, @colorSec 70%, #000) 100%);padding:48px var(--spacing-xl);border-bottom:3px solid @colorPri;">
+    <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:var(--spacing-2xl);flex-wrap:wrap;">
+        @if (!string.IsNullOrEmpty(eq.Logo))
+        {
+            <img src="@eq.Logo" alt="@eq.Nombre"
+                 style="width:100px;height:100px;object-fit:contain;border-radius:12px;background:rgba(255,255,255,0.1);padding:8px;"
+                 onerror="this.style.display='none'" />
+        }
+        else
+        {
+            <div style="width:100px;height:100px;border-radius:12px;background:rgba(255,255,255,0.1);border:2px solid @colorPri;display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:900;color:@colorPri;">
+                @(eq.Abreviacion ?? eq.Nombre.Substring(0, Math.Min(2, eq.Nombre.Length)).ToUpper())
+            </div>
+        }
+        <div>
+            @if (!string.IsNullOrEmpty(eq.Abreviacion))
+            {
+                <div style="font-size:var(--text-sm);color:rgba(255,255,255,0.5);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;">@eq.Abreviacion</div>
+            }
+            <h1 style="font-size:var(--text-4xl);font-weight:var(--font-extrabold);color:#fff;margin:0 0 8px;">@eq.Nombre</h1>
+            @if (!string.IsNullOrEmpty(eq.EntrenadorNombre))
+            {
+                <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.7);font-size:var(--text-base);">
+                    <i class="bi bi-person-fill" style="color:@colorPri;"></i>
+                    <span>@eq.EntrenadorNombre</span>
+                    <span style="font-size:var(--text-sm);opacity:.6;">— Entrenador</span>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(eq.Sede))
+            {
+                <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.6);font-size:var(--text-sm);margin-top:6px;">
+                    <i class="bi bi-geo-alt-fill"></i> @eq.Sede
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- PLANTILLA -->
+<div style="background:var(--color-bg-primary);min-height:60vh;padding:var(--spacing-3xl) var(--spacing-xl);">
+    <div style="max-width:900px;margin:0 auto;">
+        <h2 style="font-size:var(--text-2xl);font-weight:var(--font-bold);color:var(--color-text-primary);margin-bottom:var(--spacing-xl);display:flex;align-items:center;gap:10px;">
+            <i class="bi bi-people-fill" style="color:@colorPri;"></i>
+            Plantilla inscrita
+            <span style="font-size:var(--text-base);font-weight:400;color:var(--color-text-muted);margin-left:auto;">@eq.Jugadores.Count jugador@(eq.Jugadores.Count == 1 ? "" : "es")</span>
+        </h2>
+
+        @{
+            var grupos = new[] { "Portero", "Defensa", "Medio", "Delantero" };
+            var sinPosicion = eq.Jugadores.Where(j => string.IsNullOrEmpty(j.Posicion) || !grupos.Contains(j.Posicion)).ToList();
+        }
+
+        @if (!eq.Jugadores.Any())
+        {
+            <div style="text-align:center;padding:64px 0;color:var(--color-text-muted);">
+                <i class="bi bi-person-x" style="font-size:3rem;display:block;margin-bottom:16px;"></i>
+                <p>No hay jugadores inscritos en este torneo aún.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var pos in grupos)
+            {
+                var jugPos = eq.Jugadores.Where(j => j.Posicion == pos).ToList();
+                if (jugPos.Any())
+                {
+                    <div style="margin-bottom:var(--spacing-2xl);">
+                        <h3 style="font-size:var(--text-base);font-weight:var(--font-semibold);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:var(--spacing-md);padding-bottom:8px;border-bottom:1px solid var(--color-border);">
+                            @pos <span style="color:var(--color-text-muted);font-weight:400;">(@jugPos.Count)</span>
+                        </h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+                            @foreach (var jug in jugPos)
+                            {
+                                <div style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:center;gap:16px;">
+                                    <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.06);border:2px solid @colorPri;display:flex;align-items:center;justify-content:center;font-size:var(--text-base);font-weight:var(--font-bold);color:@colorPri;flex-shrink:0;">
+                                        @jug.NumeroCamiseta
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:var(--font-semibold);color:var(--color-text-primary);font-size:var(--text-base);">@jug.Nombre</div>
+                                        <div style="font-size:var(--text-sm);color:var(--color-text-muted);">@(jug.Posicion ?? "Sin posición")</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            @if (sinPosicion.Any())
+            {
+                <div style="margin-bottom:var(--spacing-2xl);">
+                    <h3 style="font-size:var(--text-base);font-weight:var(--font-semibold);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:var(--spacing-md);padding-bottom:8px;border-bottom:1px solid var(--color-border);">
+                        Sin posición
+                    </h3>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+                        @foreach (var jug in sinPosicion)
+                        {
+                            <div style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:center;gap:16px;">
+                                <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.06);border:2px solid var(--color-border);display:flex;align-items:center;justify-content:center;font-size:var(--text-base);font-weight:var(--font-bold);color:var(--color-text-muted);flex-shrink:0;">
+                                    @jug.NumeroCamiseta
+                                </div>
+                                <div>
+                                    <div style="font-weight:var(--font-semibold);color:var(--color-text-primary);">@jug.Nombre</div>
+                                    <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Sin posición asignada</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<footer class="footer-landing" style="padding:var(--spacing-xl);">
+    <div style="max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+        <a href="/" class="brand-logo-text" style="font-size:var(--text-xl);text-decoration:none;">Blaze<span class="accent-dot">bol</span></a>
+        <a asp-page="/Torneos/Details" asp-route-id="@Model.TorneoId" style="color:var(--color-text-muted);font-size:var(--text-sm);">← Volver al torneo</a>
+    </div>
+</footer>
+
+@section Scripts {
+    <script>
+        const nav = document.getElementById('eqNavbar');
+        window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40));
+    </script>
+}

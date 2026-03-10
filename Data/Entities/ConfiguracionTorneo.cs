@@ -16,6 +16,14 @@ namespace ControlTorneosFutbol.Data.Entities
         public int? MaximoJugadoresConvocados { get; set; } = 18;
         public int MinimoJugadoresTitulares { get; set; } = 11;
 
+        // Fixture automático
+        public bool IdaYVuelta { get; set; } = false;
+        public bool CampoNeutral { get; set; } = false;
+        public bool EquilibrioLocalVisitante { get; set; } = true;
+        public int? NumeroGrupos { get; set; }
+        public int? EquiposPorGrupo { get; set; }
+        public int? ClasificanPorGrupo { get; set; } = 2;
+
         // Navegación
         public Torneo Torneo { get; set; } = null!;
     }

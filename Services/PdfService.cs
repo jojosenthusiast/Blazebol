@@ -174,6 +174,120 @@ namespace ControlTorneosFutbol.Services
             return document.GeneratePdf();
         }
 
+        public byte[] GenerarReglamentoPdf(Torneo torneo, ConfiguracionTorneo? config)
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            var documento = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(11));
+
+                    page.Header().Column(col =>
+                    {
+                        col.Item().Text($"REGLAMENTO — {torneo.Nombre.ToUpper()}")
+                            .SemiBold().FontSize(18).FontColor(Colors.Black);
+                        col.Item().Text($"{torneo.Liga?.Nombre} · {torneo.Categoria?.Nombre} · {torneo.Formato}")
+                            .FontSize(10).FontColor(Colors.Grey.Darken2);
+                        col.Item().PaddingTop(4).BorderBottom(1).BorderColor(Colors.Grey.Lighten1).Text("").FontSize(4);
+                    });
+
+                    page.Content().PaddingVertical(1, Unit.Centimetre).Column(col =>
+                    {
+                        col.Spacing(12);
+
+                        // Período
+                        col.Item().Text("1. PERÍODO DEL TORNEO").SemiBold().FontSize(13);
+                        col.Item().Text($"Inicio: {torneo.FechaInicio:dd/MM/yyyy}    Fin: {torneo.FechaFin:dd/MM/yyyy}");
+
+                        // Equipos
+                        col.Item().Text("2. EQUIPOS").SemiBold().FontSize(13);
+                        col.Item().Text($"Mínimo de equipos: {torneo.NumeroEquiposMinimo}    Máximo de equipos: {torneo.NumeroEquiposMaximo}");
+
+                        // Sistema de puntuación
+                        if (config != null)
+                        {
+                            col.Item().Text("3. SISTEMA DE PUNTUACIÓN").SemiBold().FontSize(13);
+                            col.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(c => { c.RelativeColumn(3); c.RelativeColumn(1); });
+                                void Row(string label, string val)
+                                {
+                                    table.Cell().PaddingVertical(3).Text(label);
+                                    table.Cell().PaddingVertical(3).AlignRight().Text(val).SemiBold();
+                                }
+                                Row("Victoria", $"{config.PuntosPorVictoria} pts");
+                                Row("Empate",   $"{config.PuntosPorEmpate} pts");
+                                Row("Derrota",  $"{config.PuntosPorDerrota} pts");
+                            });
+
+                            col.Item().Text("4. CRITERIOS DE DESEMPATE").SemiBold().FontSize(13);
+                            var criterios = new[] { config.CriterioDesempate1, config.CriterioDesempate2, config.CriterioDesempate3, config.CriterioDesempate4 }
+                                .Where(c => !string.IsNullOrEmpty(c)).Select((c, i) => $"{i + 1}. {c}");
+                            col.Item().Text(string.Join("    ", criterios));
+
+                            col.Item().Text("5. DISCIPLINA").SemiBold().FontSize(13);
+                            col.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(c => { c.RelativeColumn(4); c.RelativeColumn(2); });
+                                void Row(string label, string val)
+                                {
+                                    table.Cell().PaddingVertical(3).Text(label);
+                                    table.Cell().PaddingVertical(3).AlignRight().Text(val).SemiBold();
+                                }
+                                Row("Tarjetas amarillas para suspensión", $"{config.TarjetasAmarillasParaSuspension}");
+                                Row("Partidos de suspensión por tarjeta roja", $"{config.PartidosSuspensionTarjetaRoja}");
+                            });
+
+                            col.Item().Text("6. PLANTILLA").SemiBold().FontSize(13);
+                            col.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(c => { c.RelativeColumn(4); c.RelativeColumn(2); });
+                                void Row(string label, string val)
+                                {
+                                    table.Cell().PaddingVertical(3).Text(label);
+                                    table.Cell().PaddingVertical(3).AlignRight().Text(val).SemiBold();
+                                }
+                                if (config.MaximoJugadoresConvocados.HasValue)
+                                    Row("Máximo jugadores convocados", $"{config.MaximoJugadoresConvocados}");
+                                Row("Mínimo jugadores titulares", $"{config.MinimoJugadoresTitulares}");
+                            });
+                        }
+                        else
+                        {
+                            col.Item().Text("3. CONFIGURACIÓN").SemiBold().FontSize(13);
+                            col.Item().Text("La configuración detallada del torneo aún no ha sido establecida por el organizador.")
+                                .FontColor(Colors.Grey.Darken1);
+                        }
+
+                        if (!string.IsNullOrEmpty(torneo.Ubicacion))
+                        {
+                            col.Item().Text("7. SEDE").SemiBold().FontSize(13);
+                            col.Item().Text(torneo.Ubicacion);
+                            if (!string.IsNullOrEmpty(torneo.DireccionSede))
+                                col.Item().Text(torneo.DireccionSede).FontColor(Colors.Grey.Darken1);
+                        }
+                    });
+
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Generado el ");
+                        x.Span(DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
+                        x.Span("  ·  Página ");
+                        x.CurrentPageNumber();
+                        x.Span(" de ");
+                        x.TotalPages();
+                    });
+                });
+            });
+
+            return documento.GeneratePdf();
+        }
+
         public byte[] GenerateJugadoresReport(List<Jugador> jugadores)
         {
             QuestPDF.Settings.License = LicenseType.Community;

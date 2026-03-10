@@ -7,7 +7,8 @@
       "Bash(dotnet ef database update --no-build)",
       "Bash(where psql)",
       "Bash(dotnet build)",
-      "Bash(dotnet ef migrations script --output migration_supabase.sql --idempotent)"
+      "Bash(dotnet ef migrations script --output migration_supabase.sql --idempotent)",
+      "Bash(dotnet ef migrations add LandingPageTorneoFields --no-build)"
     ]
   }
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ControlTorneosFutbol.Data;
 using ControlTorneosFutbol.Data.Entities;
 using ControlTorneosFutbol.Models.ViewModels;
+using ControlTorneosFutbol.Services;
 using ControlTorneosFutbol.Helpers;
 
 namespace ControlTorneosFutbol.Pages.Admin.Torneos
@@ -11,10 +12,12 @@ namespace ControlTorneosFutbol.Pages.Admin.Torneos
     public class DetailsModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly IFixtureService _fixture;
 
-        public DetailsModel(ApplicationDbContext context)
+        public DetailsModel(ApplicationDbContext context, IFixtureService fixture)
         {
             _context = context;
+            _fixture = fixture;
         }
 
         public TorneoItemViewModel Torneo { get; set; } = new();
@@ -31,6 +34,13 @@ namespace ControlTorneosFutbol.Pages.Admin.Torneos
         public string? AbreviacionCampeon { get; set; }
         public int TotalPartidosJugados { get; set; }
         public int TotalGolesAnotados { get; set; }
+
+        // Fixture status
+        public string? UrlGrupoWhatsApp { get; set; }
+        public bool TieneFixture { get; set; }
+        public int FixtureTotalPartidos { get; set; }
+        public int FixtureProgramados { get; set; }
+        public int FixtureJugados { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id, string? message)
         {
@@ -67,6 +77,7 @@ namespace ControlTorneosFutbol.Pages.Admin.Torneos
 
             Configuracion = torneo.ConfiguracionTorneo;
             PuedeEditar = torneo.Estado != EstadosTorneo.Finalizado;
+            UrlGrupoWhatsApp = torneo.UrlGrupoWhatsApp;
 
             EquiposInscritos = torneo.EquiposTorneos.Select(et => new EquipoInscritoViewModel
             {
@@ -76,6 +87,16 @@ namespace ControlTorneosFutbol.Pages.Admin.Torneos
                 Logo = et.Equipo.Logo,
                 ColorPrimario = et.Equipo.ColorPrimario
             }).ToList();
+
+            // Fixture stats
+            TieneFixture = await _fixture.TieneFixture(id);
+            if (TieneFixture)
+            {
+                var (total, programados, jugados) = await _fixture.EstadisticasFixture(id);
+                FixtureTotalPartidos = total;
+                FixtureProgramados = programados;
+                FixtureJugados = jugados;
+            }
 
             if (!string.IsNullOrEmpty(message))
                 SuccessMessage = message;

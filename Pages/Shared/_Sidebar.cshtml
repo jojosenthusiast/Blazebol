@@ -1,18 +1,40 @@
 @using Microsoft.AspNetCore.Http
+@using ControlTorneosFutbol.Helpers
 @inject IHttpContextAccessor HttpContextAccessor
 @{
-    var userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole");
+    var userRole  = HttpContextAccessor.HttpContext?.Session.GetUserRole();
+    var userName  = HttpContextAccessor.HttpContext?.Session.GetUserName();
+    var userEmail = HttpContextAccessor.HttpContext?.Session.GetUserEmail();
     var currentPath = HttpContextAccessor.HttpContext?.Request.Path.Value?.ToLower() ?? "";
+
+    // Iniciales para el avatar
+    var initials = string.IsNullOrEmpty(userName) ? "?" :
+        string.Concat(userName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2).Select(s => char.ToUpper(s[0]).ToString()));
+
+    // Color del badge según rol
+    var roleColor = userRole switch
+    {
+        "Administrador" => "#ff3b30",
+        "Entrenador"    => "#5ac8fa",
+        "Jugador"       => "#34c759",
+        "Arbitro"       => "#ff9500",
+        "Espectador"    => "#888888",
+        _               => "#a3ff12"
+    };
 }
 
-<aside class="sidebar">
+<aside class="sidebar" id="appSidebar">
+
+    <!-- ── LOGO ── -->
     <div class="sidebar-header">
-        <div class="sidebar-logo">
-            <i class="bi bi-shield-fill logo-icon" style="color:var(--color-accent);"></i>
-            <span class="logo-text">Control Torneos</span>
-        </div>
+        <a href="/" class="sidebar-logo">
+            <img src="~/images/logoblazebol.png" alt="Blazebol" class="sidebar-logo-img" />
+            <span class="logo-text">Blaze<span style="color:var(--color-accent);">bol</span></span>
+        </a>
     </div>
 
+    <!-- ── NAVEGACIÓN (scrolleable) ── -->
     <nav class="sidebar-nav">
         @if (userRole == "Administrador")
         {
@@ -66,10 +88,6 @@
             <a asp-page="/Jugador/Dashboard" class="nav-item @(currentPath.StartsWith("/jugador/dashboard") ? "active" : "")">
                 <i class="bi bi-grid-fill nav-icon"></i>
                 <span class="nav-text">Mi Dashboard</span>
-            </a>
-            <a asp-page="/Jugador/Perfil" class="nav-item @(currentPath == "/jugador/perfil" ? "active" : "")">
-                <i class="bi bi-person-circle nav-icon"></i>
-                <span class="nav-text">Mi Perfil</span>
             </a>
             <a asp-page="/Jugador/Partidos/Index" class="nav-item @(currentPath.Contains("/jugador/partidos") ? "active" : "")">
                 <i class="bi bi-calendar-event nav-icon"></i>
@@ -147,10 +165,281 @@
         }
     </nav>
 
-    <div class="sidebar-footer">
-        <a asp-page="/Account/Logout" class="nav-item logout-item">
-            <i class="bi bi-box-arrow-right nav-icon"></i>
-            <span class="nav-text">Cerrar Sesión</span>
-        </a>
+    <!-- ── FOOTER: PERFIL DE USUARIO ── -->
+    <div class="sidebar-footer" id="sidebarFooter">
+
+        <!-- Menú desplegable (aparece encima del botón) -->
+        <div class="user-dropdown-menu" id="userDropdownMenu">
+            @if (userRole == "Jugador")
+            {
+                <button type="button" class="user-dropdown-item" onclick="abrirModalPerfil(); toggleUserMenu();">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Mi Perfil</span>
+                </button>
+                <div class="user-dropdown-divider"></div>
+            }
+            <a asp-page="/Account/Logout" class="user-dropdown-item user-dropdown-logout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </div>
+
+        <!-- Botón de perfil -->
+        <button class="sidebar-user-btn" id="userMenuBtn" onclick="toggleUserMenu()" type="button">
+            <div class="sidebar-user-avatar" style="background:@roleColor;">@initials</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name">@userName</div>
+                <div class="sidebar-user-email">@userEmail</div>
+                <span class="sidebar-user-role" style="color:@roleColor;">@userRole</span>
+            </div>
+            <i class="bi bi-chevron-up sidebar-user-chevron" id="userChevron"></i>
+        </button>
     </div>
+
 </aside>
+
+@if (userRole == "Jugador")
+{
+    <!-- ══ MODAL MI PERFIL (Jugador) ══ -->
+    <div class="perfil-overlay" id="perfilOverlay" onclick="cerrarModalPerfil()"></div>
+
+    <div class="perfil-modal" id="perfilModal" role="dialog" aria-modal="true" aria-labelledby="perfilModalTitle">
+
+        <!-- Header -->
+        <div class="perfil-modal-header">
+            <div class="perfil-modal-avatar" id="perfilAvatar">?</div>
+            <div>
+                <div class="perfil-modal-name" id="perfilNombreDisplay">Cargando...</div>
+                <div class="perfil-modal-role">
+                    <i class="bi bi-person-fill" style="color:var(--color-success);font-size:0.7rem;"></i>
+                    <span style="color:var(--color-success);font-size:0.75rem;font-weight:600;">Jugador</span>
+                </div>
+            </div>
+            <button class="perfil-modal-close" onclick="cerrarModalPerfil()" type="button" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <!-- Error/Success message -->
+        <div id="perfilMsg" style="display:none;padding:10px 24px 0;font-size:0.83rem;"></div>
+
+        <!-- Form -->
+        <form id="perfilForm" class="perfil-modal-body">
+            @Html.AntiForgeryToken()
+
+            <div class="perfil-section-title">Información Personal</div>
+
+            <div class="perfil-row">
+                <div class="perfil-field">
+                    <label class="perfil-label">Nombre <span class="perfil-required">*</span></label>
+                    <input class="perfil-input" id="pf-nombre" name="Input.Nombre" type="text" required maxlength="100" placeholder="Juan" />
+                </div>
+                <div class="perfil-field">
+                    <label class="perfil-label">Apellido Paterno <span class="perfil-required">*</span></label>
+                    <input class="perfil-input" id="pf-apPaterno" name="Input.ApellidoPaterno" type="text" required maxlength="100" placeholder="Pérez" />
+                </div>
+            </div>
+
+            <div class="perfil-row">
+                <div class="perfil-field">
+                    <label class="perfil-label">Apellido Materno</label>
+                    <input class="perfil-input" id="pf-apMaterno" name="Input.ApellidoMaterno" type="text" maxlength="100" placeholder="García (opcional)" />
+                </div>
+                <div class="perfil-field">
+                    <label class="perfil-label">Teléfono</label>
+                    <input class="perfil-input" id="pf-telefono" name="Input.Telefono" type="tel" maxlength="20" placeholder="+503 1234-5678" />
+                </div>
+            </div>
+
+            <div class="perfil-section-title" style="margin-top:20px;">Datos de Jugador</div>
+
+            <div class="perfil-row">
+                <div class="perfil-field">
+                    <label class="perfil-label">Posición Preferida</label>
+                    <select class="perfil-input perfil-select" id="pf-posicion" name="Input.PosicionPreferida">
+                        <option value="">Sin posición definida</option>
+                        <option value="Portero">Portero</option>
+                        <option value="Defensa">Defensa</option>
+                        <option value="Medio">Medio</option>
+                        <option value="Delantero">Delantero</option>
+                    </select>
+                </div>
+                <div class="perfil-field">
+                    <label class="perfil-label">N° Camiseta</label>
+                    <input class="perfil-input" id="pf-camiseta" name="Input.NumeroCamiseta" type="number" min="1" max="99" placeholder="Ej: 10" />
+                </div>
+            </div>
+
+            <!-- Footer de acciones -->
+            <div class="perfil-modal-footer">
+                <button type="button" class="perfil-btn-cancel" onclick="cerrarModalPerfil()">Cancelar</button>
+                <button type="submit" class="perfil-btn-save" id="perfilBtnSave">
+                    <i class="bi bi-floppy" id="perfilBtnIcon"></i>
+                    <span id="perfilBtnText">Guardar Cambios</span>
+                </button>
+            </div>
+        </form>
+
+    </div>
+}
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Mobile hamburger -->
+<button class="sidebar-hamburger" id="sidebarHamburger" onclick="openSidebar()" type="button">
+    <i class="bi bi-list"></i>
+</button>
+
+<script>
+    // ── Dropdown de usuario ──────────────────────────────────────────────
+    function toggleUserMenu() {
+        var menu    = document.getElementById('userDropdownMenu');
+        var chevron = document.getElementById('userChevron');
+        var isOpen  = menu.classList.contains('open');
+        menu.classList.toggle('open', !isOpen);
+        chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+    }
+
+    document.addEventListener('click', function(e) {
+        var footer = document.getElementById('sidebarFooter');
+        if (footer && !footer.contains(e.target)) {
+            var menu    = document.getElementById('userDropdownMenu');
+            var chevron = document.getElementById('userChevron');
+            if (menu && menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+    });
+
+    // ── Mobile sidebar ───────────────────────────────────────────────────
+    function openSidebar() {
+        document.getElementById('appSidebar').classList.add('sidebar-open');
+        document.getElementById('sidebarOverlay').classList.add('visible');
+    }
+    function closeSidebar() {
+        document.getElementById('appSidebar').classList.remove('sidebar-open');
+        document.getElementById('sidebarOverlay').classList.remove('visible');
+    }
+
+    // ── Modal Mi Perfil (solo Jugador) ───────────────────────────────────
+    function abrirModalPerfil() {
+        var overlay = document.getElementById('perfilOverlay');
+        var modal   = document.getElementById('perfilModal');
+        if (!overlay || !modal) return;
+
+        // Reset estado
+        ocultarMensajePerfil();
+        setLoadingPerfil(false);
+
+        overlay.classList.add('open');
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+
+        // Cargar datos vía AJAX
+        fetch('/Jugador/Perfil?handler=Datos', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.error) { mostrarMensajePerfil(d.error, false); return; }
+            document.getElementById('pf-nombre').value    = d.nombre    || '';
+            document.getElementById('pf-apPaterno').value = d.apellidoPaterno || '';
+            document.getElementById('pf-apMaterno').value = d.apellidoMaterno || '';
+            document.getElementById('pf-telefono').value  = d.telefono  || '';
+            document.getElementById('pf-posicion').value  = d.posicionPreferida || '';
+            document.getElementById('pf-camiseta').value  = d.numeroCamiseta || '';
+            // Actualizar avatar
+            var nombre = (d.nombre || '').charAt(0).toUpperCase();
+            var ap     = (d.apellidoPaterno || '').charAt(0).toUpperCase();
+            document.getElementById('perfilAvatar').textContent = nombre + ap || '?';
+            document.getElementById('perfilNombreDisplay').textContent = d.nombre + ' ' + d.apellidoPaterno;
+        })
+        .catch(function() { mostrarMensajePerfil('Error al cargar el perfil.', false); });
+    }
+
+    function cerrarModalPerfil() {
+        var overlay = document.getElementById('perfilOverlay');
+        var modal   = document.getElementById('perfilModal');
+        if (!overlay || !modal) return;
+        overlay.classList.remove('open');
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    // Submit del form vía AJAX
+    var perfilForm = document.getElementById('perfilForm');
+    if (perfilForm) {
+        perfilForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            setLoadingPerfil(true);
+            ocultarMensajePerfil();
+
+            var fd = new FormData(perfilForm);
+            fetch('/Jugador/Perfil?handler=Guardar', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                setLoadingPerfil(false);
+                if (d.ok) {
+                    mostrarMensajePerfil('Perfil actualizado correctamente.', true);
+                    // Actualizar nombre en sidebar
+                    if (d.nombreCompleto) {
+                        var sn = document.querySelector('.sidebar-user-name');
+                        if (sn) sn.textContent = d.nombreCompleto;
+                        document.getElementById('perfilNombreDisplay').textContent = d.nombreCompleto;
+                        var partes = d.nombreCompleto.split(' ');
+                        var initials = partes.slice(0,2).map(function(p){return p[0]||'';}).join('').toUpperCase();
+                        var av = document.getElementById('perfilAvatar');
+                        if (av) av.textContent = initials;
+                    }
+                    // Cerrar modal tras 1.5 s
+                    setTimeout(cerrarModalPerfil, 1500);
+                } else {
+                    var msg = (d.errors && d.errors.length) ? d.errors.join(' · ') : (d.error || 'Error al guardar.');
+                    mostrarMensajePerfil(msg, false);
+                }
+            })
+            .catch(function() {
+                setLoadingPerfil(false);
+                mostrarMensajePerfil('Error de conexión. Intenta de nuevo.', false);
+            });
+        });
+    }
+
+    function setLoadingPerfil(loading) {
+        var btn  = document.getElementById('perfilBtnSave');
+        var icon = document.getElementById('perfilBtnIcon');
+        var txt  = document.getElementById('perfilBtnText');
+        if (!btn) return;
+        btn.disabled = loading;
+        if (icon) icon.className = loading ? 'bi bi-arrow-repeat spin' : 'bi bi-floppy';
+        if (txt)  txt.textContent = loading ? 'Guardando…' : 'Guardar Cambios';
+    }
+
+    function mostrarMensajePerfil(msg, ok) {
+        var el = document.getElementById('perfilMsg');
+        if (!el) return;
+        el.style.display  = 'block';
+        el.style.color    = ok ? 'var(--color-success)' : 'var(--color-error)';
+        el.style.background = ok ? 'rgba(52,199,89,0.08)' : 'rgba(255,59,48,0.08)';
+        el.style.borderRadius = '8px';
+        el.style.padding  = '10px 14px';
+        el.style.margin   = '0 24px 4px';
+        el.textContent    = msg;
+    }
+
+    function ocultarMensajePerfil() {
+        var el = document.getElementById('perfilMsg');
+        if (el) el.style.display = 'none';
+    }
+
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') cerrarModalPerfil();
+    });
+</script>

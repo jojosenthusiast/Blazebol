@@ -138,6 +138,21 @@
             </div>
         </div>
 
+        @if (!string.IsNullOrEmpty(Model.UrlGrupoWhatsApp))
+        {
+            <div class="details-card">
+                <h3>Comunicación</h3>
+                <div class="detail-item" style="flex-direction:column;align-items:flex-start;gap:8px;">
+                    <span class="detail-label">Grupo WhatsApp:</span>
+                    <a href="@Model.UrlGrupoWhatsApp" target="_blank" rel="noopener noreferrer"
+                       class="btn btn-sm btn-icon"
+                       style="background:#25D366;color:#fff;border:none;font-weight:600;">
+                        <i class="bi bi-whatsapp"></i> Unirse al grupo
+                    </a>
+                </div>
+            </div>
+        }
+
         <div class="details-card">
             <h3>Equipos</h3>
             <div class="detail-item">
@@ -263,6 +278,65 @@
             </div>
         }
     }
+
+    <!-- ══ BLOQUE FIXTURE ══ -->
+    <div class="card" style="margin-bottom:24px;">
+        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <h3 class="card-title"><i class="bi bi-lightning-fill nav-icon"></i> Fixture Automático</h3>
+            <div style="display:flex;gap:8px;">
+                @if (Model.TieneFixture)
+                {
+                    <a asp-page="/Admin/Torneos/AsignarDetallesFixture" asp-route-id="@Model.Torneo.Id"
+                       class="btn btn-secondary btn-icon btn-sm">
+                        <i class="bi bi-calendar-event"></i> Asignar Detalles
+                    </a>
+                    <a asp-page="/Admin/Partidos/Index" asp-route-torneoId="@Model.Torneo.Id"
+                       class="btn btn-info btn-icon btn-sm">
+                        <i class="bi bi-eye"></i> Ver Partidos
+                    </a>
+                    @if (Model.PuedeEditar)
+                    {
+                        <a asp-page="/Admin/Torneos/GenerarFixture" asp-route-id="@Model.Torneo.Id"
+                           class="btn btn-warning btn-icon btn-sm">
+                            <i class="bi bi-arrow-clockwise"></i> Regenerar
+                        </a>
+                    }
+                }
+                else if (Model.PuedeEditar)
+                {
+                    <a asp-page="/Admin/Torneos/GenerarFixture" asp-route-id="@Model.Torneo.Id"
+                       class="btn btn-primary btn-icon btn-sm">
+                        <i class="bi bi-lightning-fill"></i> Generar Fixture
+                    </a>
+                }
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.TieneFixture)
+            {
+                <div style="display:flex;gap:32px;flex-wrap:wrap;">
+                    <div>
+                        <div class="stat-label">Total Partidos</div>
+                        <div class="stat-value">@Model.FixtureTotalPartidos</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Programados</div>
+                        <div class="stat-value" style="color:var(--color-text-muted);">@Model.FixtureProgramados</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Jugados</div>
+                        <div class="stat-value" style="color:var(--color-success);">@Model.FixtureJugados</div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p style="color:var(--color-text-muted);font-size:0.88rem;margin:0;">
+                    El fixture no ha sido generado aún. Una vez inscritos los equipos, genera el calendario de partidos automáticamente.
+                </p>
+            }
+        </div>
+    </div>
 
     <div class="section-header">
         <h2>Equipos Inscritos</h2>

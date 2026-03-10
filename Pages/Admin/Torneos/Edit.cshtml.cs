@@ -48,17 +48,35 @@ namespace ControlTorneosFutbol.Pages.Admin.Torneos
 
             Input = new TorneoViewModel
             {
-                Id = torneo.Id,
-                Nombre = torneo.Nombre,
-                LigaId = torneo.LigaId,
-                TemporadaId = torneo.TemporadaId,
-                CategoriaId = torneo.CategoriaId,
-                Formato = torneo.Formato,
-                Estado = torneo.Estado,
-                FechaInicio = torneo.FechaInicio,
-                FechaFin = torneo.FechaFin,
+                Id                  = torneo.Id,
+                Nombre              = torneo.Nombre,
+                LigaId              = torneo.LigaId,
+                TemporadaId         = torneo.TemporadaId,
+                CategoriaId         = torneo.CategoriaId,
+                Formato             = torneo.Formato,
+                Estado              = torneo.Estado,
+                FechaInicio         = torneo.FechaInicio,
+                FechaFin            = torneo.FechaFin,
                 NumeroEquiposMinimo = torneo.NumeroEquiposMinimo,
-                NumeroEquiposMaximo = torneo.NumeroEquiposMaximo
+                NumeroEquiposMaximo = torneo.NumeroEquiposMaximo,
+                LogoUrl             = torneo.LogoUrl,
+                ImagenUrl           = torneo.ImagenUrl,
+                DescripcionCompleta = torneo.DescripcionCompleta,
+                Ubicacion           = torneo.Ubicacion,
+                DireccionSede       = torneo.DireccionSede,
+                UrlGrupoWhatsApp    = torneo.UrlGrupoWhatsApp,
+                UrlReglamento       = torneo.UrlReglamento,
+                ImagenesGaleria     = torneo.ImagenesGaleria,
+                Patrocinadores      = torneo.Patrocinadores,
+                Frase1              = torneo.Frase1,
+                Frase2              = torneo.Frase2,
+                Frase3              = torneo.Frase3,
+                IdaYVuelta              = torneo.ConfiguracionTorneo?.IdaYVuelta ?? false,
+                CampoNeutral            = torneo.ConfiguracionTorneo?.CampoNeutral ?? false,
+                EquilibrioLocalVisitante = torneo.ConfiguracionTorneo?.EquilibrioLocalVisitante ?? true,
+                NumeroGrupos            = torneo.ConfiguracionTorneo?.NumeroGrupos,
+                EquiposPorGrupo         = torneo.ConfiguracionTorneo?.EquiposPorGrupo,
+                ClasificanPorGrupo      = torneo.ConfiguracionTorneo?.ClasificanPorGrupo ?? 2
             };
 
             await LoadSelectListsAsync(torneo.LigaId, torneo.TemporadaId);

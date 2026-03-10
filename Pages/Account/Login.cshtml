@@ -2,71 +2,95 @@
 @model LoginModel
 @{
     ViewData["Title"] = "Iniciar Sesión";
-    Layout = "_Layout";
+    Layout = null;
 }
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar Sesión — Blazebol</title>
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body>
 <div class="auth-container">
-    <div class="auth-card">
-        <h1 class="auth-title">Iniciar Sesión</h1>
-        
+
+    <!-- ── COLUMNA IZQUIERDA: FORMULARIO ── -->
+    <div class="auth-form-col">
+
+        <a href="/" class="auth-brand">
+            <img src="~/images/logoblazebol.png" alt="Blazebol" />
+            <span class="auth-brand-text">Blaze<span>bol</span></span>
+        </a>
+
+        <h1 class="auth-heading">Iniciar Sesión</h1>
+        <p class="auth-sub">Accede a tu cuenta para gestionar torneos</p>
+
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
         {
-            <div class="alert alert-error">
-                @Model.ErrorMessage
-            </div>
+            <div class="auth-error">@Model.ErrorMessage</div>
         }
-
         @if (!string.IsNullOrEmpty(Model.SuccessMessage))
         {
-            <div class="alert alert-success">
-                @Model.SuccessMessage
-            </div>
+            <div class="auth-success">@Model.SuccessMessage</div>
         }
 
-        <form method="post" class="auth-form">
+        <form method="post" class="auth-form" id="loginForm">
             <div class="form-group">
-                <label asp-for="Input.Email"></label>
-                <input asp-for="Input.Email" class="form-control" placeholder="correo@ejemplo.com" />
+                <label asp-for="Input.Email" class="form-label">Correo Electrónico</label>
+                <input asp-for="Input.Email" class="form-control"
+                       type="email" placeholder="correo@ejemplo.com" autofocus />
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="Input.Password"></label>
-                <input asp-for="Input.Password" class="form-control" placeholder="••••••••" />
+                <label asp-for="Input.Password" class="form-label">Contraseña</label>
+                <input asp-for="Input.Password" class="form-control"
+                       type="password" placeholder="••••••••" />
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
 
-            <div class="form-group-checkbox">
-                <input asp-for="Input.RememberMe" type="checkbox" />
-                <label asp-for="Input.RememberMe">Recordarme</label>
+            <div class="auth-check">
+                <input asp-for="Input.RememberMe" type="checkbox" id="rememberMe" />
+                <label for="rememberMe">Recordarme</label>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block btn-icon" id="loginBtn">
-                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+            <button type="submit" class="auth-btn" id="loginBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/>
+                </svg>
+                Iniciar Sesión
             </button>
+
+            <div class="auth-footer-link">
+                ¿No tienes cuenta? <a asp-page="/Account/Register">Regístrate aquí</a>
+            </div>
         </form>
 
-        <!-- Overlay de carga (se muestra al hacer submit) -->
-        <div class="login-overlay" id="loginOverlay">
-            <div class="spinner-lg"></div>
-            <p>Iniciando sesión...</p>
-        </div>
+    </div>
 
-        <div class="auth-footer">
-            <p>¿No tienes una cuenta? <a asp-page="/Account/Register">Regístrate aquí</a></p>
+    <!-- ── COLUMNA DERECHA: IMAGEN + QUOTE ── -->
+    <div class="auth-image-col">
+        <div class="auth-quote-wrap">
+            <h2 class="auth-quote">
+                Gestiona tus torneos con <span class="hi">pasión</span>
+            </h2>
+            <p class="auth-quote-sub">
+                Sistema profesional de control de torneos de fútbol para organizadores, equipos y árbitros
+            </p>
         </div>
     </div>
+
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        document.querySelector('.auth-form').addEventListener('submit', function (e) {
-            var email = document.querySelector('#Input_Email').value.trim();
-            var password = document.querySelector('#Input_Password').value.trim();
-            if (email && password) {
-                document.getElementById('loginOverlay').style.display = 'flex';
-            }
-        });
-    </script>
-}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function () {
+        document.getElementById('loginBtn').disabled = true;
+        document.getElementById('loginBtn').textContent = 'Iniciando...';
+    });
+</script>
+</body>
+</html>

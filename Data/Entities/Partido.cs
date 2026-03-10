@@ -15,6 +15,8 @@ namespace ControlTorneosFutbol.Data.Entities
         public string Estado { get; set; } = EstadosPartido.Programado;
         public int? GolesLocal { get; set; }
         public int? GolesVisitante { get; set; }
+        public string? Fase { get; set; }        // "Grupo A", "Octavos", "Cuartos", "Semifinal", "Final"
+        public int? Jornada { get; set; }        // Número de jornada dentro del torneo/grupo
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
         public DateTime? FechaActualizacion { get; set; }
 

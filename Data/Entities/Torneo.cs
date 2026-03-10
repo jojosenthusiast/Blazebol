@@ -19,6 +19,20 @@ namespace ControlTorneosFutbol.Data.Entities
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
         public DateTime? FechaActualizacion { get; set; }
 
+        // Campos para landing page pública
+        public string? LogoUrl { get; set; }
+        public string? ImagenUrl { get; set; }
+        public string? DescripcionCompleta { get; set; }
+        public string? Ubicacion { get; set; }
+        public string? DireccionSede { get; set; }
+        public string? UrlGrupoWhatsApp { get; set; }
+        public string? UrlReglamento { get; set; }
+        public string? ImagenesGaleria { get; set; }   // JSON array de URLs
+        public string? Patrocinadores { get; set; }    // JSON array de URLs
+        public string? Frase1 { get; set; }
+        public string? Frase2 { get; set; }
+        public string? Frase3 { get; set; }
+
         // Navegación
         public Liga Liga { get; set; } = null!;
         public Temporada Temporada { get; set; } = null!;

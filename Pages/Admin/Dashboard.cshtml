@@ -6,17 +6,35 @@
 }
 
 <div class="dashboard-container">
-    <div class="dashboard-header">
-        <h1>Panel de Administración</h1>
-        <p class="dashboard-subtitle">Bienvenido, @Model.UserName</p>
+
+    <!-- ── ENCABEZADO ── -->
+    <div class="dashboard-header" style="margin-bottom:28px;">
+        <div>
+            <h1 style="margin:0 0 4px;">Panel de Administración</h1>
+            <p class="dashboard-subtitle" style="margin:0;">Bienvenido, <strong>@Model.UserName</strong></p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a asp-page="/Admin/Torneos/Create" class="btn btn-primary btn-icon">
+                <i class="bi bi-plus-lg"></i> Crear Torneo
+            </a>
+            <a asp-page="/Calendario/Index" class="btn btn-secondary btn-icon">
+                <i class="bi bi-calendar3"></i> Calendario
+            </a>
+        </div>
     </div>
 
-    <div class="stats-grid">
+    <!-- ── MÉTRICAS ── -->
+    <div class="stats-grid" style="margin-bottom:28px;">
+
         <div class="stat-card">
             <i class="bi bi-trophy-fill stat-icon" style="color:var(--color-accent);"></i>
             <div class="stat-content">
                 <h3>@Model.TotalTorneos</h3>
                 <p>Torneos Totales</p>
+                @if (Model.TorneosNuevosEsteMes > 0)
+                {
+                    <span class="stat-trend stat-trend-up">+@Model.TorneosNuevosEsteMes este mes</span>
+                }
             </div>
         </div>
 
@@ -33,6 +51,10 @@
             <div class="stat-content">
                 <h3>@Model.TotalEquipos</h3>
                 <p>Equipos Registrados</p>
+                @if (Model.EquiposNuevosEstaSemana > 0)
+                {
+                    <span class="stat-trend stat-trend-up">+@Model.EquiposNuevosEstaSemana esta semana</span>
+                }
             </div>
         </div>
 
@@ -52,13 +74,17 @@
             </div>
         </div>
 
-        <div class="stat-card stat-warning">
-            <i class="bi bi-person-exclamation stat-icon" style="color:var(--color-warning);"></i>
-            <div class="stat-content">
-                <h3>@Model.ArbitrosPendientesAprobacion</h3>
-                <p>Árbitros Pendientes</p>
+        @if (Model.ArbitrosPendientesAprobacion > 0)
+        {
+            <div class="stat-card stat-warning">
+                <i class="bi bi-person-exclamation stat-icon" style="color:var(--color-warning);"></i>
+                <div class="stat-content">
+                    <h3>@Model.ArbitrosPendientesAprobacion</h3>
+                    <p>Árbitros Pendientes</p>
+                    <span class="stat-trend stat-trend-warn">Requieren aprobación</span>
+                </div>
             </div>
-        </div>
+        }
 
         <div class="stat-card">
             <i class="bi bi-clock-history stat-icon" style="color:var(--color-info);"></i>
@@ -68,154 +94,258 @@
             </div>
         </div>
 
-        <div class="stat-card stat-danger">
-            <i class="bi bi-exclamation-triangle-fill stat-icon" style="color:var(--color-error);"></i>
-            <div class="stat-content">
-                <h3>@Model.IntentosFallidos</h3>
-                <p>Intentos Fallidos</p>
-            </div>
-        </div>
-
-        <div class="stat-card stat-danger">
-            <i class="bi bi-lock-fill stat-icon" style="color:var(--color-error);"></i>
-            <div class="stat-content">
-                <h3>@Model.UsuariosBloqueados</h3>
-                <p>Usuarios Bloqueados</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="dashboard-actions">
-        <h2>Acciones Rápidas</h2>
-        <div class="action-cards">
-            <a asp-page="/Admin/Torneos/Create" class="action-card">
-                <i class="bi bi-plus-circle action-icon" style="color:var(--color-accent);"></i>
-                <h3>Crear Torneo</h3>
-                <p>Inicia un nuevo torneo</p>
-            </a>
-
-            <a asp-page="/Admin/Torneos/Index" class="action-card">
-                <i class="bi bi-trophy-fill action-icon" style="color:var(--color-accent);"></i>
-                <h3>Gestionar Torneos</h3>
-                <p>Ver y editar torneos</p>
-            </a>
-
-            @* Sprint 2: Gestión de equipos y usuarios
-            <a asp-page="/Admin/Equipos/Index" class="action-card">
-                <i class="bi bi-shield action-icon"></i>
-                <h3>Gestionar Equipos</h3>
-                <p>Administrar equipos</p>
-            </a>
-
-            <a asp-page="/Admin/Usuarios/Index" class="action-card">
-                <i class="bi bi-people-fill action-icon"></i>
-                <h3>Gestionar Usuarios</h3>
-                <p>Ver jugadores, entrenadores y árbitros</p>
-            </a>
-            *@
-
-            @if (Model.ArbitrosPendientesAprobacion > 0)
-            {
-                <a asp-page="/Admin/Arbitros/Pendientes" class="action-card action-alert">
-                    <i class="bi bi-person-check action-icon" style="color:var(--color-warning);"></i>
-                    <h3>Aprobar Árbitros</h3>
-                    <p>@Model.ArbitrosPendientesAprobacion pendientes de aprobación</p>
-                </a>
-            }
-        </div>
-    </div>
-
-    <div class="recent-section">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <h2 style="margin:0;">Próximos Partidos</h2>
-            <a asp-page="/Calendario/Index" class="btn btn-sm btn-info btn-icon">
-                <i class="bi bi-calendar3"></i> Ver Calendario
-            </a>
-        </div>
-        @if (Model.ProximosPartidos.Any())
+        @if (Model.IntentosFallidos > 0 || Model.UsuariosBloqueados > 0)
         {
-            <div class="match-mini-list">
-                @foreach (var p in Model.ProximosPartidos)
+            <div class="stat-card stat-danger">
+                <i class="bi bi-shield-exclamation stat-icon" style="color:var(--color-error);"></i>
+                <div class="stat-content">
+                    <h3>@Model.IntentosFallidos</h3>
+                    <p>Intentos Fallidos Hoy</p>
+                    @if (Model.UsuariosBloqueados > 0)
+                    {
+                        <span class="stat-trend stat-trend-danger">@Model.UsuariosBloqueados bloqueado(s)</span>
+                    }
+                </div>
+            </div>
+        }
+
+    </div>
+
+    <!-- ── GRID PRINCIPAL 2/3 + 1/3 ── -->
+    <div class="dash-main-grid">
+
+        <!-- Columna izquierda -->
+        <div style="display:flex;flex-direction:column;gap:24px;">
+
+            <!-- Actividad Reciente -->
+            @if (Model.ActividadReciente.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="bi bi-activity nav-icon"></i> Actividad Reciente</h3>
+                        <a asp-page="/Admin/Auditoria" class="btn btn-sm btn-secondary btn-icon">
+                            <i class="bi bi-journal-text"></i> Ver todo
+                        </a>
+                    </div>
+                    <div class="activity-timeline">
+                        @foreach (var a in Model.ActividadReciente)
+                        {
+                            <div class="activity-item">
+                                <div class="activity-dot" style="background:@a.IconColor;">
+                                    <i class="bi @a.IconClass" style="font-size:0.65rem;"></i>
+                                </div>
+                                <div class="activity-body">
+                                    <div class="activity-text">
+                                        @if (a.Exitoso)
+                                        {
+                                            <span><strong>@a.Email</strong> inició sesión</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Intento fallido — <strong>@a.Email</strong>
+                                                @if (!string.IsNullOrEmpty(a.MotivoFallo))
+                                                {
+                                                    <span style="color:var(--color-text-muted);"> (@a.MotivoFallo)</span>
+                                                }
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="activity-time">@a.TiempoRelativo</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Próximos Partidos -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="bi bi-calendar-event nav-icon"></i> Próximos Partidos</h3>
+                    <a asp-page="/Calendario/Index" class="btn btn-sm btn-info btn-icon">
+                        <i class="bi bi-calendar3"></i> Calendario
+                    </a>
+                </div>
+                @if (Model.ProximosPartidos.Any())
                 {
-                    <div class="match-mini-card">
-                        <div class="match-mini-dot" style="background:@p.ColorTorneo;"></div>
-                        <div class="match-mini-body">
-                            <div class="match-mini-teams"><strong>@p.AbrevLocal</strong> vs <strong>@p.AbrevVisitante</strong></div>
-                            <div class="match-mini-meta">@p.Fecha.ToString("dd/MM HH:mm") · @p.NombreTorneo@(p.Sede != null ? " · " + p.Sede : "")</div>
-                        </div>
-                        <a asp-page="/Admin/Partidos/Index" class="btn btn-sm btn-info btn-icon" style="flex-shrink:0;">
-                            <i class="bi bi-eye"></i>
+                    <div class="match-mini-list">
+                        @foreach (var p in Model.ProximosPartidos)
+                        {
+                            <div class="match-mini-card">
+                                <div class="match-mini-dot" style="background:@p.ColorTorneo;"></div>
+                                <div class="match-mini-body">
+                                    <div class="match-mini-teams"><strong>@p.AbrevLocal</strong> vs <strong>@p.AbrevVisitante</strong></div>
+                                    <div class="match-mini-meta">@p.Fecha.ToString("dd/MM HH:mm") · @p.NombreTorneo@(p.Sede != null ? " · " + p.Sede : "")</div>
+                                </div>
+                                <a asp-page="/Admin/Partidos/Index" class="btn btn-sm btn-info btn-icon" style="flex-shrink:0;">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state" style="padding:24px;">
+                        <i class="bi bi-calendar-x empty-icon"></i>
+                        <p>No hay partidos próximos programados</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Torneos Recientes -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="bi bi-trophy-fill nav-icon"></i> Torneos Recientes</h3>
+                    <a asp-page="/Admin/Torneos/Index" class="btn btn-sm btn-secondary btn-icon">
+                        <i class="bi bi-list"></i> Ver todos
+                    </a>
+                </div>
+                @if (Model.UltimosTorneos.Any())
+                {
+                    <div style="overflow-x:auto;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Liga</th>
+                                    <th>Estado</th>
+                                    <th>Inicio</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var torneo in Model.UltimosTorneos)
+                                {
+                                    <tr>
+                                        <td><strong>@torneo.Nombre</strong></td>
+                                        <td style="font-size:0.85rem;color:var(--color-text-muted);">@torneo.NombreLiga</td>
+                                        <td>
+                                            <span class="badge badge-@torneo.Estado.ToLower()">@torneo.Estado</span>
+                                        </td>
+                                        <td style="font-size:0.85rem;">@torneo.FechaInicio.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            <a asp-page="/Admin/Torneos/Details" asp-route-id="@torneo.Id"
+                                               class="btn btn-sm btn-info btn-icon">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            @if (torneo.PuedeEditar)
+                                            {
+                                                <a asp-page="/Admin/Torneos/Edit" asp-route-id="@torneo.Id"
+                                                   class="btn btn-sm btn-warning btn-icon">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state" style="padding:24px;">
+                        <i class="bi bi-trophy empty-icon"></i>
+                        <p>No hay torneos creados aún</p>
+                        <a asp-page="/Admin/Torneos/Create" class="btn btn-primary btn-icon">
+                            <i class="bi bi-plus-lg"></i> Crear Primer Torneo
                         </a>
                     </div>
                 }
             </div>
-        }
-        else
-        {
-            <div class="empty-state" style="padding:16px;">
-                <i class="bi bi-calendar-x empty-icon"></i>
-                <p>No hay partidos próximos programados</p>
+
+        </div>
+
+        <!-- Columna derecha (sidebar del dashboard) -->
+        <div class="dash-sidebar-col">
+
+            <!-- Acciones Rápidas -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title" style="font-size:0.9rem;"><i class="bi bi-lightning-fill nav-icon"></i> Acciones Rápidas</h3>
+                </div>
+                <div class="dash-quick-actions">
+                    <a asp-page="/Admin/Torneos/Create" class="dash-quick-btn dash-quick-primary">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        <span>Crear Torneo</span>
+                    </a>
+                    <a asp-page="/Admin/Partidos/Crear" class="dash-quick-btn">
+                        <i class="bi bi-calendar-plus"></i>
+                        <span>Programar Partido</span>
+                    </a>
+                    <a asp-page="/Admin/Usuarios/Index" class="dash-quick-btn">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Gestionar Usuarios</span>
+                    </a>
+                    <a asp-page="/Admin/Arbitros/Pendientes" class="dash-quick-btn @(Model.ArbitrosPendientesAprobacion > 0 ? "dash-quick-alert" : "")">
+                        <i class="bi bi-person-check-fill"></i>
+                        <span>Aprobar Árbitros</span>
+                        @if (Model.ArbitrosPendientesAprobacion > 0)
+                        {
+                            <span class="dash-quick-badge">@Model.ArbitrosPendientesAprobacion</span>
+                        }
+                    </a>
+                </div>
             </div>
-        }
+
+            <!-- Torneos Activos -->
+            @if (Model.TorneosActivosList.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title" style="font-size:0.9rem;">
+                            <i class="bi bi-play-circle-fill nav-icon" style="color:var(--color-success);"></i> Torneos Activos
+                        </h3>
+                    </div>
+                    <div>
+                        @foreach (var t in Model.TorneosActivosList)
+                        {
+                            <a asp-page="/Admin/Torneos/Details" asp-route-id="@t.Id" class="dash-torneo-item">
+                                <div class="dash-torneo-dot"></div>
+                                <div style="flex:1;min-width:0;">
+                                    <div style="font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@t.Nombre</div>
+                                    <div style="font-size:0.72rem;color:var(--color-text-muted);">@t.NumEquipos equipos · Fin @t.FechaFin.ToString("dd/MM")</div>
+                                </div>
+                                <i class="bi bi-chevron-right" style="font-size:0.75rem;color:var(--color-text-muted);"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Alertas de Seguridad -->
+            @if (Model.UsuariosBloqueados > 0 || Model.IntentosFallidos > 0)
+            {
+                <div class="card" style="border-color:rgba(255,59,48,0.3);">
+                    <div class="card-header">
+                        <h3 class="card-title" style="font-size:0.9rem;color:var(--color-error);">
+                            <i class="bi bi-shield-exclamation nav-icon"></i> Alertas de Seguridad
+                        </h3>
+                    </div>
+                    <div style="padding:8px 16px 12px;display:flex;flex-direction:column;gap:6px;">
+                        @if (Model.UsuariosBloqueados > 0)
+                        {
+                            <div style="font-size:0.82rem;">
+                                <i class="bi bi-lock-fill" style="color:var(--color-error);margin-right:6px;"></i>
+                                <strong>@Model.UsuariosBloqueados</strong> usuario(s) bloqueado(s)
+                            </div>
+                        }
+                        @if (Model.IntentosFallidos > 0)
+                        {
+                            <div style="font-size:0.82rem;">
+                                <i class="bi bi-exclamation-triangle" style="color:var(--color-warning);margin-right:6px;"></i>
+                                <strong>@Model.IntentosFallidos</strong> intento(s) fallido(s) hoy
+                            </div>
+                        }
+                        <a asp-page="/Admin/Auditoria" class="btn btn-sm btn-secondary btn-icon" style="margin-top:6px;">
+                            <i class="bi bi-journal-text"></i> Ver Auditoría
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
     </div>
 
-    <div class="recent-section">
-        <h2>Torneos Recientes</h2>
-    @if (Model.UltimosTorneos.Any())
-    {
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Liga</th>
-                            <th>Temporada</th>
-                            <th>Estado</th>
-                            <th>Fecha Inicio</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var torneo in Model.UltimosTorneos)
-                        {
-                            <tr>
-                                <td>@torneo.Nombre</td>
-                                <td>@torneo.NombreLiga</td>
-                                <td>@torneo.NombreTemporada</td>
-                                <td>
-                                    <span class="badge badge-@torneo.Estado.ToLower()">
-                                        @torneo.Estado
-                                    </span>
-                                </td>
-                                <td>@torneo.FechaInicio.ToString("dd/MM/yyyy")</td>
-                                <td class="actions-cell">
-                                    <a asp-page="/Admin/Torneos/Details" asp-route-id="@torneo.Id"
-                                       class="btn btn-sm btn-info btn-icon">
-                                        <i class="bi bi-eye"></i> Ver
-                                    </a>
-                                    @if (torneo.PuedeEditar)
-                                    {
-                                        <a asp-page="/Admin/Torneos/Edit" asp-route-id="@torneo.Id"
-                                           class="btn btn-sm btn-warning btn-icon">
-                                            <i class="bi bi-pencil"></i> Editar
-                                        </a>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-    }
-    else
-    {
-        <div class="empty-state">
-            <i class="bi bi-trophy empty-icon"></i>
-            <p>No hay torneos creados aún</p>
-            <a asp-page="/Admin/Torneos/Create" class="btn btn-primary btn-icon">
-                <i class="bi bi-plus-lg"></i> Crear Primer Torneo
-            </a>
-        </div>
-    }
-    </div>
 </div>

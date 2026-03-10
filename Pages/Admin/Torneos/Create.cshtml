@@ -132,9 +132,144 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN: LANDING PAGE PÚBLICA -->
+            <div class="form-section">
+                <h3 class="form-section-title">Landing Page Pública</h3>
+                <p class="form-text" style="margin-bottom:var(--spacing-md);color:var(--color-text-muted);">
+                    Esta información se mostrará en la página pública del torneo visible para todos los usuarios.
+                </p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.LogoUrl"></label>
+                        <input asp-for="Input.LogoUrl" class="form-control" placeholder="https://..." />
+                        <small class="form-text">URL del logo del torneo (PNG transparente, 200×200px recomendado)</small>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Input.ImagenUrl"></label>
+                        <input asp-for="Input.ImagenUrl" class="form-control" placeholder="https://..." />
+                        <small class="form-text">URL de imagen principal/banner (1200×600px recomendado)</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.DescripcionCompleta"></label>
+                    <textarea asp-for="Input.DescripcionCompleta" class="form-control" rows="5"
+                              placeholder="Descripción detallada del torneo, reglas generales, información para participantes..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.Ubicacion"></label>
+                        <input asp-for="Input.Ubicacion" class="form-control" placeholder="Ej: San Salvador, El Salvador" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Input.DireccionSede"></label>
+                        <input asp-for="Input.DireccionSede" class="form-control" placeholder="Dirección exacta de la sede principal" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.UrlGrupoWhatsApp"></label>
+                        <input asp-for="Input.UrlGrupoWhatsApp" class="form-control" placeholder="https://chat.whatsapp.com/..." />
+                        <small class="form-text">Link de invitación al grupo de WhatsApp (opcional)</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Input.Frase1"></label>
+                        <input asp-for="Input.Frase1" class="form-control" placeholder="MÁS QUE UN TORNEO, UNA EXPERIENCIA" maxlength="100" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Input.Frase2"></label>
+                        <input asp-for="Input.Frase2" class="form-control" placeholder="MOMENTOS QUE HACEN EQUIPO" maxlength="100" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Input.Frase3"></label>
+                        <input asp-for="Input.Frase3" class="form-control" placeholder="DONDE LA PASIÓN SE CONVIERTE EN UNIÓN" maxlength="100" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Galería de Fotos (URLs)</label>
+                    <div id="galeria-list"></div>
+                    <button type="button" class="btn btn-secondary btn-sm btn-icon" onclick="agregarImagen()">
+                        <i class="bi bi-plus-lg"></i> Agregar foto
+                    </button>
+                    <input type="hidden" asp-for="Input.ImagenesGaleria" id="galeriaInput" />
+                    <small class="form-text">URLs de fotos del torneo (equipos, instalaciones, partidos anteriores)</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Logos de Patrocinadores (URLs)</label>
+                    <div id="patrocinadores-list"></div>
+                    <button type="button" class="btn btn-secondary btn-sm btn-icon" onclick="agregarPatrocinador()">
+                        <i class="bi bi-plus-lg"></i> Agregar patrocinador
+                    </button>
+                    <input type="hidden" asp-for="Input.Patrocinadores" id="patrocinadoresInput" />
+                    <small class="form-text">URLs de logos de empresas patrocinadoras</small>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: CONFIGURACIÓN DE FIXTURE -->
+            <div class="form-section" id="seccionFixture">
+                <h3 class="form-section-title">Configuración de Fixture Automático</h3>
+                <p style="margin-bottom:var(--spacing-md);color:var(--color-text-muted);font-size:0.88rem;">
+                    Estas opciones se usan al generar el calendario de partidos automáticamente.
+                </p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input asp-for="Input.IdaYVuelta" type="checkbox" />
+                            <span>Ida y Vuelta</span>
+                        </label>
+                        <small class="form-text">Genera partidos de ida y de vuelta con roles invertidos.</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input asp-for="Input.CampoNeutral" type="checkbox" />
+                            <span>Campo Neutral</span>
+                        </label>
+                        <small class="form-text">Todos los partidos se juegan en sede neutral.</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input asp-for="Input.EquilibrioLocalVisitante" type="checkbox" />
+                            <span>Equilibrar Local/Visitante</span>
+                        </label>
+                        <small class="form-text">Alterna roles en jornadas pares para reducir ventaja local.</small>
+                    </div>
+                </div>
+
+                <div class="form-row" id="camposGrupos" style="display:none">
+                    <div class="form-group">
+                        <label asp-for="Input.NumeroGrupos"></label>
+                        <input asp-for="Input.NumeroGrupos" class="form-control" type="number" min="2" max="16" placeholder="Ej: 4" />
+                        <small class="form-text">Cantidad de grupos (A, B, C…).</small>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Input.EquiposPorGrupo"></label>
+                        <input asp-for="Input.EquiposPorGrupo" class="form-control" type="number" min="2" max="20" placeholder="Ej: 4" />
+                        <small class="form-text">Equipos que conforman cada grupo.</small>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Input.ClasificanPorGrupo"></label>
+                        <input asp-for="Input.ClasificanPorGrupo" class="form-control" type="number" min="1" max="10" placeholder="2" />
+                        <small class="form-text">Equipos de cada grupo que avanzan a la fase eliminatoria.</small>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Crear Torneo</button>
-                <a asp-page="/Admin/Torneos/Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary btn-icon">
+                    <i class="bi bi-floppy"></i> Crear Torneo
+                </button>
+                <a asp-page="/Admin/Torneos/Index" class="btn btn-secondary btn-icon">
+                    <i class="bi bi-x-lg"></i> Cancelar
+                </a>
             </div>
         </form>
     </div>
@@ -142,4 +277,74 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // === Fixture: mostrar campos de grupos solo para GruposYEliminacion ===
+        const formatoSelect = document.querySelector('select[name="Input.Formato"]');
+        const camposGrupos = document.getElementById('camposGrupos');
+        function toggleGrupos() {
+            camposGrupos.style.display = formatoSelect.value === 'GruposYEliminacion' ? '' : 'none';
+        }
+        formatoSelect?.addEventListener('change', toggleGrupos);
+        toggleGrupos();
+
+        // === Galería ===
+        let galeriaUrls = [];
+
+        function agregarImagen() {
+            const url = prompt('URL de la imagen:');
+            if (url && url.trim()) {
+                galeriaUrls.push(url.trim());
+                renderGaleria();
+            }
+        }
+
+        function eliminarImagen(i) {
+            galeriaUrls.splice(i, 1);
+            renderGaleria();
+        }
+
+        function renderGaleria() {
+            const c = document.getElementById('galeria-list');
+            c.innerHTML = galeriaUrls.map((url, i) => `
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;background:var(--color-bg-hover);padding:8px;border-radius:8px;">
+                    <img src="${url}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" onerror="this.style.display='none'" />
+                    <span style="flex:1;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${url}</span>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="eliminarImagen(${i})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+            document.getElementById('galeriaInput').value = JSON.stringify(galeriaUrls);
+        }
+
+        // === Patrocinadores ===
+        let patrocinadoresUrls = [];
+
+        function agregarPatrocinador() {
+            const url = prompt('URL del logo del patrocinador:');
+            if (url && url.trim()) {
+                patrocinadoresUrls.push(url.trim());
+                renderPatrocinadores();
+            }
+        }
+
+        function eliminarPatrocinador(i) {
+            patrocinadoresUrls.splice(i, 1);
+            renderPatrocinadores();
+        }
+
+        function renderPatrocinadores() {
+            const c = document.getElementById('patrocinadores-list');
+            c.innerHTML = patrocinadoresUrls.map((url, i) => `
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;background:var(--color-bg-hover);padding:8px;border-radius:8px;">
+                    <img src="${url}" style="width:40px;height:30px;object-fit:contain;border-radius:4px;background:#fff;" onerror="this.style.display='none'" />
+                    <span style="flex:1;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${url}</span>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="eliminarPatrocinador(${i})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+            document.getElementById('patrocinadoresInput').value = JSON.stringify(patrocinadoresUrls);
+        }
+    </script>
 }

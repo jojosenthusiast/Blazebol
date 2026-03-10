@@ -1,0 +1,139 @@
+@page "{id:int}"
+@model AsignarDetallesFixtureModel
+@{
+    ViewData["Title"] = "Asignar Detalles del Fixture";
+    Layout = "_Layout";
+
+    var grupos = Model.Partidos.GroupBy(p => p.Fase ?? "Sin Fase").OrderBy(g => g.Key);
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Admin/Torneos/Details" asp-route-id="@Model.Torneo.Id" class="back-link">← Volver al Torneo</a>
+            <h1>Asignar Detalles del Fixture</h1>
+            <p class="page-subtitle">@Model.Torneo.Nombre</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <a asp-page="/Admin/Torneos/GenerarFixture" asp-route-id="@Model.Torneo.Id" class="btn btn-secondary btn-icon btn-sm">
+                <i class="bi bi-arrow-clockwise"></i> Regenerar
+            </a>
+            <a asp-page="/Admin/Partidos/Index" asp-route-torneoId="@Model.Torneo.Id" class="btn btn-info btn-icon btn-sm">
+                <i class="bi bi-calendar-event"></i> Ver Partidos
+            </a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+
+    @if (!Model.Partidos.Any())
+    {
+        <div class="empty-state" style="text-align:center;padding:60px;">
+            <i class="bi bi-calendar-x empty-icon"></i>
+            <h3>Sin partidos generados</h3>
+            <p>Primero genera el fixture para poder asignar fechas, sedes y árbitros.</p>
+            <a asp-page="/Admin/Torneos/GenerarFixture" asp-route-id="@Model.Torneo.Id" class="btn btn-primary btn-icon">
+                <i class="bi bi-lightning-fill"></i> Generar Fixture
+            </a>
+        </div>
+    }
+    else
+    {
+        <form method="post" asp-route-id="@Model.Torneo.Id">
+            @{int rowIdx = 0;}
+            @foreach (var grupo in grupos)
+            {
+                <div class="card" style="margin-bottom:24px;">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="bi bi-collection nav-icon"></i> @grupo.Key
+                        </h3>
+                        <span class="badge">@grupo.Count() partidos</span>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="table" style="min-width:780px;">
+                            <thead>
+                                <tr>
+                                    <th style="width:80px;">Jornada</th>
+                                    <th>Enfrentamiento</th>
+                                    <th style="width:170px;">Fecha y Hora</th>
+                                    <th style="width:180px;">Sede</th>
+                                    <th style="width:180px;">Árbitro</th>
+                                    <th style="width:90px;">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in grupo.OrderBy(x => x.Jornada).ThenBy(x => x.Id))
+                                {
+                                    bool finalizado = p.Estado == "Finalizado";
+                                    <tr @(finalizado ? "style=opacity:.55" : "")>
+                                        <td style="color:var(--color-text-muted);">J@(p.Jornada)</td>
+                                        <td>
+                                            <strong>@p.EquipoLocal</strong>
+                                            <span style="color:var(--color-text-muted);margin:0 6px;">vs</span>
+                                            <strong>@p.EquipoVisitante</strong>
+                                        </td>
+                                        <td>
+                                            <input type="hidden" name="detalles[@rowIdx].PartidoId" value="@p.Id" />
+                                            <input type="datetime-local"
+                                                   name="detalles[@rowIdx].Fecha"
+                                                   class="form-control form-control-sm"
+                                                   value="@p.Fecha.ToString("yyyy-MM-ddTHH:mm")"
+                                                   @(finalizado ? "disabled" : "") />
+                                        </td>
+                                        <td>
+                                            <input type="text"
+                                                   name="detalles[@rowIdx].Sede"
+                                                   class="form-control form-control-sm"
+                                                   value="@p.Sede"
+                                                   placeholder="Sede…"
+                                                   @(finalizado ? "disabled" : "") />
+                                        </td>
+                                        <td>
+                                            <select name="detalles[@rowIdx].ArbitroId"
+                                                    class="form-control form-control-sm"
+                                                    @(finalizado ? "disabled" : "")>
+                                                <option value="0">— Sin árbitro —</option>
+                                                @foreach (var arb in Model.ArbitrosDisponibles)
+                                                {
+                                                    if (p.ArbitroId == arb.Id)
+                                                    {
+                                                        <option value="@arb.Id" selected="selected">@arb.Persona.Nombre @arb.Persona.ApellidoPaterno</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@arb.Id">@arb.Persona.Nombre @arb.Persona.ApellidoPaterno</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-@p.Estado.ToLower()">@p.Estado</span>
+                                        </td>
+                                    </tr>
+                                    rowIdx++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+
+            <div class="form-actions" style="position:sticky;bottom:0;background:var(--color-bg-secondary);border-top:1px solid var(--color-border);padding:16px;margin:-24px;margin-top:0;">
+                <button type="submit" class="btn btn-primary btn-icon">
+                    <i class="bi bi-floppy"></i> Guardar Todos los Cambios
+                </button>
+                <a asp-page="/Admin/Torneos/Details" asp-route-id="@Model.Torneo.Id" class="btn btn-secondary btn-icon">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </form>
+    }
+</div>

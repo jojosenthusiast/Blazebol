@@ -27,6 +27,7 @@ builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITorneoService, TorneoService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
+builder.Services.AddScoped<IFixtureService, FixtureService>();
 
 // Configurar sesiones
 builder.Services.AddDistributedMemoryCache();

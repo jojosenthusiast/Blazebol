@@ -1,0 +1,179 @@
+@page
+@model ControlTorneosFutbol.Pages.Torneos.IndexModel
+@{
+    ViewData["Title"] = "Torneos";
+    Layout = "_Layout";
+}
+
+<!-- Navbar pública reutilizable -->
+<nav class="navbar-public-landing" id="torneosNavbar">
+    <div class="nav-container">
+        <a href="/" class="brand-logo-link">
+            <img src="~/images/logo.png" alt="Blazebol" class="brand-logo-img"
+                 onerror="this.style.display='none'" />
+            <span class="brand-logo-text">Blaze<span class="accent-dot">bol</span></span>
+        </a>
+        <ul class="nav-links-public">
+            <li><a href="/#torneos">Inicio</a></li>
+            <li><a href="/#como-funciona">Cómo funciona</a></li>
+            <li><a href="/#para-quien">Para quién</a></li>
+        </ul>
+        <div class="nav-cta-group">
+            @if (Model.IsAuthenticated)
+            {
+                <a asp-page="@Model.DashboardPage" class="btn-nav-dashboard">Mi Dashboard</a>
+            }
+            else
+            {
+                <a asp-page="/Account/Login" class="btn-nav-login">Iniciar sesión</a>
+                <a asp-page="/Account/Register" class="btn-nav-register">Registrarse</a>
+            }
+        </div>
+    </div>
+</nav>
+
+<!-- Header de sección -->
+<div style="background:var(--color-bg-secondary);border-bottom:1px solid var(--color-border);padding:48px var(--spacing-xl) 32px;">
+    <div class="section-container-landing">
+        <span class="section-eyebrow">Competencias</span>
+        <h1 class="section-title-landing" style="text-align:left;margin-bottom:8px;">Todos los torneos</h1>
+        <p style="color:var(--color-text-secondary);font-size:var(--text-lg);">
+            Encuentra el torneo perfecto para ti y tu equipo.
+        </p>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div style="background:var(--color-bg-secondary);padding:0 var(--spacing-xl) 24px;border-bottom:1px solid var(--color-border);">
+    <div class="section-container-landing">
+        <form method="get" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            <div style="flex:1;min-width:200px;">
+                <label style="font-size:var(--text-sm);color:var(--color-text-muted);display:block;margin-bottom:6px;">Buscar torneo</label>
+                <input name="Busqueda" value="@Model.Busqueda" type="text" placeholder="Nombre del torneo..."
+                       class="form-control" style="height:42px;" />
+            </div>
+            <div style="min-width:160px;">
+                <label style="font-size:var(--text-sm);color:var(--color-text-muted);display:block;margin-bottom:6px;">Estado</label>
+                <select name="Estado" class="form-control" style="height:42px;">
+                    <option value="">Todos</option>
+                    <option value="Activo"     selected="@(Model.Estado == "Activo"     ? "selected" : null)">En curso</option>
+                    <option value="Borrador"   selected="@(Model.Estado == "Borrador"   ? "selected" : null)">Próximos</option>
+                    <option value="Finalizado" selected="@(Model.Estado == "Finalizado" ? "selected" : null)">Finalizados</option>
+                </select>
+            </div>
+            <div style="min-width:160px;">
+                <label style="font-size:var(--text-sm);color:var(--color-text-muted);display:block;margin-bottom:6px;">Categoría</label>
+                <select name="CategoriaId" class="form-control" style="height:42px;">
+                    <option value="">Todas</option>
+                    @foreach (var cat in Model.Categorias)
+                    {
+                        <option value="@cat.Id" selected="@(Model.CategoriaId == cat.Id ? "selected" : null)">@cat.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button type="submit" class="btn btn-primary btn-icon" style="height:42px;">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+                <a href="/Torneos/Index" class="btn btn-link btn-sm btn-icon" style="height:42px;">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Grid de torneos -->
+<div class="section-landing">
+    <div class="section-container-landing">
+        @if (Model.Torneos.Any())
+        {
+            <p style="color:var(--color-text-muted);font-size:var(--text-sm);margin-bottom:var(--spacing-xl);">
+                @Model.Torneos.Count torneo@(Model.Torneos.Count == 1 ? "" : "s") encontrado@(Model.Torneos.Count == 1 ? "" : "s")
+            </p>
+            <div class="torneos-grid-landing">
+                @foreach (var t in Model.Torneos)
+                {
+                    <a asp-page="/Torneos/Details" asp-route-id="@t.Id" class="torneo-card-landing">
+                        <div class="torneo-card-image">
+                            @if (!string.IsNullOrEmpty(t.ImagenUrl))
+                            {
+                                <img src="@t.ImagenUrl" alt="@t.Nombre" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="torneo-card-image-placeholder">
+                                    <i class="bi bi-trophy"></i>
+                                </div>
+                            }
+                            <span class="torneo-badge-card @t.BadgeClass">@t.EstadoDisplay</span>
+                        </div>
+                        <div class="torneo-card-body">
+                            <div class="torneo-card-nombre">@t.Nombre</div>
+                            <div class="torneo-card-meta">
+                                <div class="torneo-meta-item">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span>@t.FechaInicio.ToString("dd MMM") - @t.FechaFin.ToString("dd MMM yyyy")</span>
+                                </div>
+                                <div class="torneo-meta-item">
+                                    <i class="bi bi-shield-fill"></i>
+                                    <span>@t.LigaNombre</span>
+                                </div>
+                                <div class="torneo-meta-item">
+                                    <i class="bi bi-tag-fill"></i>
+                                    <span>@t.CategoriaNombre</span>
+                                </div>
+                            </div>
+                            @{
+                                bool lleno = t.EquiposMaximo.HasValue && t.EquiposInscritos >= t.EquiposMaximo.Value;
+                                int pctBar = t.EquiposMaximo.HasValue && t.EquiposMaximo.Value > 0
+                                    ? Math.Min(100, (int)((double)t.EquiposInscritos / t.EquiposMaximo.Value * 100)) : 0;
+                            }
+                            <div class="torneo-equipos-bar">
+                                <div class="equipos-bar-label">
+                                    <span>@(lleno ? "Torneo completo" : "Equipos inscritos")</span>
+                                    <span style="@(lleno ? "color:var(--color-accent);font-weight:700;" : "")">
+                                        @t.EquiposInscritos@(t.EquiposMaximo.HasValue ? $" / {t.EquiposMaximo}" : "")
+                                    </span>
+                                </div>
+                                @if (t.EquiposMaximo.HasValue && t.EquiposMaximo.Value > 0)
+                                {
+                                    <div class="equipos-bar-track">
+                                        <div class="equipos-bar-fill" style="width:@pctBar%"></div>
+                                    </div>
+                                }
+                            </div>
+                            <span class="btn-torneo-card">Ver detalles</span>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div style="text-align:center;padding:80px 0;color:var(--color-text-muted);">
+                <i class="bi bi-calendar-x" style="font-size:3.5rem;display:block;margin-bottom:20px;"></i>
+                <h3 style="color:var(--color-text-secondary);margin-bottom:8px;">No se encontraron torneos</h3>
+                <p>Intenta con otros filtros o vuelve pronto para ver nuevos eventos.</p>
+                <a href="/Torneos/Index" class="btn-outline-accent" style="display:inline-flex;margin-top:24px;gap:8px;padding:12px 28px;border:2px solid var(--color-accent);color:var(--color-accent);border-radius:12px;text-decoration:none;font-weight:600;transition:all .2s;">
+                    <i class="bi bi-arrow-left"></i> Ver todos
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Footer mínimo -->
+<footer class="footer-landing" style="padding:var(--spacing-xl);">
+    <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+        <a href="/" class="brand-logo-text" style="font-size:var(--text-xl);text-decoration:none;">Blaze<span class="accent-dot">bol</span></a>
+        <span style="font-size:var(--text-sm);color:var(--color-text-muted);">&copy; 2026 Blazebol</span>
+    </div>
+</footer>
+
+@section Scripts {
+    <script>
+        const nav = document.getElementById('torneosNavbar');
+        window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40));
+    </script>
+}
