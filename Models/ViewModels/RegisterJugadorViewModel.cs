@@ -58,5 +58,9 @@ namespace ControlTorneosFutbol.Models.ViewModels
         [Range(1, 99, ErrorMessage = "El número de camiseta debe estar entre 1 y 99")]
         [Display(Name = "Número de Camiseta (Preferido)")]
         public int? NumeroCamiseta { get; set; }
+
+        [Required(ErrorMessage = "El género es obligatorio")]
+        [Display(Name = "Género")]
+        public string Genero { get; set; } = "Masculino";
     }
 }

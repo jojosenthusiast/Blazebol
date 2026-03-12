@@ -24,20 +24,31 @@ namespace ControlTorneosFutbol.Pages.Jugador
         public List<EquipoResultadoViewModel> Equipos { get; set; } = new();
         public List<TorneoOpcionViewModel> TorneosActivos { get; set; } = new();
 
+        // Jugador profile data for compatibility filtering
+        private string? _generoJugador;
+        private DateTime? _fechaNacimientoJugador;
         private int? _jugadorId;
 
-        private async Task<int?> ObtenerJugadorIdAsync()
+        private async Task<(int? jugadorId, string? genero, DateTime? fechaNacimiento)> ObtenerDatosJugadorAsync()
         {
-            if (_jugadorId.HasValue) return _jugadorId;
+            if (_jugadorId.HasValue) return (_jugadorId, _generoJugador, _fechaNacimientoJugador);
             var userId = HttpContext.Session.GetUserId();
-            if (!userId.HasValue) return null;
+            if (!userId.HasValue) return (null, null, null);
 
             var persona = await _context.Personas
                 .Include(p => p.Jugador)
                 .FirstOrDefaultAsync(p => p.UsuarioId == userId.Value);
 
             _jugadorId = persona?.Jugador?.Id;
-            return _jugadorId;
+            _generoJugador = persona?.Genero;
+            _fechaNacimientoJugador = persona?.FechaNacimiento;
+            return (_jugadorId, _generoJugador, _fechaNacimientoJugador);
+        }
+
+        private async Task<int?> ObtenerJugadorIdAsync()
+        {
+            var (id, _, _) = await ObtenerDatosJugadorAsync();
+            return id;
         }
 
         public async Task<IActionResult> OnGetAsync(string? buscar, int? torneoId, string? message)
@@ -51,7 +62,7 @@ namespace ControlTorneosFutbol.Pages.Jugador
             BuscarTerm = buscar;
             TorneoFiltro = torneoId;
 
-            var jugadorId = await ObtenerJugadorIdAsync();
+            var (jugadorId, genero, fechaNacimiento) = await ObtenerDatosJugadorAsync();
             if (!jugadorId.HasValue)
             {
                 ErrorMessage = "No se encontró el perfil de jugador. Contacta al administrador.";
@@ -84,10 +95,16 @@ namespace ControlTorneosFutbol.Pages.Jugador
                 equiposQuery = equiposQuery.Where(e => equiposEnTorneo.Contains(e.Id));
             }
 
-            var equipos = await equiposQuery
+            var equiposRaw = await equiposQuery
                 .OrderBy(e => e.Nombre)
-                .Take(40)
+                .Take(80)
                 .ToListAsync();
+
+            // Filter by TipoEquipo compatibility
+            var equipos = equiposRaw
+                .Where(e => TiposEquipo.ValidarJugador(e.TipoEquipo, genero, fechaNacimiento).ok)
+                .Take(40)
+                .ToList();
 
             if (!equipos.Any())
             {
@@ -152,6 +169,7 @@ namespace ControlTorneosFutbol.Pages.Jugador
                     Sede = e.Sede ?? "—",
                     NombreEntrenador = nombreEntrenador,
                     TorneosActivos = torneoNombres,
+                    TipoEquipo = e.TipoEquipo,
                     YaMiembro = yaMiembro,
                     SolicitudPendiente = solicitudPendiente,
                     PuedeSolicitar = !yaMiembro && !solicitudPendiente
@@ -166,7 +184,7 @@ namespace ControlTorneosFutbol.Pages.Jugador
             if (!HttpContext.Session.IsAuthenticated() || !HttpContext.Session.IsInRole("Jugador"))
                 return RedirectToPage("/Account/Login");
 
-            var jugadorId = await ObtenerJugadorIdAsync();
+            var (jugadorId, genero, fechaNacimiento) = await ObtenerDatosJugadorAsync();
             if (!jugadorId.HasValue)
                 return RedirectToPage("/Account/Login");
 
@@ -174,6 +192,14 @@ namespace ControlTorneosFutbol.Pages.Jugador
             if (equipo == null)
             {
                 ErrorMessage = "El equipo no existe.";
+                return await OnGetAsync(null, torneoId, null);
+            }
+
+            // Validate TipoEquipo compatibility
+            var (compatible, razon) = TiposEquipo.ValidarJugador(equipo.TipoEquipo, genero, fechaNacimiento);
+            if (!compatible)
+            {
+                ErrorMessage = razon;
                 return await OnGetAsync(null, torneoId, null);
             }
 
@@ -239,6 +265,7 @@ namespace ControlTorneosFutbol.Pages.Jugador
         public string Sede { get; set; } = string.Empty;
         public string? NombreEntrenador { get; set; }
         public List<string> TorneosActivos { get; set; } = new();
+        public string TipoEquipo { get; set; } = "Libre";
         public bool YaMiembro { get; set; }
         public bool SolicitudPendiente { get; set; }
         public bool PuedeSolicitar { get; set; }

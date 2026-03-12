@@ -1,0 +1,166 @@
+@page
+@model ControlTorneosFutbol.Pages.Entrenador.Partidos.Convocatoria.VerConvocatoriaModel
+@{
+    ViewData["Title"] = "Ver Convocatoria";
+    Layout = "_Layout";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Entrenador/Partidos/Index" class="back-link">← Volver a Partidos</a>
+            <h1>Convocatoria</h1>
+            @if (Model.Convocatoria != null)
+            {
+                <p class="page-subtitle">
+                    @Model.NombrePartido &mdash; @Model.Convocatoria.Partido.Fecha.ToString("dd/MM/yyyy HH:mm")
+                </p>
+            }
+        </div>
+        @if (Model.Convocatoria != null)
+        {
+            <div>
+                <a asp-page="/Entrenador/Partidos/Convocatoria/Crear"
+                   asp-route-partidoId="@Model.Convocatoria.PartidoId"
+                   class="btn btn-primary btn-icon">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+            </div>
+        }
+    </div>
+
+    @if (Model.Convocatoria == null)
+    {
+        <div class="empty-state">
+            <i class="bi bi-clipboard-x empty-icon"></i>
+            <p>Convocatoria no encontrada.</p>
+        </div>
+    }
+    else
+    {
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:24px;">
+            <span class="badge @(Model.Convocatoria.Estado == "Publicada" ? "badge-encurso" : "")">
+                @Model.Convocatoria.Estado
+            </span>
+            @if (Model.Convocatoria.FechaPublicacion.HasValue)
+            {
+                <span style="font-size:0.8rem;opacity:0.5;">
+                    Publicada: @Model.Convocatoria.FechaPublicacion.Value.ToString("dd/MM/yyyy HH:mm")
+                </span>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Convocatoria.Observaciones))
+        {
+            <div class="card" style="margin-bottom:20px;padding:16px;">
+                <div style="font-size:0.8rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Observaciones</div>
+                <p style="margin:0;font-size:0.9rem;">@Model.Convocatoria.Observaciones</p>
+            </div>
+        }
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+            <!-- TITULARES -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 style="margin:0;">Titulares <span class="badge badge-encurso" style="margin-left:8px;">@Model.Titulares.Count</span></h3>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    @if (!Model.Titulares.Any())
+                    {
+                        <p style="padding:16px;opacity:0.5;font-size:0.85rem;">Sin titulares</p>
+                    }
+                    else
+                    {
+                        <table class="data-table" style="font-size:0.88rem;">
+                            <thead>
+                                <tr><th>#</th><th>Jugador</th><th>Posición</th><th>Confirmación</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cj in Model.Titulares)
+                                {
+                                    <tr>
+                                        <td><strong>@cj.EquipoJugadorTorneo.NumeroCamiseta</strong></td>
+                                        <td>@cj.EquipoJugadorTorneo.Jugador.Persona.Nombre @cj.EquipoJugadorTorneo.Jugador.Persona.ApellidoPaterno</td>
+                                        <td>@(cj.PosicionAsignada ?? "—")</td>
+                                        <td>
+                                            @{
+                                                string confColor = cj.EstadoConfirmacion switch
+                                                {
+                                                    "Confirmo" => "var(--color-success)",
+                                                    "NoDisponible" => "var(--color-error)",
+                                                    _ => "var(--color-warning)"
+                                                };
+                                                string confLabel = cj.EstadoConfirmacion switch
+                                                {
+                                                    "Confirmo" => "Confirmó",
+                                                    "NoDisponible" => "No disponible",
+                                                    _ => "Pendiente"
+                                                };
+                                            }
+                                            <span style="color:@confColor;font-size:0.8rem;">@confLabel</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+
+            <!-- SUPLENTES + RESERVAS -->
+            <div style="display:flex;flex-direction:column;gap:20px;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin:0;">Suplentes <span class="badge" style="background:rgba(90,200,250,0.15);color:var(--color-info);margin-left:8px;">@Model.Suplentes.Count</span></h3>
+                    </div>
+                    <div class="card-body" style="padding:0;">
+                        @if (!Model.Suplentes.Any())
+                        {
+                            <p style="padding:16px;opacity:0.5;font-size:0.85rem;">Sin suplentes</p>
+                        }
+                        else
+                        {
+                            <table class="data-table" style="font-size:0.88rem;">
+                                <thead><tr><th>#</th><th>Jugador</th><th>Confirmación</th></tr></thead>
+                                <tbody>
+                                    @foreach (var cj in Model.Suplentes)
+                                    {
+                                        <tr>
+                                            <td><strong>@cj.EquipoJugadorTorneo.NumeroCamiseta</strong></td>
+                                            <td>@cj.EquipoJugadorTorneo.Jugador.Persona.Nombre @cj.EquipoJugadorTorneo.Jugador.Persona.ApellidoPaterno</td>
+                                            <td><span style="font-size:0.8rem;opacity:0.6;">@cj.EstadoConfirmacion</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.Reservas.Any())
+                {
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 style="margin:0;">Reservas <span style="font-size:0.8rem;opacity:0.5;margin-left:6px;">@Model.Reservas.Count</span></h3>
+                        </div>
+                        <div class="card-body" style="padding:0;">
+                            <table class="data-table" style="font-size:0.85rem;">
+                                <thead><tr><th>#</th><th>Jugador</th></tr></thead>
+                                <tbody>
+                                    @foreach (var cj in Model.Reservas)
+                                    {
+                                        <tr>
+                                            <td><strong>@cj.EquipoJugadorTorneo.NumeroCamiseta</strong></td>
+                                            <td>@cj.EquipoJugadorTorneo.Jugador.Persona.Nombre @cj.EquipoJugadorTorneo.Jugador.Persona.ApellidoPaterno</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

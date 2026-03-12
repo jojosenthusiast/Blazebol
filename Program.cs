@@ -28,6 +28,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITorneoService, TorneoService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 builder.Services.AddScoped<IFixtureService, FixtureService>();
+builder.Services.AddScoped<INotificacionService, NotificacionService>();
+builder.Services.AddScoped<IConvocatoriaService, ConvocatoriaService>();
+builder.Services.AddScoped<IPartidoEnVivoService, PartidoEnVivoService>();
 
 // Configurar sesiones
 builder.Services.AddDistributedMemoryCache();

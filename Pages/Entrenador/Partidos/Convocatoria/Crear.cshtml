@@ -1,0 +1,344 @@
+@page
+@model ControlTorneosFutbol.Pages.Entrenador.Partidos.Convocatoria.CrearConvocatoriaModel
+@{
+    ViewData["Title"] = "Gestionar Convocatoria";
+    Layout = "_Layout";
+    int titulares = Model.Jugadores.Count(j => j.Seleccionado && j.Rol == "Titular");
+    int suplentes = Model.Jugadores.Count(j => j.Seleccionado && j.Rol == "Suplente");
+    int total = Model.Jugadores.Count(j => j.Seleccionado);
+}
+
+<style>
+    .conv-header { background: var(--color-bg-card); border-radius: 16px; padding: 20px 24px; margin-bottom: 24px; border: 1px solid var(--color-border); }
+    .conv-match-row { display: flex; align-items: center; gap: 20px; justify-content: center; }
+    .conv-team-block { display: flex; align-items: center; gap: 12px; }
+    .conv-team-logo { width: 48px; height: 48px; border-radius: 10px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .conv-vs { font-size: 1.1rem; font-weight: 700; opacity: 0.4; padding: 0 12px; }
+    .conv-grid { display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
+    .conv-table { width: 100%; border-collapse: collapse; }
+    .conv-table th { padding: 10px 12px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.5; border-bottom: 1px solid var(--color-border); }
+    .conv-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    .conv-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .conv-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-accent); }
+    .conv-rol-sel { background: var(--color-bg-secondary); border: 1px solid var(--color-border); color: var(--color-text-primary); border-radius: 6px; padding: 4px 8px; font-size: 0.8rem; }
+    .conv-pos-inp { background: var(--color-bg-secondary); border: 1px solid var(--color-border); color: var(--color-text-primary); border-radius: 6px; padding: 4px 8px; font-size: 0.8rem; width: 100px; }
+    .conv-counter-panel { background: var(--color-bg-card); border-radius: 12px; padding: 20px; border: 1px solid var(--color-border); position: sticky; top: 20px; }
+    .conv-counter-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+    .conv-counter-row:last-child { border-bottom: none; }
+    .conv-counter-label { font-size: 0.85rem; opacity: 0.7; }
+    .conv-counter-val { font-size: 1.1rem; font-weight: 700; }
+    .conv-counter-val.ok { color: var(--color-success); }
+    .conv-counter-val.warn { color: var(--color-warning); }
+    .conv-counter-val.bad { color: var(--color-error); }
+    .btn-guardar { background: rgba(255,255,255,0.08); color: var(--color-text-primary); border: 1px solid var(--color-border); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .btn-publicar { background: var(--color-accent); color: #000; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; display: flex; align-items: center; gap: 8px; }
+    .btn-publicar:disabled { background: rgba(163,255,18,0.3); color: rgba(0,0,0,0.5); cursor: not-allowed; }
+    .conv-obs { width: 100%; background: var(--color-bg-secondary); border: 1px solid var(--color-border); color: var(--color-text-primary); border-radius: 8px; padding: 10px; font-size: 0.85rem; resize: vertical; min-height: 60px; }
+    .badge-tipo { font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-titular { background: rgba(163,255,18,0.15); color: var(--color-accent); }
+    .badge-suplente { background: rgba(90,200,250,0.15); color: var(--color-info); }
+    .badge-reserva { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+    @media (max-width: 900px) { .conv-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Entrenador/Partidos/Index" class="back-link">← Volver a Partidos</a>
+            <h1>Gestionar Convocatoria</h1>
+            @if (Model.Partido != null)
+            {
+                <p class="page-subtitle">@Model.Partido.NombreTorneo &mdash; @Model.Partido.Fecha.ToString("dd/MM/yyyy HH:mm")</p>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+
+    @if (Model.Partido != null)
+    {
+        <!-- Match Header -->
+        <div class="conv-header">
+            <div class="conv-match-row">
+                <div class="conv-team-block">
+                    <div class="conv-team-logo">
+                        @if (!string.IsNullOrEmpty(Model.Partido.LogoLocal))
+                        {
+                            <img src="@Model.Partido.LogoLocal" style="width:40px;height:40px;object-fit:contain;" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-dribbble" style="opacity:0.3;font-size:1.4rem;"></i>
+                        }
+                    </div>
+                    <div style="font-weight:700;font-size:1rem;">@Model.Partido.NombreLocal</div>
+                </div>
+                <div class="conv-vs">vs</div>
+                <div class="conv-team-block">
+                    <div style="font-weight:700;font-size:1rem;">@Model.Partido.NombreVisitante</div>
+                    <div class="conv-team-logo">
+                        @if (!string.IsNullOrEmpty(Model.Partido.LogoVisitante))
+                        {
+                            <img src="@Model.Partido.LogoVisitante" style="width:40px;height:40px;object-fit:contain;" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-dribbble" style="opacity:0.3;font-size:1.4rem;"></i>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:10px;font-size:0.8rem;opacity:0.5;">
+                <i class="bi bi-calendar"></i> @Model.Partido.Fecha.ToString("dddd, dd MMMM yyyy HH:mm", new System.Globalization.CultureInfo("es-ES"))
+                @if (!string.IsNullOrEmpty(Model.Partido.Sede))
+                {
+                    <span> &middot; <i class="bi bi-geo-alt"></i> @Model.Partido.Sede</span>
+                }
+            </div>
+        </div>
+
+        <form method="post" id="convForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="PartidoId" value="@Model.PartidoId" />
+
+            <div class="conv-grid">
+                <!-- LEFT: Player list -->
+                <div>
+                    <div class="card">
+                        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+                            <h3 style="margin:0;">Jugadores Disponibles</h3>
+                            <div style="display:flex;gap:8px;">
+                                <button type="button" class="btn btn-sm btn-secondary btn-icon" onclick="selectAll()">
+                                    <i class="bi bi-check2-all"></i> Todos
+                                </button>
+                                <button type="button" class="btn btn-sm btn-secondary btn-icon" onclick="clearAll()">
+                                    <i class="bi bi-x-circle"></i> Ninguno
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" style="padding:0;">
+                            @if (!Model.Jugadores.Any())
+                            {
+                                <div class="empty-state" style="padding:40px;">
+                                    <i class="bi bi-person-x empty-icon"></i>
+                                    <p>No hay jugadores inscritos en este torneo.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <table class="conv-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:40px;">Sel.</th>
+                                            <th style="width:50px;">#</th>
+                                            <th>Jugador</th>
+                                            <th>Rol</th>
+                                            <th>Posición</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="jugadoresBody">
+                                        @for (int i = 0; i < Model.Jugadores.Count; i++)
+                                        {
+                                            var j = Model.Jugadores[i];
+                                            <tr data-ejtid="@j.EjtId" class="jugador-row @(j.Seleccionado ? "selected-row" : "")">
+                                                <td>
+                                                    <input type="checkbox" class="conv-checkbox jugador-check"
+                                                           name="ejtIds"
+                                                           value="@j.EjtId"
+                                                           @(j.Seleccionado ? "checked" : "")
+                                                           onchange="onJugadorChange(this)" />
+                                                </td>
+                                                <td>
+                                                    <strong style="font-size:0.9rem;">@j.NumeroCamiseta</strong>
+                                                </td>
+                                                <td>
+                                                    <div style="font-size:0.88rem;font-weight:500;">@j.NombreCompleto</div>
+                                                    <div style="font-size:0.72rem;opacity:0.45;">@j.PosicionPreferida</div>
+                                                </td>
+                                                <td>
+                                                    <select class="conv-rol-sel jugador-rol" name="roles"
+                                                            @(j.Seleccionado ? "" : "disabled")
+                                                            onchange="updateCounter()">
+                                                        <option value="Titular" @(j.Rol == "Titular" ? "selected" : "")>Titular</option>
+                                                        <option value="Suplente" @(j.Rol == "Suplente" ? "selected" : "")>Suplente</option>
+                                                        <option value="Reserva" @(j.Rol == "Reserva" ? "selected" : "")>Reserva</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="conv-pos-inp" name="posiciones"
+                                                           value="@j.PosicionAsignada"
+                                                           placeholder="@j.PosicionPreferida"
+                                                           @(j.Seleccionado ? "" : "disabled") />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    </div>
+
+                    <div style="margin-top:16px;">
+                        <label style="font-size:0.85rem;opacity:0.7;display:block;margin-bottom:6px;">Observaciones</label>
+                        <textarea name="observaciones" class="conv-obs" placeholder="Instrucciones, lesiones, etc.">@Model.Observaciones</textarea>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Summary panel -->
+                <div>
+                    <div class="conv-counter-panel">
+                        <h4 style="margin:0 0 16px;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.06em;opacity:0.6;">Resumen Convocatoria</h4>
+
+                        <div class="conv-counter-row">
+                            <span class="conv-counter-label">Titulares</span>
+                            <span class="conv-counter-val" id="cntTitulares">@titulares</span>
+                        </div>
+                        <div style="font-size:0.72rem;opacity:0.4;padding-bottom:4px;">
+                            Mínimo: @Model.TitularesMinimo
+                        </div>
+                        <div class="conv-counter-row">
+                            <span class="conv-counter-label">Suplentes</span>
+                            <span class="conv-counter-val" id="cntSuplentes">@suplentes</span>
+                        </div>
+                        <div class="conv-counter-row">
+                            <span class="conv-counter-label">Total convocados</span>
+                            <span class="conv-counter-val" id="cntTotal">@total</span>
+                        </div>
+                        <div style="font-size:0.72rem;opacity:0.4;padding-bottom:12px;">
+                            Máximo: @Model.MaxConvocados
+                        </div>
+
+                        <!-- Validation status -->
+                        <div id="validStatus" style="padding:10px;border-radius:8px;font-size:0.82rem;margin-bottom:16px;"></div>
+
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <button type="submit" asp-page-handler="Guardar" class="btn-guardar">
+                                <i class="bi bi-floppy"></i> Guardar Borrador
+                            </button>
+                            <button type="submit" asp-page-handler="Publicar" class="btn-publicar" id="btnPublicar">
+                                <i class="bi bi-send-check"></i> Publicar y Notificar
+                            </button>
+                        </div>
+
+                        <div style="margin-top:12px;font-size:0.75rem;opacity:0.5;text-align:center;">
+                            Al publicar, los jugadores recibirán una notificación
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+<script>
+const MIN_TITULARES = @Model.TitularesMinimo;
+const MAX_CONVOCADOS = @Model.MaxConvocados;
+
+function onJugadorChange(checkbox) {
+    const row = checkbox.closest('tr');
+    const rolSel = row.querySelector('.jugador-rol');
+    const posInp = row.querySelector('.conv-pos-inp');
+
+    if (checkbox.checked) {
+        row.classList.add('selected-row');
+        rolSel.disabled = false;
+        posInp.disabled = false;
+    } else {
+        row.classList.remove('selected-row');
+        rolSel.disabled = true;
+        posInp.disabled = true;
+    }
+    updateCounter();
+}
+
+function updateCounter() {
+    const checks = document.querySelectorAll('.jugador-check:checked');
+    let titulares = 0, suplentes = 0, total = 0;
+    checks.forEach(cb => {
+        const row = cb.closest('tr');
+        const rol = row.querySelector('.jugador-rol');
+        if (rol && !rol.disabled) {
+            total++;
+            if (rol.value === 'Titular') titulares++;
+            else if (rol.value === 'Suplente') suplentes++;
+        }
+    });
+
+    document.getElementById('cntTitulares').textContent = titulares;
+    document.getElementById('cntTitulares').className = 'conv-counter-val ' +
+        (titulares >= MIN_TITULARES ? 'ok' : 'bad');
+    document.getElementById('cntSuplentes').textContent = suplentes;
+    document.getElementById('cntTotal').textContent = total;
+    document.getElementById('cntTotal').className = 'conv-counter-val ' +
+        (total > MAX_CONVOCADOS ? 'bad' : total > 0 ? 'ok' : '');
+
+    const valDiv = document.getElementById('validStatus');
+    const btnPub = document.getElementById('btnPublicar');
+
+    if (total > MAX_CONVOCADOS) {
+        valDiv.style.background = 'rgba(255,59,48,0.12)';
+        valDiv.style.color = 'var(--color-error)';
+        valDiv.innerHTML = '<i class="bi bi-x-circle"></i> Se superó el máximo de ' + MAX_CONVOCADOS + ' convocados.';
+        btnPub.disabled = true;
+    } else if (titulares < MIN_TITULARES) {
+        valDiv.style.background = 'rgba(255,149,0,0.12)';
+        valDiv.style.color = 'var(--color-warning)';
+        valDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Faltan ' + (MIN_TITULARES - titulares) + ' titular(es) más.';
+        btnPub.disabled = true;
+    } else {
+        valDiv.style.background = 'rgba(52,199,89,0.12)';
+        valDiv.style.color = 'var(--color-success)';
+        valDiv.innerHTML = '<i class="bi bi-check-circle"></i> Convocatoria válida para publicar.';
+        btnPub.disabled = false;
+    }
+}
+
+function selectAll() {
+    document.querySelectorAll('.jugador-check').forEach(cb => {
+        if (!cb.checked) {
+            cb.checked = true;
+            const row = cb.closest('tr');
+            row.querySelector('.jugador-rol').disabled = false;
+            row.querySelector('.conv-pos-inp').disabled = false;
+            row.classList.add('selected-row');
+        }
+    });
+    updateCounter();
+}
+
+function clearAll() {
+    document.querySelectorAll('.jugador-check').forEach(cb => {
+        if (cb.checked) {
+            cb.checked = false;
+            const row = cb.closest('tr');
+            row.querySelector('.jugador-rol').disabled = true;
+            row.querySelector('.conv-pos-inp').disabled = true;
+            row.classList.remove('selected-row');
+        }
+    });
+    updateCounter();
+}
+
+// Prevent submitting disabled inputs
+document.getElementById('convForm')?.addEventListener('submit', function() {
+    document.querySelectorAll('.jugador-rol:disabled, .conv-pos-inp:disabled').forEach(el => {
+        el.disabled = false;
+        el.name = '';
+    });
+});
+
+// Init
+updateCounter();
+</script>
+
+<style>
+    .selected-row { background: rgba(163,255,18,0.03); }
+    .alert-success { background: rgba(52,199,89,0.12); color: var(--color-success); border: 1px solid rgba(52,199,89,0.3); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+</style>

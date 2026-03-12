@@ -246,6 +246,121 @@ namespace ControlTorneosFutbol.Migrations
                     b.ToTable("configuracionestorneo", "public");
                 });
 
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Convocatoria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EntrenadorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("entrenadorid");
+
+                    b.Property<int>("EquipoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("equipoid");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
+                    b.Property<DateTime?>("FechaActualizacion")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechaactualizacion");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechacreacion");
+
+                    b.Property<DateTime?>("FechaPublicacion")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechapublicacion");
+
+                    b.Property<string>("Observaciones")
+                        .HasColumnType("text")
+                        .HasColumnName("observaciones");
+
+                    b.Property<int>("PartidoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("partidoid");
+
+                    b.HasKey("Id")
+                        .HasName("pk_convocatorias");
+
+                    b.HasIndex("EntrenadorId")
+                        .HasDatabaseName("ix_convocatorias_entrenadorid");
+
+                    b.HasIndex("EquipoId")
+                        .HasDatabaseName("ix_convocatorias_equipoid");
+
+                    b.HasIndex("PartidoId", "EquipoId")
+                        .IsUnique();
+
+                    b.ToTable("convocatorias", "public");
+                });
+
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.ConvocatoriaJugador", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ConvocatoriaId")
+                        .HasColumnType("integer")
+                        .HasColumnName("convocatoriaid");
+
+                    b.Property<int>("EquipoJugadorTorneoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("equipojugadortorneoid");
+
+                    b.Property<string>("EstadoConfirmacion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estadoconfirmacion");
+
+                    b.Property<DateTime?>("FechaConfirmacion")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechaconfirmacion");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechacreacion");
+
+                    b.Property<string>("NotaConfirmacion")
+                        .HasColumnType("text")
+                        .HasColumnName("notaconfirmacion");
+
+                    b.Property<string>("PosicionAsignada")
+                        .HasColumnType("text")
+                        .HasColumnName("posicionasignada");
+
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("rol");
+
+                    b.HasKey("Id")
+                        .HasName("pk_convocatoriasjugadores");
+
+                    b.HasIndex("EquipoJugadorTorneoId")
+                        .HasDatabaseName("ix_convocatoriasjugadores_equipojugadortorneoid");
+
+                    b.HasIndex("ConvocatoriaId", "EquipoJugadorTorneoId")
+                        .IsUnique();
+
+                    b.ToTable("convocatoriasjugadores", "public");
+                });
+
             modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Entrenador", b =>
                 {
                     b.Property<int>("Id")
@@ -327,6 +442,14 @@ namespace ControlTorneosFutbol.Migrations
                     b.Property<string>("Sede")
                         .HasColumnType("text")
                         .HasColumnName("sede");
+
+                    b.Property<string>("TipoEquipo")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Libre")
+                        .HasColumnName("tipoequipo");
 
                     b.HasKey("Id")
                         .HasName("pk_equipos");
@@ -515,6 +638,147 @@ namespace ControlTorneosFutbol.Migrations
                     b.ToTable("grupos", "public");
                 });
 
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.HistorialPartido", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid?>("CambiadoPorUsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cambiadoporusuarioid");
+
+                    b.Property<string>("EstadoAnterior")
+                        .HasColumnType("text")
+                        .HasColumnName("estadoanterior");
+
+                    b.Property<string>("EstadoNuevo")
+                        .HasColumnType("text")
+                        .HasColumnName("estadonuevo");
+
+                    b.Property<DateTime?>("FechaAnterior")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechaanterior");
+
+                    b.Property<DateTime>("FechaCambio")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechacambio");
+
+                    b.Property<DateTime?>("FechaNueva")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechanueva");
+
+                    b.Property<int>("PartidoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("partidoid");
+
+                    b.Property<string>("Razon")
+                        .HasColumnType("text")
+                        .HasColumnName("razon");
+
+                    b.Property<string>("SedeAnterior")
+                        .HasColumnType("text")
+                        .HasColumnName("sedeanterior");
+
+                    b.Property<string>("SedeNueva")
+                        .HasColumnType("text")
+                        .HasColumnName("sedenueva");
+
+                    b.Property<string>("TipoCambio")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("tipocambio");
+
+                    b.HasKey("Id")
+                        .HasName("pk_historialpartido");
+
+                    b.HasIndex("CambiadoPorUsuarioId");
+
+                    b.HasIndex("PartidoId")
+                        .HasDatabaseName("ix_historialpartido_partidoid");
+
+                    b.ToTable("historialpartido", "public");
+                });
+
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.IncidenciaPartido", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("text")
+                        .HasColumnName("descripcion");
+
+                    b.Property<int?>("EjtJugadorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ejtjugadorid");
+
+                    b.Property<int?>("EjtJugadorSalidaId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ejtjugadorsalidaid");
+
+                    b.Property<int>("EquipoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("equipoid");
+
+                    b.Property<bool>("EsAutogol")
+                        .HasColumnType("boolean")
+                        .HasColumnName("esautogol");
+
+                    b.Property<bool>("EsPenal")
+                        .HasColumnType("boolean")
+                        .HasColumnName("espenal");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechacreacion");
+
+                    b.Property<int?>("Minuto")
+                        .HasColumnType("integer")
+                        .HasColumnName("minuto");
+
+                    b.Property<int>("PartidoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("partidoid");
+
+                    b.Property<int?>("ReportePartidoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("reportepartidoid");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("tipo");
+
+                    b.HasKey("Id")
+                        .HasName("pk_incidenciaspartido");
+
+                    b.HasIndex("EjtJugadorId")
+                        .HasDatabaseName("ix_incidenciaspartido_ejtjugadorid");
+
+                    b.HasIndex("EjtJugadorSalidaId")
+                        .HasDatabaseName("ix_incidenciaspartido_ejtjugadorsalidaid");
+
+                    b.HasIndex("EquipoId")
+                        .HasDatabaseName("ix_incidenciaspartido_equipoid");
+
+                    b.HasIndex("ReportePartidoId")
+                        .HasDatabaseName("ix_incidenciaspartido_reportepartidoid");
+
+                    b.HasIndex("PartidoId", "Tipo");
+
+                    b.ToTable("incidenciaspartido", "public");
+                });
+
             modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Jugador", b =>
                 {
                     b.Property<int>("Id")
@@ -594,6 +858,65 @@ namespace ControlTorneosFutbol.Migrations
                     b.ToTable("ligas", "public");
                 });
 
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.NotificacionInterna", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechacreacion");
+
+                    b.Property<DateTime?>("FechaLectura")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechalectura");
+
+                    b.Property<bool>("Leida")
+                        .HasColumnType("boolean")
+                        .HasColumnName("leida");
+
+                    b.Property<string>("Mensaje")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("mensaje");
+
+                    b.Property<int?>("ReferenciaId")
+                        .HasColumnType("integer")
+                        .HasColumnName("referenciaid");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("tipo");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("titulo");
+
+                    b.Property<string>("UrlAccion")
+                        .HasColumnType("text")
+                        .HasColumnName("urlaccion");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuarioid");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notificacionesinternas");
+
+                    b.HasIndex("UsuarioId", "Leida");
+
+                    b.ToTable("notificacionesinternas", "public");
+                });
+
             modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Partido", b =>
                 {
                     b.Property<int>("Id")
@@ -637,6 +960,10 @@ namespace ControlTorneosFutbol.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("fechacreacion");
 
+                    b.Property<DateTime?>("FechaInicioReal")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechainicioreal");
+
                     b.Property<int?>("GolesLocal")
                         .HasColumnType("integer")
                         .HasColumnName("goleslocal");
@@ -652,6 +979,14 @@ namespace ControlTorneosFutbol.Migrations
                     b.Property<int?>("Jornada")
                         .HasColumnType("integer")
                         .HasColumnName("jornada");
+
+                    b.Property<int?>("MinutoActual")
+                        .HasColumnType("integer")
+                        .HasColumnName("minutoactual");
+
+                    b.Property<string>("RazonReprogramacion")
+                        .HasColumnType("text")
+                        .HasColumnName("razonreprogramacion");
 
                     b.Property<string>("Sede")
                         .HasMaxLength(200)
@@ -719,6 +1054,11 @@ namespace ControlTorneosFutbol.Migrations
                     b.Property<string>("FotoPerfil")
                         .HasColumnType("text")
                         .HasColumnName("fotoperfil");
+
+                    b.Property<string>("Genero")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("genero");
 
                     b.Property<string>("IdentificacionCifrada")
                         .HasColumnType("text")
@@ -851,6 +1191,82 @@ namespace ControlTorneosFutbol.Migrations
                     b.HasIndex("TorneoId", "Orden");
 
                     b.ToTable("reglaspersonalizadastorneo", "public");
+                });
+
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.ReportePartido", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArbitroId")
+                        .HasColumnType("integer")
+                        .HasColumnName("arbitroid");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
+                    b.Property<DateTime?>("FechaActualizacion")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechaactualizacion");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechacreacion");
+
+                    b.Property<DateTime?>("FechaEnvio")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("fechaenvio");
+
+                    b.Property<int?>("GolesLocalPenales")
+                        .HasColumnType("integer")
+                        .HasColumnName("goleslocalpenales");
+
+                    b.Property<int?>("GolesVisitantePenales")
+                        .HasColumnType("integer")
+                        .HasColumnName("golesvisitantepenales");
+
+                    b.Property<bool>("HuboPenales")
+                        .HasColumnType("boolean")
+                        .HasColumnName("hubopenales");
+
+                    b.Property<bool>("HuboProrroga")
+                        .HasColumnType("boolean")
+                        .HasColumnName("huboprorroga");
+
+                    b.Property<int?>("MinutosJugados")
+                        .HasColumnType("integer")
+                        .HasColumnName("minutosjugados");
+
+                    b.Property<string>("MotivoReapertura")
+                        .HasColumnType("text")
+                        .HasColumnName("motivoreapertura");
+
+                    b.Property<string>("Observaciones")
+                        .HasColumnType("text")
+                        .HasColumnName("observaciones");
+
+                    b.Property<int>("PartidoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("partidoid");
+
+                    b.HasKey("Id")
+                        .HasName("pk_reportespartido");
+
+                    b.HasIndex("ArbitroId")
+                        .HasDatabaseName("ix_reportespartido_arbitroid");
+
+                    b.HasIndex("PartidoId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_reportespartido_partidoid");
+
+                    b.ToTable("reportespartido", "public");
                 });
 
             modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Rol", b =>
@@ -1258,6 +1674,57 @@ namespace ControlTorneosFutbol.Migrations
                     b.Navigation("Torneo");
                 });
 
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Convocatoria", b =>
+                {
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Entrenador", "Entrenador")
+                        .WithMany()
+                        .HasForeignKey("EntrenadorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_convocatorias_entrenadores_entrenadorid");
+
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Equipo", "Equipo")
+                        .WithMany()
+                        .HasForeignKey("EquipoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_convocatorias_equipos_equipoid");
+
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Partido", "Partido")
+                        .WithMany()
+                        .HasForeignKey("PartidoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_convocatorias_partidos_partidoid");
+
+                    b.Navigation("Entrenador");
+
+                    b.Navigation("Equipo");
+
+                    b.Navigation("Partido");
+                });
+
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.ConvocatoriaJugador", b =>
+                {
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Convocatoria", "Convocatoria")
+                        .WithMany("ConvocatoriaJugadores")
+                        .HasForeignKey("ConvocatoriaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_convocatoriasjugadores_convocatorias_convocatoriaid");
+
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.EquipoJugadorTorneo", "EquipoJugadorTorneo")
+                        .WithMany()
+                        .HasForeignKey("EquipoJugadorTorneoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_convocatoriasjugadores_equiposjugadorestorneos_equipojugado~");
+
+                    b.Navigation("Convocatoria");
+
+                    b.Navigation("EquipoJugadorTorneo");
+                });
+
             modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Entrenador", b =>
                 {
                     b.HasOne("ControlTorneosFutbol.Data.Entities.Persona", "Persona")
@@ -1361,6 +1828,71 @@ namespace ControlTorneosFutbol.Migrations
                     b.Navigation("Torneo");
                 });
 
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.HistorialPartido", b =>
+                {
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Usuario", "CambiadoPor")
+                        .WithMany()
+                        .HasForeignKey("CambiadoPorUsuarioId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_historialpartido_usuarios_cambiadoporid");
+
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Partido", "Partido")
+                        .WithMany()
+                        .HasForeignKey("PartidoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_historialpartido_partidos_partidoid");
+
+                    b.Navigation("CambiadoPor");
+
+                    b.Navigation("Partido");
+                });
+
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.IncidenciaPartido", b =>
+                {
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.EquipoJugadorTorneo", "EjtJugador")
+                        .WithMany()
+                        .HasForeignKey("EjtJugadorId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_incidenciaspartido_equiposjugadorestorneos_ejtjugadorid");
+
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.EquipoJugadorTorneo", "EjtJugadorSalida")
+                        .WithMany()
+                        .HasForeignKey("EjtJugadorSalidaId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_incidenciaspartido_equiposjugadorestorneos_ejtjugadorsalida~");
+
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Equipo", "Equipo")
+                        .WithMany()
+                        .HasForeignKey("EquipoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_incidenciaspartido_equipos_equipoid");
+
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Partido", "Partido")
+                        .WithMany()
+                        .HasForeignKey("PartidoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_incidenciaspartido_partidos_partidoid");
+
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.ReportePartido", "ReportePartido")
+                        .WithMany("Incidencias")
+                        .HasForeignKey("ReportePartidoId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_incidenciaspartido_reportespartido_reportepartidoid");
+
+                    b.Navigation("EjtJugador");
+
+                    b.Navigation("EjtJugadorSalida");
+
+                    b.Navigation("Equipo");
+
+                    b.Navigation("Partido");
+
+                    b.Navigation("ReportePartido");
+                });
+
             modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Jugador", b =>
                 {
                     b.HasOne("ControlTorneosFutbol.Data.Entities.Persona", "Persona")
@@ -1371,6 +1903,18 @@ namespace ControlTorneosFutbol.Migrations
                         .HasConstraintName("fk_jugadores_personas_personaid");
 
                     b.Navigation("Persona");
+                });
+
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.NotificacionInterna", b =>
+                {
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notificacionesinternas_usuarios_usuarioid");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Partido", b =>
@@ -1461,6 +2005,27 @@ namespace ControlTorneosFutbol.Migrations
                         .HasConstraintName("fk_reglaspersonalizadastorneo_torneos_torneoid");
 
                     b.Navigation("Torneo");
+                });
+
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.ReportePartido", b =>
+                {
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Arbitro", "Arbitro")
+                        .WithMany()
+                        .HasForeignKey("ArbitroId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_reportespartido_arbitros_arbitroid");
+
+                    b.HasOne("ControlTorneosFutbol.Data.Entities.Partido", "Partido")
+                        .WithMany()
+                        .HasForeignKey("PartidoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_reportespartido_partidos_partidoid");
+
+                    b.Navigation("Arbitro");
+
+                    b.Navigation("Partido");
                 });
 
             modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.SolicitudJugadorEquipo", b =>
@@ -1556,6 +2121,11 @@ namespace ControlTorneosFutbol.Migrations
                     b.Navigation("Torneos");
                 });
 
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Convocatoria", b =>
+                {
+                    b.Navigation("ConvocatoriaJugadores");
+                });
+
             modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Entrenador", b =>
                 {
                     b.Navigation("EquiposEntrenadores");
@@ -1590,6 +2160,11 @@ namespace ControlTorneosFutbol.Migrations
                     b.Navigation("Entrenador");
 
                     b.Navigation("Jugador");
+                });
+
+            modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.ReportePartido", b =>
+                {
+                    b.Navigation("Incidencias");
                 });
 
             modelBuilder.Entity("ControlTorneosFutbol.Data.Entities.Rol", b =>

@@ -15,8 +15,11 @@ namespace ControlTorneosFutbol.Data.Entities
         public string Estado { get; set; } = EstadosPartido.Programado;
         public int? GolesLocal { get; set; }
         public int? GolesVisitante { get; set; }
-        public string? Fase { get; set; }        // "Grupo A", "Octavos", "Cuartos", "Semifinal", "Final"
-        public int? Jornada { get; set; }        // Número de jornada dentro del torneo/grupo
+        public string? Fase { get; set; }
+        public int? Jornada { get; set; }
+        public int? MinutoActual { get; set; }           // Minuto en curso
+        public DateTime? FechaInicioReal { get; set; }   // Cuando el árbitro presiona "Iniciar"
+        public string? RazonReprogramacion { get; set; }
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
         public DateTime? FechaActualizacion { get; set; }
 
@@ -30,9 +33,10 @@ namespace ControlTorneosFutbol.Data.Entities
 
     public static class EstadosPartido
     {
-        public const string Programado = "Programado";
-        public const string EnCurso = "EnCurso";
-        public const string Finalizado = "Finalizado";
-        public const string Cancelado = "Cancelado";
+        public const string Programado   = "Programado";
+        public const string EnCurso      = "EnCurso";
+        public const string Finalizado   = "Finalizado";
+        public const string Cancelado    = "Cancelado";
+        public const string Reprogramado = "Reprogramado";
     }
 }

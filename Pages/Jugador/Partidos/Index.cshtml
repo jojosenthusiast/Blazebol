@@ -19,40 +19,93 @@
         return $"<div style=\"width:{size}px;height:{size}px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:{bg};flex-shrink:0;\">{inner}</div>";
     }
 
+    string ConvBadgeHtml(ControlTorneosFutbol.Pages.Jugador.Partidos.PartidoJugadorViewModel p)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append("<div style=\"margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;\">");
+
+        string (bg, color, label) = p.EstadoConvocatoria switch
+        {
+            "Titular" => ("rgba(163,255,18,0.15)", "var(--color-accent)", "Titular"),
+            "Suplente" => ("rgba(90,200,250,0.15)", "var(--color-info)", "Suplente"),
+            "Reserva" => ("rgba(255,255,255,0.08)", "rgba(255,255,255,0.5)", "Reserva"),
+            "NoConvocado" => ("rgba(255,59,48,0.1)", "var(--color-error)", "No convocado"),
+            "Pendiente" => ("rgba(255,149,0,0.15)", "var(--color-warning)", "Alineación pendiente"),
+            _ => ("rgba(255,255,255,0.05)", "rgba(255,255,255,0.35)", "Sin convocatoria")
+        };
+
+        sb.Append($"<span style=\"font-size:0.72rem;padding:3px 10px;border-radius:20px;background:{bg};color:{color};font-weight:600;\">⚽ {label}</span>");
+
+        // Confirmation buttons
+        if (p.EstadoConvocatoria is "Titular" or "Suplente" or "Reserva")
+        {
+            if (p.EstadoConfirmacion == "Pendiente")
+            {
+                sb.Append($"<form method=\"post\" asp-page-handler=\"Confirmar\" style=\"display:inline;\">");
+                sb.Append($"<input type=\"hidden\" name=\"ejtId\" value=\"{p.EjtId}\" />");
+                sb.Append($"<input type=\"hidden\" name=\"convocatoriaId\" value=\"{p.ConvocatoriaId}\" />");
+                sb.Append($"<input type=\"hidden\" name=\"estado\" value=\"Confirmo\" />");
+                sb.Append("<button type=\"submit\" style=\"background:rgba(52,199,89,0.15);color:var(--color-success);border:1px solid rgba(52,199,89,0.3);border-radius:6px;padding:3px 10px;font-size:0.72rem;cursor:pointer;\">✓ Confirmar</button>");
+                sb.Append("</form>");
+
+                sb.Append($"<form method=\"post\" asp-page-handler=\"Confirmar\" style=\"display:inline;\">");
+                sb.Append($"<input type=\"hidden\" name=\"ejtId\" value=\"{p.EjtId}\" />");
+                sb.Append($"<input type=\"hidden\" name=\"convocatoriaId\" value=\"{p.ConvocatoriaId}\" />");
+                sb.Append($"<input type=\"hidden\" name=\"estado\" value=\"NoDisponible\" />");
+                sb.Append("<button type=\"submit\" style=\"background:rgba(255,59,48,0.12);color:var(--color-error);border:1px solid rgba(255,59,48,0.3);border-radius:6px;padding:3px 10px;font-size:0.72rem;cursor:pointer;\">✗ No puedo</button>");
+                sb.Append("</form>");
+            }
+            else if (p.EstadoConfirmacion == "Confirmo")
+            {
+                sb.Append("<span style=\"font-size:0.72rem;color:var(--color-success);\">✓ Confirmaste</span>");
+            }
+            else if (p.EstadoConfirmacion == "NoDisponible")
+            {
+                sb.Append("<span style=\"font-size:0.72rem;color:var(--color-error);\">✗ No disponible</span>");
+            }
+        }
+
+        sb.Append("</div>");
+        return sb.ToString();
+    }
+
     Microsoft.AspNetCore.Html.IHtmlContent MatchCard(ControlTorneosFutbol.Pages.Jugador.Partidos.PartidoJugadorViewModel p)
     {
         var sb = new System.Text.StringBuilder();
         string borderColor = p.Estado switch {
             "EnCurso" => "#f59e0b",
             "Finalizado" => "rgba(163,255,18,0.25)",
+            "Reprogramado" => "rgba(90,200,250,0.25)",
             _ => "rgba(255,255,255,0.08)"
         };
 
         sb.Append($"<div style=\"border:1px solid {borderColor};border-radius:12px;padding:16px 20px;\">");
 
-        // Torneo badge + fecha
-        sb.Append($"<div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;\">");
+        // Torneo badge + estado
+        sb.Append("<div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;\">");
         sb.Append($"<span style=\"font-size:0.72rem;opacity:0.45;\">{p.NombreTorneo}</span>");
+        sb.Append("<div style=\"display:flex;gap:6px;align-items:center;\">");
         string estadoStyle = p.Estado switch {
             "EnCurso" => "background:rgba(245,158,11,0.2);color:#f59e0b;",
             "Finalizado" => "background:rgba(163,255,18,0.15);color:var(--accent);",
+            "Reprogramado" => "background:rgba(90,200,250,0.15);color:var(--color-info);",
             _ => "background:rgba(255,255,255,0.08);"
         };
         sb.Append($"<span class=\"badge\" style=\"{estadoStyle}\">{p.Estado}</span>");
-        sb.Append("</div>");
+        if (string.IsNullOrEmpty(p.Sede))
+            sb.Append("<span class=\"badge bg-warning text-dark\" style=\"font-size:0.68rem;\">Sede pendiente</span>");
+        sb.Append("</div></div>");
 
-        // Match row: escudo local | resultado/hora | escudo visitante
+        // Match row
         sb.Append("<div style=\"display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:12px;\">");
 
-        // Local
         string localHighlight = p.EsMiEquipoLocal ? "color:var(--accent);" : "";
-        sb.Append($"<div style=\"display:flex;align-items:center;gap:10px;\">");
+        sb.Append("<div style=\"display:flex;align-items:center;gap:10px;\">");
         sb.Append(EscudoHtml(p.LogoLocal, p.AbrevLocal, p.ColorLocal));
         sb.Append($"<div><div style=\"font-size:0.88rem;font-weight:600;{localHighlight}\">{p.NombreLocal}</div>");
         if (!string.IsNullOrEmpty(p.AbrevLocal)) sb.Append($"<div style=\"font-size:0.68rem;opacity:0.4;\">[{p.AbrevLocal}]</div>");
         sb.Append("</div></div>");
 
-        // Centro
         if (p.Estado == "Finalizado" && p.GolesLocal.HasValue)
         {
             sb.Append($"<div style=\"text-align:center;\"><div style=\"font-size:1.8rem;font-weight:900;letter-spacing:-1px;\">{p.GolesLocal}<span style=\"opacity:0.4;font-size:1.2rem;\">–</span>{p.GolesVisitante}</div></div>");
@@ -62,9 +115,8 @@
             sb.Append($"<div style=\"text-align:center;\"><div style=\"font-size:0.9rem;font-weight:700;opacity:0.4;\">vs</div><div style=\"font-size:0.75rem;opacity:0.5;\">{p.Fecha:dd/MM/yyyy}</div><div style=\"font-size:0.72rem;opacity:0.45;\">{p.Fecha:HH:mm}h</div></div>");
         }
 
-        // Visitante
         string visitHighlight = !p.EsMiEquipoLocal ? "color:var(--accent);" : "";
-        sb.Append($"<div style=\"display:flex;align-items:center;gap:10px;justify-content:flex-end;\">");
+        sb.Append("<div style=\"display:flex;align-items:center;gap:10px;justify-content:flex-end;\">");
         sb.Append($"<div style=\"text-align:right;\"><div style=\"font-size:0.88rem;font-weight:600;{visitHighlight}\">{p.NombreVisitante}</div>");
         if (!string.IsNullOrEmpty(p.AbrevVisitante)) sb.Append($"<div style=\"font-size:0.68rem;opacity:0.4;\">[{p.AbrevVisitante}]</div>");
         sb.Append("</div>");
@@ -78,6 +130,12 @@
         if (!string.IsNullOrEmpty(p.Sede)) sb.Append($"<span><i class=\"bi bi-geo-alt\"></i> {p.Sede}</span>");
         if (!string.IsNullOrEmpty(p.NombreArbitro)) sb.Append($"<span><i class=\"bi bi-person\"></i> {p.NombreArbitro}</span>");
         sb.Append("</div>");
+
+        // Convocatoria status (only for upcoming/in-progress)
+        if (p.Estado != "Finalizado")
+        {
+            sb.Append(ConvBadgeHtml(p));
+        }
 
         sb.Append("</div>"); // card
         return new Microsoft.AspNetCore.Html.HtmlString(sb.ToString());
@@ -95,6 +153,13 @@
             }
         </div>
     </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert" style="background:rgba(52,199,89,0.12);color:var(--color-success);border:1px solid rgba(52,199,89,0.3);border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+            @Model.SuccessMessage
+        </div>
+    }
 
     @if (!Model.PartidosEnCurso.Any() && !Model.ProximosPartidos.Any() && !Model.PartidosPasados.Any())
     {
@@ -135,9 +200,7 @@
         @if (Model.ProximosPartidos.Any())
         {
             <div style="margin-bottom:32px;">
-                <h2 class="section-header">
-                    PRÓXIMOS PARTIDOS
-                </h2>
+                <h2 class="section-header">PRÓXIMOS PARTIDOS</h2>
                 <div style="display:flex;flex-direction:column;gap:12px;">
                     @foreach (var p in Model.ProximosPartidos)
                     {
@@ -151,9 +214,7 @@
         @if (Model.PartidosPasados.Any())
         {
             <div>
-                <h2 class="section-header">
-                    RESULTADOS
-                </h2>
+                <h2 class="section-header">RESULTADOS</h2>
                 <div style="display:flex;flex-direction:column;gap:12px;">
                     @foreach (var p in Model.PartidosPasados)
                     {

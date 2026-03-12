@@ -74,6 +74,9 @@ namespace ControlTorneosFutbol.Models.ViewModels
         [Display(Name = "Abreviación (2-3 letras)")]
         public string? Abreviacion { get; set; }
 
+        [Display(Name = "Tipo de Equipo")]
+        public string TipoEquipo { get; set; } = "Libre";
+
         // Filled by the page model after processing the uploaded file
         public string? LogoPath { get; set; }
     }

@@ -104,6 +104,19 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <label asp-for="Input.TipoEquipo" class="form-label">Tipo de Equipo</label>
+                <select asp-for="Input.TipoEquipo" class="form-control">
+                    <option value="Libre">Libre (sin restricciones)</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Juvenil">Juvenil (Sub-18)</option>
+                    <option value="Amateur">Amateur (18+)</option>
+                    <option value="Veterano">Veterano (40+)</option>
+                </select>
+                <small class="form-text">Define qué tipo de jugadores puede unirse a tu equipo</small>
+            </div>
+
             <div class="auth-row">
                 <div class="form-group">
                     <label asp-for="Input.Abreviacion" class="form-label">Abreviación (3 letras)</label>

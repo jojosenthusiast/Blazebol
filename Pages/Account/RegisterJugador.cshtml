@@ -83,6 +83,17 @@
 
             <div class="auth-section-title">Información de Jugador</div>
 
+            <div class="form-group">
+                <label asp-for="Input.Genero" class="form-label">Género *</label>
+                <select asp-for="Input.Genero" class="form-control">
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <span asp-validation-for="Input.Genero" class="text-danger"></span>
+                <small class="form-text">Requerido para validar compatibilidad con equipos</small>
+            </div>
+
             <div class="auth-row">
                 <div class="form-group">
                     <label asp-for="Input.PosicionPreferida" class="form-label">Posición</label>

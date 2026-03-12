@@ -13,6 +13,8 @@ namespace ControlTorneosFutbol.Data.Entities
         public string? IdentificacionCifrada { get; set; } // DUI/Pasaporte cifrado
         public string? Telefono { get; set; }
         public string? FotoPerfil { get; set; }
+        /// <summary>Masculino | Femenino | Otro</summary>
+        public string? Genero { get; set; }
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
         public DateTime? FechaActualizacion { get; set; }
         public bool Activo { get; set; } = true;
@@ -22,5 +24,12 @@ namespace ControlTorneosFutbol.Data.Entities
         public Jugador? Jugador { get; set; }
         public Entrenador? Entrenador { get; set; }
         public Arbitro? Arbitro { get; set; }
+    }
+
+    public static class GenerosPersona
+    {
+        public const string Masculino = "Masculino";
+        public const string Femenino  = "Femenino";
+        public const string Otro      = "Otro";
     }
 }

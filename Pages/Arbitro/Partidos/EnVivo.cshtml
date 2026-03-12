@@ -1,0 +1,619 @@
+@page
+@model ControlTorneosFutbol.Pages.Arbitro.Partidos.EnVivoModel
+@{
+    ViewData["Title"] = "Partido En Vivo";
+    Layout = "_Layout";
+    var e = Model.Estado;
+}
+
+<style>
+    .ev-root { background: #111; min-height: 100vh; color: #fff; padding: 0; }
+    .ev-scoreboard { background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%); border-bottom: 2px solid rgba(255,255,255,0.06); padding: 20px 32px; }
+    .ev-score-row { display: flex; align-items: center; justify-content: space-between; max-width: 700px; margin: 0 auto; }
+    .ev-team { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+    .ev-team-logo { width: 56px; height: 56px; border-radius: 12px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .ev-team-name { font-size: 1rem; font-weight: 700; text-align: center; max-width: 140px; }
+    .ev-score { font-size: 3rem; font-weight: 900; letter-spacing: -2px; min-width: 140px; text-align: center; color: var(--color-accent); }
+    .ev-score-sep { font-size: 2rem; opacity: 0.3; margin: 0 8px; }
+    .ev-status { text-align: center; margin-top: 8px; font-size: 0.85rem; }
+    .ev-status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent); margin-right: 6px; animation: blink 1.5s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    .ev-toolbar { background: #1a1a1a; padding: 12px 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .ev-btn { padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; gap: 6px; transition: 0.15s; }
+    .ev-btn-gol-l { background: linear-gradient(135deg, #a3ff12, #34c759); color: #000; }
+    .ev-btn-gol-v { background: linear-gradient(135deg, #5ac8fa, #007aff); color: #fff; }
+    .ev-btn-tarjeta { background: rgba(255,149,0,0.2); color: var(--color-warning); border: 1px solid rgba(255,149,0,0.3); }
+    .ev-btn-cambio { background: rgba(90,200,250,0.12); color: var(--color-info); border: 1px solid rgba(90,200,250,0.2); }
+    .ev-btn-incidencia { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.1); }
+    .ev-btn-fin { background: rgba(255,59,48,0.2); color: var(--color-error); border: 1px solid rgba(255,59,48,0.3); margin-left: auto; }
+    .ev-btn:hover { filter: brightness(1.15); }
+    .ev-main { display: grid; grid-template-columns: 1fr 1fr 340px; gap: 0; height: calc(100vh - 200px); min-height: 400px; }
+    .ev-team-panel { border-right: 1px solid rgba(255,255,255,0.05); overflow-y: auto; }
+    .ev-panel-header { padding: 14px 16px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.5; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .ev-player-row { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: 0.1s; }
+    .ev-player-row:hover { background: rgba(255,255,255,0.04); }
+    .ev-player-num { width: 28px; text-align: center; font-weight: 700; font-size: 0.9rem; opacity: 0.7; }
+    .ev-player-info { flex: 1; }
+    .ev-player-name { font-size: 0.85rem; font-weight: 500; }
+    .ev-player-pos { font-size: 0.7rem; opacity: 0.4; }
+    .ev-player-badges { display: flex; gap: 4px; }
+    .ev-on-field { border-left: 3px solid var(--color-accent); }
+    .ev-on-bench { opacity: 0.5; }
+    .ev-card-y { width: 14px; height: 18px; background: #ffcc00; border-radius: 2px; display: inline-block; }
+    .ev-card-r { width: 14px; height: 18px; background: #ff3b30; border-radius: 2px; display: inline-block; }
+    .ev-feed { background: #0d0d0d; overflow-y: auto; border-left: 1px solid rgba(255,255,255,0.05); }
+    .ev-feed-title { padding: 14px 16px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.5; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .ev-event { padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.82rem; display: flex; gap: 10px; align-items: flex-start; }
+    .ev-event-min { font-size: 0.75rem; font-weight: 700; color: var(--color-accent); min-width: 28px; }
+    .ev-event-icon { font-size: 1rem; flex-shrink: 0; }
+    .ev-empty-feed { padding: 32px 16px; text-align: center; opacity: 0.3; font-size: 0.85rem; }
+
+    /* MODAL */
+    .ev-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; }
+    .ev-modal-overlay.open { display: flex; }
+    .ev-modal { background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; min-width: 340px; max-width: 480px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .ev-modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+    .ev-modal-input { width: 100%; background: #111; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 8px 12px; font-size: 0.9rem; margin-bottom: 12px; }
+    .ev-modal-input:focus { outline: none; border-color: var(--color-accent); }
+    .ev-modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .ev-modal-btn-ok { flex: 1; background: var(--color-accent); color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .ev-modal-btn-cancel { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+    .ev-player-select { width: 100%; background: #111; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 8px 12px; font-size: 0.88rem; margin-bottom: 12px; }
+    @media (max-width: 900px) { .ev-main { grid-template-columns: 1fr; height: auto; } .ev-feed { height: 300px; } }
+</style>
+
+<div class="ev-root">
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div style="padding:40px;text-align:center;color:var(--color-error);">@Model.ErrorMessage</div>
+    }
+    else if (e == null)
+    {
+        <div style="padding:40px;text-align:center;opacity:0.5;">Cargando estado del partido...</div>
+    }
+    else
+    {
+        <!-- SCOREBOARD -->
+        <div class="ev-scoreboard">
+            <div class="ev-score-row">
+                <div class="ev-team">
+                    <div class="ev-team-logo">
+                        @if (!string.IsNullOrEmpty(e.LogoLocal))
+                        {
+                            <img src="@e.LogoLocal" style="width:48px;height:48px;object-fit:contain;" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-dribbble" style="font-size:1.5rem;opacity:0.3;"></i>
+                        }
+                    </div>
+                    <div class="ev-team-name">@e.NombreLocal</div>
+                    <div style="font-size:0.72rem;opacity:0.4;">Local</div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;align-items:center;">
+                    <div class="ev-score">
+                        <span id="golesLocal">@e.GolesLocal</span>
+                        <span class="ev-score-sep">–</span>
+                        <span id="golesVisitante">@e.GolesVisitante</span>
+                    </div>
+                    <div class="ev-status">
+                        <span class="ev-status-dot"></span>
+                        <span id="estadoLabel">EN CURSO</span>
+                        <span style="margin-left:10px;opacity:0.5;" id="minutoLabel">@(e.MinutoActual.HasValue ? $"{e.MinutoActual}'" : "")</span>
+                    </div>
+                </div>
+
+                <div class="ev-team">
+                    <div class="ev-team-logo">
+                        @if (!string.IsNullOrEmpty(e.LogoVisitante))
+                        {
+                            <img src="@e.LogoVisitante" style="width:48px;height:48px;object-fit:contain;" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-dribbble" style="font-size:1.5rem;opacity:0.3;"></i>
+                        }
+                    </div>
+                    <div class="ev-team-name">@e.NombreVisitante</div>
+                    <div style="font-size:0.72rem;opacity:0.4;">Visitante</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="ev-toolbar">
+            <button class="ev-btn ev-btn-gol-l" onclick="abrirModalGol(@e.EquipoLocalId, '@e.NombreLocal', true)">
+                <i class="bi bi-bullseye"></i> Gol Local
+            </button>
+            <button class="ev-btn ev-btn-gol-v" onclick="abrirModalGol(@e.EquipoVisitanteId, '@e.NombreVisitante', false)">
+                <i class="bi bi-bullseye"></i> Gol Visitante
+            </button>
+            <button class="ev-btn ev-btn-tarjeta" onclick="abrirModalTarjeta()">
+                <i class="bi bi-card-list"></i> Tarjeta
+            </button>
+            <button class="ev-btn ev-btn-cambio" onclick="abrirModalCambio()">
+                <i class="bi bi-arrow-left-right"></i> Cambio
+            </button>
+            <button class="ev-btn ev-btn-incidencia" onclick="abrirModalIncidencia()">
+                <i class="bi bi-exclamation-triangle"></i> Incidencia
+            </button>
+            <button class="ev-btn ev-btn-fin" onclick="confirmarFinalizar()">
+                <i class="bi bi-flag-fill"></i> Finalizar Partido
+            </button>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="ev-main">
+
+            <!-- EQUIPO LOCAL -->
+            <div class="ev-team-panel">
+                <div class="ev-panel-header">@e.NombreLocal</div>
+                <div id="jugadoresLocal">
+                    @foreach (var j in e.JugadoresLocal)
+                    {
+                        <div class="ev-player-row @(j.EstaEnCampo ? "ev-on-field" : "ev-on-bench")"
+                             data-ejtid="@j.EjtId"
+                             data-nombre="@j.NombreCompleto"
+                             data-num="@j.NumeroCamiseta"
+                             data-pos="@j.PosicionAsignada"
+                             data-rol="@j.Rol">
+                            <div class="ev-player-num">@j.NumeroCamiseta</div>
+                            <div class="ev-player-info">
+                                <div class="ev-player-name">@j.NombreCompleto</div>
+                                <div class="ev-player-pos">@j.PosicionAsignada &middot; @j.Rol</div>
+                            </div>
+                            <div class="ev-player-badges">
+                                @for (int ta = 0; ta < j.TarjetasAmarillas; ta++)
+                                {
+                                    <span class="ev-card-y" title="Tarjeta Amarilla"></span>
+                                }
+                                @if (j.TarjetaRoja)
+                                {
+                                    <span class="ev-card-r" title="Tarjeta Roja"></span>
+                                }
+                            </div>
+                        </div>
+                    }
+                    @if (!e.JugadoresLocal.Any())
+                    {
+                        <div style="padding:24px;opacity:0.4;font-size:0.85rem;">Sin convocatoria</div>
+                    }
+                </div>
+            </div>
+
+            <!-- EQUIPO VISITANTE -->
+            <div class="ev-team-panel">
+                <div class="ev-panel-header">@e.NombreVisitante</div>
+                <div id="jugadoresVisitante">
+                    @foreach (var j in e.JugadoresVisitante)
+                    {
+                        <div class="ev-player-row @(j.EstaEnCampo ? "ev-on-field" : "ev-on-bench")"
+                             data-ejtid="@j.EjtId"
+                             data-nombre="@j.NombreCompleto"
+                             data-num="@j.NumeroCamiseta"
+                             data-pos="@j.PosicionAsignada"
+                             data-rol="@j.Rol">
+                            <div class="ev-player-num">@j.NumeroCamiseta</div>
+                            <div class="ev-player-info">
+                                <div class="ev-player-name">@j.NombreCompleto</div>
+                                <div class="ev-player-pos">@j.PosicionAsignada &middot; @j.Rol</div>
+                            </div>
+                            <div class="ev-player-badges">
+                                @for (int ta = 0; ta < j.TarjetasAmarillas; ta++)
+                                {
+                                    <span class="ev-card-y"></span>
+                                }
+                                @if (j.TarjetaRoja)
+                                {
+                                    <span class="ev-card-r"></span>
+                                }
+                            </div>
+                        </div>
+                    }
+                    @if (!e.JugadoresVisitante.Any())
+                    {
+                        <div style="padding:24px;opacity:0.4;font-size:0.85rem;">Sin convocatoria</div>
+                    }
+                </div>
+            </div>
+
+            <!-- INCIDENCIAS FEED -->
+            <div class="ev-feed">
+                <div class="ev-feed-title">INCIDENCIAS</div>
+                <div id="feedIncidencias">
+                    @if (!e.Incidencias.Any())
+                    {
+                        <div class="ev-empty-feed">Sin incidencias aún</div>
+                    }
+                    @foreach (var inc in e.Incidencias.OrderByDescending(i => i.Minuto))
+                    {
+                        <div class="ev-event">
+                            <div class="ev-event-min">@(inc.Minuto.HasValue ? $"{inc.Minuto}'" : "—")</div>
+                            <div class="ev-event-icon">@IncidenciaIcon(inc.Tipo)</div>
+                            <div>
+                                <div style="font-weight:600;">@IncidenciaLabel(inc)</div>
+                                <div style="opacity:0.5;font-size:0.75rem;">@inc.NombreEquipo</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- GOL MODAL -->
+<div class="ev-modal-overlay" id="modalGol">
+    <div class="ev-modal">
+        <div class="ev-modal-title" id="modalGolTitle">Registrar Gol</div>
+        <input type="hidden" id="golEquipoId" />
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Jugador que anota</div>
+        <select class="ev-player-select" id="golJugadorSel">
+            <option value="">— Sin asignar —</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
+            <input type="checkbox" id="golEsAutogol" onchange="toggleAutogol()" /> Autogol
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
+            <input type="checkbox" id="golEsPenal" /> Penal
+        </label>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Minuto</div>
+        <input type="number" class="ev-modal-input" id="golMinuto" min="0" max="120" placeholder="Ej: 23" />
+        <div class="ev-modal-actions">
+            <button class="ev-modal-btn-ok" onclick="confirmarGol()"><i class="bi bi-bullseye"></i> Registrar Gol</button>
+            <button class="ev-modal-btn-cancel" onclick="cerrarModal('modalGol')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- TARJETA MODAL -->
+<div class="ev-modal-overlay" id="modalTarjeta">
+    <div class="ev-modal">
+        <div class="ev-modal-title">Registrar Tarjeta</div>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Equipo</div>
+        <select class="ev-player-select" id="tarjetaEquipo" onchange="cargarJugadoresParaTarjeta()">
+            <option value="@(e?.EquipoLocalId)" data-nombre="@(e?.NombreLocal)">@(e?.NombreLocal) (Local)</option>
+            <option value="@(e?.EquipoVisitanteId)" data-nombre="@(e?.NombreVisitante)">@(e?.NombreVisitante) (Visitante)</option>
+        </select>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Jugador</div>
+        <select class="ev-player-select" id="tarjetaJugador"></select>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Tipo</div>
+        <select class="ev-player-select" id="tarjetaTipo">
+            <option value="Amarilla">Tarjeta Amarilla</option>
+            <option value="Roja">Tarjeta Roja</option>
+        </select>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Minuto</div>
+        <input type="number" class="ev-modal-input" id="tarjetaMinuto" min="0" max="120" placeholder="Ej: 34" />
+        <div class="ev-modal-actions">
+            <button class="ev-modal-btn-ok" onclick="confirmarTarjeta()"><i class="bi bi-card-list"></i> Registrar</button>
+            <button class="ev-modal-btn-cancel" onclick="cerrarModal('modalTarjeta')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- CAMBIO MODAL -->
+<div class="ev-modal-overlay" id="modalCambio">
+    <div class="ev-modal">
+        <div class="ev-modal-title">Registrar Cambio</div>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Equipo</div>
+        <select class="ev-player-select" id="cambioEquipo" onchange="cargarJugadoresParaCambio()">
+            <option value="@(e?.EquipoLocalId)">@(e?.NombreLocal) (Local)</option>
+            <option value="@(e?.EquipoVisitanteId)">@(e?.NombreVisitante) (Visitante)</option>
+        </select>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Jugador que ENTRA (suplente)</div>
+        <select class="ev-player-select" id="cambioEntra"></select>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Jugador que SALE (titular)</div>
+        <select class="ev-player-select" id="cambioSale"></select>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Minuto</div>
+        <input type="number" class="ev-modal-input" id="cambioMinuto" min="0" max="120" placeholder="Ej: 60" />
+        <div class="ev-modal-actions">
+            <button class="ev-modal-btn-ok" onclick="confirmarCambio()"><i class="bi bi-arrow-left-right"></i> Confirmar Cambio</button>
+            <button class="ev-modal-btn-cancel" onclick="cerrarModal('modalCambio')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- INCIDENCIA MODAL -->
+<div class="ev-modal-overlay" id="modalIncidencia">
+    <div class="ev-modal">
+        <div class="ev-modal-title">Registrar Incidencia</div>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Tipo</div>
+        <select class="ev-player-select" id="incTipo">
+            <option value="Lesion">Lesión</option>
+            <option value="Suspension">Suspensión</option>
+            <option value="Retraso">Retraso</option>
+        </select>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Equipo</div>
+        <select class="ev-player-select" id="incEquipo" onchange="cargarJugadoresParaInc()">
+            <option value="@(e?.EquipoLocalId)">@(e?.NombreLocal) (Local)</option>
+            <option value="@(e?.EquipoVisitanteId)">@(e?.NombreVisitante) (Visitante)</option>
+        </select>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Jugador (opcional)</div>
+        <select class="ev-player-select" id="incJugador"><option value="">— Sin jugador —</option></select>
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Minuto</div>
+        <input type="number" class="ev-modal-input" id="incMinuto" min="0" max="120" placeholder="Ej: 45" />
+        <div style="margin-bottom:8px;font-size:0.82rem;opacity:0.6;">Descripción</div>
+        <input type="text" class="ev-modal-input" id="incDesc" placeholder="Descripción breve..." />
+        <div class="ev-modal-actions">
+            <button class="ev-modal-btn-ok" onclick="confirmarIncidencia()">Registrar</button>
+            <button class="ev-modal-btn-cancel" onclick="cerrarModal('modalIncidencia')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const PARTIDO_ID = @Model.PartidoId;
+const EQUIPO_LOCAL_ID = @(e?.EquipoLocalId ?? 0);
+const EQUIPO_VISITANTE_ID = @(e?.EquipoVisitanteId ?? 0);
+
+// Player data from server
+let jugadoresLocal = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    (e?.JugadoresLocal ?? new List<ConvocadoVM>()).Select(j => new { j.EjtId, j.NombreCompleto, j.NumeroCamiseta, j.Rol, j.EstaEnCampo }).ToList(),
+    new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+
+let jugadoresVisitante = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    (e?.JugadoresVisitante ?? new List<ConvocadoVM>()).Select(j => new { j.EjtId, j.NombreCompleto, j.NumeroCamiseta, j.Rol, j.EstaEnCampo }).ToList(),
+    new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+
+let modalGolIsLocal = true;
+
+function getJugadoresPorEquipo(equipoId) {
+    return parseInt(equipoId) === EQUIPO_LOCAL_ID ? jugadoresLocal : jugadoresVisitante;
+}
+
+function abrirModalGol(equipoId, nombreEquipo, isLocal) {
+    modalGolIsLocal = isLocal;
+    document.getElementById('golEquipoId').value = equipoId;
+    document.getElementById('modalGolTitle').textContent = 'GOL — ' + nombreEquipo;
+    document.getElementById('golEsAutogol').checked = false;
+
+    const sel = document.getElementById('golJugadorSel');
+    sel.innerHTML = '<option value="">— Sin asignar —</option>';
+    const jugadores = getJugadoresPorEquipo(equipoId);
+    jugadores.forEach(j => {
+        const opt = document.createElement('option');
+        opt.value = j.ejtId;
+        opt.textContent = `#${j.numeroCamiseta} ${j.nombreCompleto} (${j.rol})`;
+        sel.appendChild(opt);
+    });
+
+    document.getElementById('modalGol').classList.add('open');
+}
+
+function toggleAutogol() {
+    const isAuto = document.getElementById('golEsAutogol').checked;
+    const equipoContrario = modalGolIsLocal ? EQUIPO_VISITANTE_ID : EQUIPO_LOCAL_ID;
+    const equipoActual = modalGolIsLocal ? EQUIPO_LOCAL_ID : EQUIPO_VISITANTE_ID;
+
+    // For autogol, show players of the team that committed it (the one who kicked into their own net)
+    const sel = document.getElementById('golJugadorSel');
+    sel.innerHTML = '<option value="">— Sin asignar —</option>';
+    const jugadores = getJugadoresPorEquipo(equipoActual);
+    jugadores.forEach(j => {
+        const opt = document.createElement('option');
+        opt.value = j.ejtId;
+        opt.textContent = `#${j.numeroCamiseta} ${j.nombreCompleto}`;
+        sel.appendChild(opt);
+    });
+}
+
+async function confirmarGol() {
+    const equipoId = document.getElementById('golEquipoId').value;
+    const ejtId = document.getElementById('golJugadorSel').value || null;
+    const minuto = parseInt(document.getElementById('golMinuto').value) || 0;
+    const esAutogol = document.getElementById('golEsAutogol').checked;
+    const esPenal = document.getElementById('golEsPenal').checked;
+
+    const resp = await fetchPost('?handler=Gol', { partidoId: PARTIDO_ID, equipoId, ejtJugadorId: ejtId, minuto, esAutogol, esPenal });
+    if (resp.ok) {
+        document.getElementById('golesLocal').textContent = resp.golesLocal;
+        document.getElementById('golesVisitante').textContent = resp.golesVisitante;
+        actualizarFeed(resp.incidencias);
+        cerrarModal('modalGol');
+    }
+}
+
+function abrirModalTarjeta() {
+    cargarJugadoresParaTarjeta();
+    document.getElementById('modalTarjeta').classList.add('open');
+}
+
+function cargarJugadoresParaTarjeta() {
+    const equipoId = document.getElementById('tarjetaEquipo').value;
+    const sel = document.getElementById('tarjetaJugador');
+    sel.innerHTML = '<option value="">— Seleccionar —</option>';
+    getJugadoresPorEquipo(equipoId).forEach(j => {
+        const opt = document.createElement('option');
+        opt.value = j.ejtId;
+        opt.textContent = `#${j.numeroCamiseta} ${j.nombreCompleto}`;
+        sel.appendChild(opt);
+    });
+}
+
+async function confirmarTarjeta() {
+    const resp = await fetchPost('?handler=Tarjeta', {
+        partidoId: PARTIDO_ID,
+        equipoId: document.getElementById('tarjetaEquipo').value,
+        ejtJugadorId: document.getElementById('tarjetaJugador').value,
+        minuto: parseInt(document.getElementById('tarjetaMinuto').value) || 0,
+        tipo: document.getElementById('tarjetaTipo').value
+    });
+    if (resp.ok) { actualizarFeed(resp.incidencias); cerrarModal('modalTarjeta'); }
+}
+
+function abrirModalCambio() {
+    cargarJugadoresParaCambio();
+    document.getElementById('modalCambio').classList.add('open');
+}
+
+function cargarJugadoresParaCambio() {
+    const equipoId = document.getElementById('cambioEquipo').value;
+    const jugadores = getJugadoresPorEquipo(equipoId);
+    const suplentes = jugadores.filter(j => !j.estaEnCampo && j.rol !== 'Titular');
+    const titulares = jugadores.filter(j => j.estaEnCampo);
+
+    const selEntra = document.getElementById('cambioEntra');
+    const selSale = document.getElementById('cambioSale');
+    selEntra.innerHTML = '<option value="">— Seleccionar —</option>';
+    selSale.innerHTML = '<option value="">— Seleccionar —</option>';
+
+    suplentes.forEach(j => {
+        const opt = document.createElement('option');
+        opt.value = j.ejtId;
+        opt.textContent = `#${j.numeroCamiseta} ${j.nombreCompleto} (${j.rol})`;
+        selEntra.appendChild(opt);
+    });
+    titulares.forEach(j => {
+        const opt = document.createElement('option');
+        opt.value = j.ejtId;
+        opt.textContent = `#${j.numeroCamiseta} ${j.nombreCompleto}`;
+        selSale.appendChild(opt);
+    });
+}
+
+async function confirmarCambio() {
+    const resp = await fetchPost('?handler=Cambio', {
+        partidoId: PARTIDO_ID,
+        equipoId: document.getElementById('cambioEquipo').value,
+        ejtEntraId: document.getElementById('cambioEntra').value,
+        ejtSaleId: document.getElementById('cambioSale').value,
+        minuto: parseInt(document.getElementById('cambioMinuto').value) || 0
+    });
+    if (resp.ok) { actualizarFeed(resp.incidencias); cerrarModal('modalCambio'); }
+}
+
+function abrirModalIncidencia() {
+    cargarJugadoresParaInc();
+    document.getElementById('modalIncidencia').classList.add('open');
+}
+
+function cargarJugadoresParaInc() {
+    const equipoId = document.getElementById('incEquipo').value;
+    const sel = document.getElementById('incJugador');
+    sel.innerHTML = '<option value="">— Sin jugador —</option>';
+    getJugadoresPorEquipo(equipoId).forEach(j => {
+        const opt = document.createElement('option');
+        opt.value = j.ejtId;
+        opt.textContent = `#${j.numeroCamiseta} ${j.nombreCompleto}`;
+        sel.appendChild(opt);
+    });
+}
+
+async function confirmarIncidencia() {
+    const resp = await fetchPost('?handler=Incidencia', {
+        partidoId: PARTIDO_ID,
+        equipoId: document.getElementById('incEquipo').value,
+        tipo: document.getElementById('incTipo').value,
+        ejtJugadorId: document.getElementById('incJugador').value || null,
+        minuto: parseInt(document.getElementById('incMinuto').value) || 0,
+        desc: document.getElementById('incDesc').value
+    });
+    if (resp.ok) { actualizarFeed(resp.incidencias); cerrarModal('modalIncidencia'); }
+}
+
+async function confirmarFinalizar() {
+    if (!confirm('¿Finalizar el partido? Esta acción no se puede deshacer.')) return;
+    const resp = await fetchPost('?handler=Finalizar', { partidoId: PARTIDO_ID });
+    if (resp.ok && resp.redirectUrl) {
+        window.location.href = resp.redirectUrl;
+    }
+}
+
+function cerrarModal(id) {
+    document.getElementById(id).classList.remove('open');
+}
+
+document.querySelectorAll('.ev-modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+async function fetchPost(url, data) {
+    const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify(data)
+    });
+    return await resp.json();
+}
+
+function actualizarFeed(incidencias) {
+    const feed = document.getElementById('feedIncidencias');
+    if (!incidencias || !incidencias.length) return;
+    const sorted = [...incidencias].sort((a, b) => (b.minuto || 0) - (a.minuto || 0));
+    feed.innerHTML = sorted.map(inc => `
+        <div class="ev-event">
+            <div class="ev-event-min">${inc.minuto != null ? inc.minuto + "'" : '—'}</div>
+            <div class="ev-event-icon">${incIconFor(inc.tipo)}</div>
+            <div>
+                <div style="font-weight:600;">${labelFor(inc)}</div>
+                <div style="opacity:0.5;font-size:0.75rem;">${inc.nombreEquipo || ''}</div>
+            </div>
+        </div>`).join('');
+}
+
+function incIconFor(tipo) {
+    switch(tipo) {
+        case 'Gol': return '⚽';
+        case 'TarjetaAmarilla': return '🟨';
+        case 'TarjetaRoja': return '🟥';
+        case 'Cambio': return '🔄';
+        case 'Lesion': return '🩹';
+        default: return 'ℹ️';
+    }
+}
+
+function labelFor(inc) {
+    if (inc.tipo === 'Gol') {
+        let lbl = inc.nombreJugador || 'Gol';
+        if (inc.esAutogol) lbl += ' (AG)';
+        if (inc.esPenal) lbl += ' (P)';
+        return lbl;
+    }
+    if (inc.tipo === 'Cambio') return `Cambio: ${inc.nombreJugador || '?'} ↔ ${inc.nombreJugadorSalida || '?'}`;
+    return `${inc.tipo}${inc.nombreJugador ? ': ' + inc.nombreJugador : ''}`;
+}
+
+// Polling every 10s
+setInterval(async () => {
+    try {
+        const resp = await fetch(`?handler=Estado&partidoId=${PARTIDO_ID}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (data.estado === 'Finalizado') { window.location.href = `/Arbitro/Partidos/Reporte?partidoId=${PARTIDO_ID}`; return; }
+        document.getElementById('golesLocal').textContent = data.golesLocal;
+        document.getElementById('golesVisitante').textContent = data.golesVisitante;
+        if (data.minutoActual != null) document.getElementById('minutoLabel').textContent = data.minutoActual + "'";
+        actualizarFeed(data.incidencias);
+        jugadoresLocal = data.jugadoresLocal || jugadoresLocal;
+        jugadoresVisitante = data.jugadoresVisitante || jugadoresVisitante;
+    } catch(e) {}
+}, 10000);
+</script>
+
+@functions {
+    string IncidenciaIcon(string tipo) => tipo switch {
+        "Gol" => "⚽",
+        "TarjetaAmarilla" => "🟨",
+        "TarjetaRoja" => "🟥",
+        "Cambio" => "🔄",
+        "Lesion" => "🩹",
+        _ => "ℹ️"
+    };
+
+    string IncidenciaLabel(IncidenciaVM inc)
+    {
+        if (inc.Tipo == "Gol")
+        {
+            var lbl = inc.NombreJugador ?? "Gol";
+            if (inc.EsAutogol) lbl += " (Autogol)";
+            if (inc.EsPenal) lbl += " (Penal)";
+            return lbl;
+        }
+        if (inc.Tipo == "Cambio") return $"Cambio: {inc.NombreJugador ?? "?"} ↔ {inc.NombreJugadorSalida ?? "?"}";
+        return $"{inc.Tipo}{(inc.NombreJugador != null ? ": " + inc.NombreJugador : "")}";
+    }
+}

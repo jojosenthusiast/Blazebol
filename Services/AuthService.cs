@@ -114,6 +114,7 @@ namespace ControlTorneosFutbol.Services
                         ? _encryptionService.Encrypt(model.NumeroIdentificacion)
                         : null,
                     Telefono = model.Telefono,
+                    Genero = model.Genero,
                     Activo = true
                 };
 
@@ -217,6 +218,7 @@ namespace ControlTorneosFutbol.Services
                     ColorPrimario = model.ColorPrimario,
                     ColorSecundario = model.ColorSecundario,
                     Sede = model.Sede,
+                    TipoEquipo = string.IsNullOrEmpty(model.TipoEquipo) ? "Libre" : model.TipoEquipo,
                     Activo = true
                 };
 

@@ -200,7 +200,7 @@
 
         </div>
 
-        <div style="margin-top: 24px; display: flex; gap: 12px;">
+        <div style="margin-top: 24px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
             <a asp-page="/Arbitro/Partidos/Jugadores" asp-route-id="@Model.PartidoId"
                class="btn btn-info btn-icon">
                 <i class="bi bi-people"></i> Ver Lista de Jugadores
@@ -208,6 +208,18 @@
             <a asp-page="/Arbitro/Partidos/Index" class="btn btn-link btn-icon">
                 <i class="bi bi-arrow-left"></i> Volver
             </a>
+            @if (Model.PuedeProceeder)
+            {
+                <form method="post" asp-page-handler="IniciarPartido" style="display:inline;">
+                    <input type="hidden" name="id" value="@Model.PartidoId" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-icon"
+                            style="background:var(--color-accent);color:#000;font-weight:700;padding:10px 24px;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;"
+                            onclick="return confirm('¿Iniciar el partido ahora? Esta acción no se puede deshacer.')">
+                        <i class="bi bi-play-circle-fill"></i> Iniciar Partido
+                    </button>
+                </form>
+            }
         </div>
     }
 </div>

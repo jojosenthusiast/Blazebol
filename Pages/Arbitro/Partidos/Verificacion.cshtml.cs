@@ -4,16 +4,21 @@ using Microsoft.EntityFrameworkCore;
 using ControlTorneosFutbol.Data;
 using ControlTorneosFutbol.Data.Entities;
 using ControlTorneosFutbol.Helpers;
+using ControlTorneosFutbol.Services;
 
 namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
 {
     public class VerificacionModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPartidoEnVivoService _enVivoService;
+        private readonly INotificacionService _notificaciones;
 
-        public VerificacionModel(ApplicationDbContext context)
+        public VerificacionModel(ApplicationDbContext context, IPartidoEnVivoService enVivoService, INotificacionService notificaciones)
         {
             _context = context;
+            _enVivoService = enVivoService;
+            _notificaciones = notificaciones;
         }
 
         public int PartidoId { get; set; }
@@ -197,6 +202,29 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
             };
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostIniciarPartidoAsync(int id)
+        {
+            if (!HttpContext.Session.IsAuthenticated() || !HttpContext.Session.IsInRole("Arbitro"))
+                return RedirectToPage("/Account/Login");
+
+            var userId = HttpContext.Session.GetUserId();
+            if (!userId.HasValue) return RedirectToPage("/Account/Login");
+
+            var persona = await _context.Personas
+                .Include(p => p.Arbitro)
+                .FirstOrDefaultAsync(p => p.UsuarioId == userId.Value);
+
+            if (persona?.Arbitro == null) return RedirectToPage("/Error");
+
+            var ok = await _enVivoService.IniciarPartidoAsync(id, persona.Arbitro.Id, _notificaciones);
+            if (!ok)
+            {
+                return RedirectToPage(new { id });
+            }
+
+            return RedirectToPage("/Arbitro/Partidos/EnVivo", new { partidoId = id });
         }
     }
 
