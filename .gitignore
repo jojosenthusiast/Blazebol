@@ -40,3 +40,9 @@ node_modules/
 # Secrets
 secrets.json
 .fake
+
+# Claude Code settings
+.claude/
+
+# Frontend vendor libraries (managed by libman/npm, not git)
+wwwroot/lib/
