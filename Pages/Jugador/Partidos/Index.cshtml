@@ -24,7 +24,7 @@
         var sb = new System.Text.StringBuilder();
         sb.Append("<div style=\"margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;\">");
 
-        string (bg, color, label) = p.EstadoConvocatoria switch
+        var (bg, color, label) = p.EstadoConvocatoria switch
         {
             "Titular" => ("rgba(163,255,18,0.15)", "var(--color-accent)", "Titular"),
             "Suplente" => ("rgba(90,200,250,0.15)", "var(--color-info)", "Suplente"),

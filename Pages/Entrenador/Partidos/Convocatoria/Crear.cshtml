@@ -38,7 +38,7 @@
     .badge-titular { background: rgba(163,255,18,0.15); color: var(--color-accent); }
     .badge-suplente { background: rgba(90,200,250,0.15); color: var(--color-info); }
     .badge-reserva { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
-    @media (max-width: 900px) { .conv-grid { grid-template-columns: 1fr; } }
+    @@media (max-width: 900px) { .conv-grid { grid-template-columns: 1fr; } }
 </style>
 
 <div class="page-container">
@@ -166,9 +166,9 @@
                                                     <select class="conv-rol-sel jugador-rol" name="roles"
                                                             @(j.Seleccionado ? "" : "disabled")
                                                             onchange="updateCounter()">
-                                                        <option value="Titular" @(j.Rol == "Titular" ? "selected" : "")>Titular</option>
-                                                        <option value="Suplente" @(j.Rol == "Suplente" ? "selected" : "")>Suplente</option>
-                                                        <option value="Reserva" @(j.Rol == "Reserva" ? "selected" : "")>Reserva</option>
+                                                        <option value="Titular" selected="@(j.Rol == "Titular" ? "selected" : null)">Titular</option>
+                                                        <option value="Suplente" selected="@(j.Rol == "Suplente" ? "selected" : null)">Suplente</option>
+                                                        <option value="Reserva" selected="@(j.Rol == "Reserva" ? "selected" : null)">Reserva</option>
                                                     </select>
                                                 </td>
                                                 <td>

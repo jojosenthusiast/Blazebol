@@ -1,0 +1,376 @@
+@page
+@model ControlTorneosFutbol.Pages.Arbitro.Partidos.ReporteModel
+@{
+    ViewData["Title"] = "Reporte de Partido";
+    Layout = "_Layout";
+    bool estaEnviado = Model.Reporte?.Estado == "Enviado";
+    var p = Model.Partido;
+}
+
+<style>
+    .rep-header { background: var(--color-bg-card); border-radius: 16px; padding: 20px 24px; margin-bottom: 24px; border: 1px solid var(--color-border); }
+    .rep-score { font-size: 2.2rem; font-weight: 900; letter-spacing: -2px; text-align: center; }
+    .rep-team-name { font-size: 1rem; font-weight: 700; }
+    .rep-teams-row { display: flex; align-items: center; justify-content: center; gap: 20px; }
+    .rep-team-block { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 120px; }
+    .rep-badge-enviado { display: inline-flex; align-items: center; gap: 6px; background: rgba(163,255,18,0.12); color: var(--color-accent); border: 1px solid rgba(163,255,18,0.3); border-radius: 20px; padding: 4px 14px; font-size: 0.78rem; font-weight: 700; }
+    .rep-badge-borrador { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,149,0,0.12); color: var(--color-warning); border: 1px solid rgba(255,149,0,0.3); border-radius: 20px; padding: 4px 14px; font-size: 0.78rem; font-weight: 700; }
+    .rep-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+    .rep-section { background: var(--color-bg-card); border-radius: 12px; border: 1px solid var(--color-border); margin-bottom: 20px; overflow: hidden; }
+    .rep-section-title { padding: 12px 18px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.5; border-bottom: 1px solid var(--color-border); }
+    .rep-section-body { padding: 16px 18px; }
+    .rep-field { margin-bottom: 14px; }
+    .rep-field label { display: block; font-size: 0.82rem; opacity: 0.6; margin-bottom: 5px; }
+    .rep-textarea { width: 100%; background: var(--color-bg-secondary); border: 1px solid var(--color-border); color: var(--color-text-primary); border-radius: 8px; padding: 10px 12px; font-size: 0.88rem; resize: vertical; min-height: 80px; }
+    .rep-textarea:focus { outline: none; border-color: var(--color-accent); }
+    .rep-input { width: 100%; background: var(--color-bg-secondary); border: 1px solid var(--color-border); color: var(--color-text-primary); border-radius: 8px; padding: 8px 12px; font-size: 0.88rem; }
+    .rep-input:focus { outline: none; border-color: var(--color-accent); }
+    .rep-input-sm { width: 90px; background: var(--color-bg-secondary); border: 1px solid var(--color-border); color: var(--color-text-primary); border-radius: 8px; padding: 6px 10px; font-size: 0.88rem; }
+    .rep-check-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.88rem; cursor: pointer; }
+    .rep-check-row input { accent-color: var(--color-accent); width: 16px; height: 16px; cursor: pointer; }
+    .rep-penales-row { display: flex; gap: 20px; align-items: center; margin-top: 10px; }
+    .inc-timeline { }
+    .inc-item { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .inc-item:last-child { border-bottom: none; }
+    .inc-min { font-size: 0.78rem; font-weight: 700; color: var(--color-accent); min-width: 30px; }
+    .inc-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .inc-info { flex: 1; }
+    .inc-label { font-size: 0.85rem; font-weight: 600; }
+    .inc-sub { font-size: 0.72rem; opacity: 0.45; }
+    .btn-pdf { background: rgba(90,200,250,0.12); color: var(--color-info); border: 1px solid rgba(90,200,250,0.25); padding: 9px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
+    .btn-guardar { background: rgba(255,255,255,0.08); color: var(--color-text-primary); border: 1px solid var(--color-border); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+    .btn-enviar { background: var(--color-accent); color: #000; padding: 10px 22px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 7px; }
+    .read-only-badge { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 3px 12px; font-size: 0.75rem; opacity: 0.6; }
+    @@media (max-width: 860px) { .rep-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <a asp-page="/Arbitro/Partidos/Index" class="back-link">← Volver a Partidos</a>
+            <h1>Reporte de Partido</h1>
+            @if (p != null)
+            {
+                <p class="page-subtitle">@p.Torneo.Nombre &mdash; @p.Fecha.ToString("dd/MM/yyyy")</p>
+            }
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            @if (Model.Reporte != null)
+            {
+                if (estaEnviado)
+                {
+                    <span class="rep-badge-enviado"><i class="bi bi-check-circle-fill"></i> Reporte Enviado</span>
+                }
+                else
+                {
+                    <span class="rep-badge-borrador"><i class="bi bi-pencil"></i> Borrador</span>
+                }
+            }
+            @if (Model.Reporte != null)
+            {
+                <a asp-page="/Arbitro/Partidos/Reporte" asp-page-handler="Pdf"
+                   asp-route-partidoId="@Model.PartidoId"
+                   class="btn-pdf" target="_blank">
+                    <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+                </a>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error">@Model.ErrorMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert" style="background:rgba(52,199,89,0.1);color:var(--color-success);border:1px solid rgba(52,199,89,0.3);border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+            <i class="bi bi-check-circle"></i> @Model.SuccessMessage
+        </div>
+    }
+
+    @if (p != null && Model.Reporte != null)
+    {
+        <!-- MATCH HEADER -->
+        <div class="rep-header">
+            <div class="rep-teams-row">
+                <div class="rep-team-block">
+                    <div style="width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                        @if (!string.IsNullOrEmpty(p.EquipoLocal.Logo))
+                        {
+                            <img src="@p.EquipoLocal.Logo" style="width:44px;height:44px;object-fit:contain;" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-dribbble" style="opacity:0.3;font-size:1.5rem;"></i>
+                        }
+                    </div>
+                    <div class="rep-team-name">@p.EquipoLocal.Nombre</div>
+                    <div style="font-size:0.72rem;opacity:0.4;">Local</div>
+                </div>
+
+                <div style="text-align:center;">
+                    <div class="rep-score">
+                        @(p.GolesLocal ?? 0) <span style="opacity:0.3;font-size:1.6rem;">–</span> @(p.GolesVisitante ?? 0)
+                    </div>
+                    <div style="font-size:0.78rem;opacity:0.45;margin-top:4px;">
+                        <i class="bi bi-calendar"></i> @p.Fecha.ToString("dd/MM/yyyy HH:mm")
+                        @if (!string.IsNullOrEmpty(p.Sede))
+                        {
+                            <span> &middot; <i class="bi bi-geo-alt"></i> @p.Sede</span>
+                        }
+                    </div>
+                    @if (p.Arbitro != null)
+                    {
+                        <div style="font-size:0.75rem;opacity:0.4;margin-top:2px;">
+                            <i class="bi bi-whistle"></i> @p.Arbitro.Persona.Nombre @p.Arbitro.Persona.ApellidoPaterno
+                        </div>
+                    }
+                </div>
+
+                <div class="rep-team-block">
+                    <div style="width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                        @if (!string.IsNullOrEmpty(p.EquipoVisitante.Logo))
+                        {
+                            <img src="@p.EquipoVisitante.Logo" style="width:44px;height:44px;object-fit:contain;" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-dribbble" style="opacity:0.3;font-size:1.5rem;"></i>
+                        }
+                    </div>
+                    <div class="rep-team-name">@p.EquipoVisitante.Nombre</div>
+                    <div style="font-size:0.72rem;opacity:0.4;">Visitante</div>
+                </div>
+            </div>
+        </div>
+
+        <form method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="PartidoId" value="@Model.PartidoId" />
+
+            <div class="rep-grid">
+                <!-- LEFT: FORM + INCIDENCIAS -->
+                <div>
+                    <!-- Datos del partido -->
+                    <div class="rep-section">
+                        <div class="rep-section-title">
+                            Datos del Partido
+                            @if (estaEnviado) { <span class="read-only-badge" style="margin-left:8px;">Solo lectura</span> }
+                        </div>
+                        <div class="rep-section-body">
+                            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                                <div class="rep-field" style="flex:1;min-width:150px;">
+                                    <label asp-for="Input.MinutosJugados">Minutos Jugados</label>
+                                    @if (estaEnviado)
+                                    {
+                                        <input asp-for="Input.MinutosJugados" class="rep-input-sm" type="number" min="1" max="180" readonly />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="Input.MinutosJugados" class="rep-input-sm" type="number" min="1" max="180" />
+                                    }
+                                </div>
+                                <div style="flex:2;min-width:180px;">
+                                    <label class="rep-check-row" style="margin-bottom:0;">
+                                        @if (estaEnviado)
+                                        {
+                                            <input asp-for="Input.HuboProrroga" type="checkbox" id="chkProrroga" disabled onchange="togglePenales()" />
+                                        }
+                                        else
+                                        {
+                                            <input asp-for="Input.HuboProrroga" type="checkbox" id="chkProrroga" onchange="togglePenales()" />
+                                        }
+                                        ¿Hubo Prórroga?
+                                    </label>
+                                    <label class="rep-check-row" style="margin-top:8px;">
+                                        @if (estaEnviado)
+                                        {
+                                            <input asp-for="Input.HuboPenales" type="checkbox" id="chkPenales" disabled onchange="togglePenalesInputs()" />
+                                        }
+                                        else
+                                        {
+                                            <input asp-for="Input.HuboPenales" type="checkbox" id="chkPenales" onchange="togglePenalesInputs()" />
+                                        }
+                                        ¿Hubo Penales?
+                                    </label>
+                                </div>
+                            </div>
+
+                            @{ string penalesDisplay = Model.Input.HuboPenales ? "flex" : "none"; }
+                            <div id="penalesSection" style="display:@penalesDisplay;gap:24px;margin-top:12px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;align-items:center;flex-wrap:wrap;">
+                                <div>
+                                    <label style="font-size:0.78rem;opacity:0.55;display:block;margin-bottom:4px;">@p.EquipoLocal.Nombre (Penales)</label>
+                                    @if (estaEnviado)
+                                    {
+                                        <input asp-for="Input.GolesLocalPenales" class="rep-input-sm" type="number" min="0" max="20" readonly placeholder="0" />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="Input.GolesLocalPenales" class="rep-input-sm" type="number" min="0" max="20" placeholder="0" />
+                                    }
+                                </div>
+                                <div style="font-size:1.2rem;opacity:0.3;align-self:flex-end;padding-bottom:4px;">–</div>
+                                <div>
+                                    <label style="font-size:0.78rem;opacity:0.55;display:block;margin-bottom:4px;">@p.EquipoVisitante.Nombre (Penales)</label>
+                                    @if (estaEnviado)
+                                    {
+                                        <input asp-for="Input.GolesVisitantePenales" class="rep-input-sm" type="number" min="0" max="20" readonly placeholder="0" />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="Input.GolesVisitantePenales" class="rep-input-sm" type="number" min="0" max="20" placeholder="0" />
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="rep-section">
+                        <div class="rep-section-title">Observaciones del Árbitro</div>
+                        <div class="rep-section-body">
+                            @if (estaEnviado)
+                            {
+                                <div style="font-size:0.88rem;white-space:pre-wrap;opacity:@(string.IsNullOrEmpty(Model.Input.Observaciones) ? "0.35" : "0.85");">
+                                    @(string.IsNullOrEmpty(Model.Input.Observaciones) ? "Sin observaciones." : Model.Input.Observaciones)
+                                </div>
+                            }
+                            else
+                            {
+                                <textarea asp-for="Input.Observaciones" class="rep-textarea"
+                                          placeholder="Describe el desarrollo del partido, comportamiento de los equipos, incidentes relevantes..."></textarea>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Incidencias -->
+                    <div class="rep-section">
+                        <div class="rep-section-title">Incidencias Registradas</div>
+                        <div class="rep-section-body" style="padding:0 18px;">
+                            @if (!Model.Incidencias.Any())
+                            {
+                                <div style="padding:24px 0;text-align:center;opacity:0.35;font-size:0.85rem;">
+                                    No se registraron incidencias durante el partido.
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="inc-timeline">
+                                    @foreach (var inc in Model.Incidencias)
+                                    {
+                                        string icon = inc.Tipo switch {
+                                            "Gol" => "⚽",
+                                            "TarjetaAmarilla" => "🟨",
+                                            "TarjetaRoja" => "🟥",
+                                            "Cambio" => "🔄",
+                                            "Lesion" => "🩹",
+                                            "Expulsion" => "🟥",
+                                            _ => "ℹ️"
+                                        };
+                                        string label = inc.Tipo switch {
+                                            "Gol" => (inc.EsAutogol ? "Autogol" : "Gol") + (inc.EsPenal ? " (P)" : "") +
+                                                     (inc.EjtJugador != null ? $" — {inc.EjtJugador.Jugador.Persona.Nombre} {inc.EjtJugador.Jugador.Persona.ApellidoPaterno}" : ""),
+                                            "Cambio" => $"Cambio: {(inc.EjtJugador != null ? $"{inc.EjtJugador.Jugador.Persona.Nombre} {inc.EjtJugador.Jugador.Persona.ApellidoPaterno}" : "?")} ↔ {(inc.EjtJugadorSalida != null ? $"{inc.EjtJugadorSalida.Jugador.Persona.Nombre} {inc.EjtJugadorSalida.Jugador.Persona.ApellidoPaterno}" : "?")}",
+                                            _ => inc.Tipo + (inc.EjtJugador != null ? $" — {inc.EjtJugador.Jugador.Persona.Nombre} {inc.EjtJugador.Jugador.Persona.ApellidoPaterno}" : "") + (!string.IsNullOrEmpty(inc.Descripcion) ? $": {inc.Descripcion}" : "")
+                                        };
+                                        <div class="inc-item">
+                                            <div class="inc-min">@(inc.Minuto.HasValue ? $"{inc.Minuto}'" : "—")</div>
+                                            <div class="inc-icon">@icon</div>
+                                            <div class="inc-info">
+                                                <div class="inc-label">@label</div>
+                                                <div class="inc-sub">@inc.Equipo.Nombre</div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: ACTIONS -->
+                <div>
+                    <div style="background:var(--color-bg-card);border-radius:12px;padding:20px;border:1px solid var(--color-border);position:sticky;top:20px;">
+                        <h4 style="margin:0 0 16px;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.06em;opacity:0.5;">Acciones</h4>
+
+                        @if (estaEnviado)
+                        {
+                            <div style="text-align:center;padding:16px 0;">
+                                <i class="bi bi-check-circle-fill" style="font-size:2rem;color:var(--color-accent);"></i>
+                                <p style="margin:10px 0 4px;font-weight:600;">Reporte Enviado</p>
+                                <p style="font-size:0.78rem;opacity:0.45;margin:0;">
+                                    @(Model.Reporte.FechaEnvio.HasValue ? Model.Reporte.FechaEnvio.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                                </p>
+                                <p style="font-size:0.78rem;opacity:0.45;margin-top:8px;">
+                                    El reporte está cerrado. Para correcciones, solicita al administrador que lo reabra.
+                                </p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="display:flex;flex-direction:column;gap:10px;">
+                                <button type="submit" asp-page-handler="Guardar" class="btn-guardar" style="width:100%;justify-content:center;">
+                                    <i class="bi bi-floppy"></i> Guardar Borrador
+                                </button>
+                                <button type="submit" asp-page-handler="Enviar" class="btn-enviar" style="width:100%;justify-content:center;"
+                                        onclick="return confirm('¿Enviar el reporte? Una vez enviado quedará solo lectura.')">
+                                    <i class="bi bi-send-check"></i> Enviar Reporte
+                                </button>
+                            </div>
+                            <p style="font-size:0.75rem;opacity:0.4;margin-top:12px;text-align:center;">
+                                Al enviar, el reporte queda bloqueado para edición.
+                            </p>
+                        }
+
+                        <hr style="border-color:var(--color-border);margin:16px 0;" />
+
+                        <a asp-page="/Arbitro/Partidos/Reporte" asp-page-handler="Pdf"
+                           asp-route-partidoId="@Model.PartidoId"
+                           class="btn-pdf" style="width:100%;justify-content:center;box-sizing:border-box;" target="_blank">
+                            <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+                        </a>
+
+                        <!-- Resumen estadístico -->
+                        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--color-border);">
+                            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;opacity:0.45;margin-bottom:12px;">Resumen</div>
+                            @{
+                                int goles = Model.Incidencias.Count(i => i.Tipo == "Gol");
+                                int amarillas = Model.Incidencias.Count(i => i.Tipo == "TarjetaAmarilla");
+                                int rojas = Model.Incidencias.Count(i => i.Tipo == "TarjetaRoja" || i.Tipo == "Expulsion");
+                                int cambios = Model.Incidencias.Count(i => i.Tipo == "Cambio");
+                            }
+                            <div style="display:flex;flex-direction:column;gap:6px;font-size:0.83rem;">
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span>⚽ Goles</span><strong>@goles</strong>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span>🟨 Amarillas</span><strong>@amarillas</strong>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span>🟥 Rojas/Expulsiones</span><strong>@rojas</strong>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span>🔄 Cambios</span><strong>@cambios</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+<script>
+function togglePenalesInputs() {
+    const show = document.getElementById('chkPenales').checked;
+    document.getElementById('penalesSection').style.display = show ? 'flex' : 'none';
+}
+function togglePenales() {
+    // prórroga toggle - if unchecked, also uncheck penales
+    if (!document.getElementById('chkProrroga').checked) {
+        document.getElementById('chkPenales').checked = false;
+        document.getElementById('penalesSection').style.display = 'none';
+    }
+}
+</script>

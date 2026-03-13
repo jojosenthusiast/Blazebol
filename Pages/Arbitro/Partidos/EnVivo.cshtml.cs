@@ -29,6 +29,10 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
         public PartidoEnVivoVM? Estado { get; set; }
         public int ArbitroId { get; set; }
         public string? ErrorMessage { get; set; }
+        public bool EsPorIniciar { get; set; }
+        public string NombreLocal { get; set; } = string.Empty;
+        public string NombreVisitante { get; set; } = string.Empty;
+        public DateTime FechaPartido { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -46,7 +50,10 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
 
             ArbitroId = persona.Arbitro.Id;
 
-            var partido = await _context.Partidos.FindAsync(PartidoId);
+            var partido = await _context.Partidos
+                .Include(p => p.EquipoLocal)
+                .Include(p => p.EquipoVisitante)
+                .FirstOrDefaultAsync(p => p.Id == PartidoId);
             if (partido == null) return NotFound();
 
             if (partido.ArbitroId != ArbitroId)
@@ -55,15 +62,43 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
                 return Page();
             }
 
-            if (partido.Estado != EstadosPartido.EnCurso)
+            NombreLocal = partido.EquipoLocal.Nombre;
+            NombreVisitante = partido.EquipoVisitante.Nombre;
+            FechaPartido = partido.Fecha;
+
+            if (partido.Estado == EstadosPartido.Finalizado)
+                return RedirectToPage("/Arbitro/Partidos/Reporte", new { partidoId = PartidoId });
+
+            if (partido.Estado == EstadosPartido.Programado || partido.Estado == EstadosPartido.Reprogramado)
             {
-                if (partido.Estado == EstadosPartido.Finalizado)
-                    return RedirectToPage("/Arbitro/Partidos/Reporte", new { partidoId = PartidoId });
-                return RedirectToPage("/Arbitro/Partidos/Index");
+                EsPorIniciar = true;
+                return Page();
             }
+
+            if (partido.Estado != EstadosPartido.EnCurso)
+                return RedirectToPage("/Arbitro/Partidos/Index");
 
             Estado = await _enVivoService.GetEstadoEnVivoAsync(PartidoId);
             return Page();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> OnPostIniciarAsync(int partidoId)
+        {
+            if (!HttpContext.Session.IsAuthenticated() || !HttpContext.Session.IsInRole("Arbitro"))
+                return new JsonResult(new { ok = false, error = "Unauthorized" });
+
+            var userId = HttpContext.Session.GetUserId();
+            if (!userId.HasValue) return new JsonResult(new { ok = false });
+
+            var persona = await _context.Personas
+                .Include(p => p.Arbitro)
+                .FirstOrDefaultAsync(p => p.UsuarioId == userId.Value);
+
+            if (persona?.Arbitro == null) return new JsonResult(new { ok = false });
+
+            var ok = await _enVivoService.IniciarPartidoAsync(partidoId, persona.Arbitro.Id, _notificaciones);
+            return new JsonResult(new { ok, redirectUrl = ok ? $"/Arbitro/Partidos/EnVivo?partidoId={partidoId}" : null });
         }
 
         [HttpGet]

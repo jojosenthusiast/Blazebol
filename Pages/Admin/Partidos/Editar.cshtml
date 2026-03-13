@@ -35,6 +35,7 @@
                     <label asp-for="Input.Estado"></label>
                     <select asp-for="Input.Estado" class="form-control" id="estadoSelect">
                         <option value="Programado">Programado</option>
+                        <option value="Reprogramado">Reprogramado</option>
                         <option value="EnCurso">En Curso</option>
                         <option value="Finalizado">Finalizado</option>
                         <option value="Cancelado">Cancelado</option>
@@ -69,8 +70,18 @@
                 <div class="form-group">
                     <label asp-for="Input.Fecha"></label>
                     <input asp-for="Input.Fecha" class="form-control" type="datetime-local"
-                           value="@Model.Input.Fecha.ToString("yyyy-MM-ddTHH:mm")" />
+                           value="@Model.Input.Fecha.ToString("yyyy-MM-ddTHH:mm")" id="fechaInput" />
                     <span asp-validation-for="Input.Fecha" class="text-danger"></span>
+                    <small style="opacity:0.5;font-size:0.78rem;">
+                        Al cambiar la fecha de un partido Programado se marcará automáticamente como <strong>Reprogramado</strong> y se notificará a los involucrados.
+                    </small>
+                </div>
+
+                <div class="form-group" id="razonSection">
+                    <label asp-for="Input.RazonReprogramacion"></label>
+                    <input asp-for="Input.RazonReprogramacion" class="form-control"
+                           placeholder="Ej: Lluvia, conflicto de cancha, solicitud del equipo..." />
+                    <span asp-validation-for="Input.RazonReprogramacion" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
@@ -107,12 +118,25 @@
     <script>
         const estadoSelect = document.getElementById('estadoSelect');
         const resultadoSection = document.getElementById('resultadoSection');
+        const razonSection = document.getElementById('razonSection');
+        const fechaInput = document.getElementById('fechaInput');
+        const fechaOriginal = fechaInput.value;
 
         function toggleResultado() {
             resultadoSection.style.display = estadoSelect.value === 'Finalizado' ? 'block' : 'none';
         }
 
-        estadoSelect.addEventListener('change', toggleResultado);
+        function toggleRazon() {
+            const estado = estadoSelect.value;
+            const fechaCambia = fechaInput.value !== fechaOriginal;
+            const necesitaRazon = estado === 'Cancelado' || estado === 'Reprogramado' || fechaCambia;
+            razonSection.style.display = necesitaRazon ? 'block' : 'none';
+        }
+
+        estadoSelect.addEventListener('change', () => { toggleResultado(); toggleRazon(); });
+        fechaInput.addEventListener('change', toggleRazon);
+
         toggleResultado();
+        toggleRazon();
     </script>
 }

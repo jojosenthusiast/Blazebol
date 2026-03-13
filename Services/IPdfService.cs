@@ -8,5 +8,6 @@ namespace ControlTorneosFutbol.Services
         byte[] GenerateTorneosReport(List<Torneo> torneos);
         byte[] GenerateJugadoresReport(List<Jugador> jugadores);
         byte[] GenerarReglamentoPdf(Torneo torneo, ConfiguracionTorneo? config);
+        byte[] GenerarReportePartidoPdf(ReportePartido reporte);
     }
 }

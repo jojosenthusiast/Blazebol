@@ -362,5 +362,97 @@ namespace ControlTorneosFutbol.Services
 
             return document.GeneratePdf();
         }
+
+        public byte[] GenerarReportePartidoPdf(ReportePartido reporte)
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            var p = reporte.Partido;
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+
+                    page.Header().Column(col =>
+                    {
+                        col.Item().Text("Reporte de Partido Oficial").SemiBold().FontSize(18).FontColor(Colors.Black);
+                        col.Item().Text($"{p.Torneo?.Nombre ?? "Torneo"} — {p.Fecha:dd/MM/yyyy HH:mm}").FontSize(10).FontColor(Colors.Grey.Darken2);
+                        col.Item().PaddingTop(4).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+                    });
+
+                    page.Content().PaddingVertical(0.8f, Unit.Centimetre).Column(col =>
+                    {
+                        // Match info
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(c => { c.RelativeColumn(); c.ConstantColumn(60); c.RelativeColumn(); });
+                            table.Cell().AlignCenter().Text(p.EquipoLocal?.Nombre ?? "Local").SemiBold().FontSize(14);
+                            table.Cell().AlignCenter().Text($"{p.GolesLocal ?? 0} – {p.GolesVisitante ?? 0}").SemiBold().FontSize(18).FontColor(Colors.Black);
+                            table.Cell().AlignCenter().Text(p.EquipoVisitante?.Nombre ?? "Visitante").SemiBold().FontSize(14);
+                        });
+
+                        col.Item().PaddingVertical(6).Row(row =>
+                        {
+                            row.RelativeItem().Text($"Sede: {p.Sede ?? "—"}").FontSize(9).FontColor(Colors.Grey.Darken2);
+                            row.RelativeItem().AlignCenter().Text($"Árbitro: {reporte.Arbitro?.Persona?.Nombre} {reporte.Arbitro?.Persona?.ApellidoPaterno}").FontSize(9).FontColor(Colors.Grey.Darken2);
+                            row.RelativeItem().AlignRight().Text($"Estado: {reporte.Estado}").FontSize(9).FontColor(Colors.Grey.Darken2);
+                        });
+
+                        col.Item().LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten2);
+                        col.Item().PaddingTop(8).Text("Datos del Partido").SemiBold().FontSize(12);
+                        col.Item().PaddingTop(4).Row(row =>
+                        {
+                            row.RelativeItem().Text($"Minutos jugados: {reporte.MinutosJugados ?? 90}").FontSize(9);
+                            row.RelativeItem().Text($"Prórroga: {(reporte.HuboProrroga ? "Sí" : "No")}").FontSize(9);
+                            row.RelativeItem().Text($"Penales: {(reporte.HuboPenales ? $"Sí ({reporte.GolesLocalPenales}–{reporte.GolesVisitantePenales})" : "No")}").FontSize(9);
+                        });
+
+                        if (!string.IsNullOrWhiteSpace(reporte.Observaciones))
+                        {
+                            col.Item().PaddingTop(10).Text("Observaciones del Árbitro").SemiBold().FontSize(12);
+                            col.Item().PaddingTop(4).Text(reporte.Observaciones).FontSize(9).FontColor(Colors.Grey.Darken1);
+                        }
+
+                        if (reporte.Incidencias?.Any() == true)
+                        {
+                            col.Item().PaddingTop(10).Text("Incidencias").SemiBold().FontSize(12);
+                            col.Item().PaddingTop(4).Table(table =>
+                            {
+                                table.ColumnsDefinition(c => { c.ConstantColumn(40); c.RelativeColumn(2); c.RelativeColumn(3); c.RelativeColumn(3); });
+                                table.Header(header =>
+                                {
+                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(4).Text("Min.").SemiBold().FontSize(8);
+                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(4).Text("Tipo").SemiBold().FontSize(8);
+                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(4).Text("Jugador").SemiBold().FontSize(8);
+                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(4).Text("Equipo").SemiBold().FontSize(8);
+                                });
+                                foreach (var inc in reporte.Incidencias.OrderBy(i => i.Minuto))
+                                {
+                                    string jugador = inc.EjtJugador != null
+                                        ? $"{inc.EjtJugador.Jugador?.Persona?.Nombre} {inc.EjtJugador.Jugador?.Persona?.ApellidoPaterno}" : "—";
+                                    table.Cell().Padding(4).Text(inc.Minuto.HasValue ? $"{inc.Minuto}'" : "—").FontSize(8);
+                                    table.Cell().Padding(4).Text(inc.Tipo).FontSize(8);
+                                    table.Cell().Padding(4).Text(jugador).FontSize(8);
+                                    table.Cell().Padding(4).Text(inc.Equipo?.Nombre ?? "—").FontSize(8);
+                                }
+                            });
+                        }
+                    });
+
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Página ").FontSize(8).FontColor(Colors.Grey.Darken1);
+                        x.CurrentPageNumber().FontSize(8).FontColor(Colors.Grey.Darken1);
+                        x.Span($" — Generado {DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(8).FontColor(Colors.Grey.Darken1);
+                    });
+                });
+            });
+
+            return document.GeneratePdf();
+        }
     }
 }
