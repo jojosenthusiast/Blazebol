@@ -4,6 +4,8 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlTorneosFutbol", "ControlTorneosFutbol.csproj", "{2CFA172A-FFB2-2712-6D25-46E377AB913B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlTorneosFutbol.Tests", "tests/ControlTorneosFutbol.Tests/ControlTorneosFutbol.Tests.csproj", "{A51B439E-3A2C-47D8-AD35-102C5E7F8B61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +16,10 @@ Global
 		{2CFA172A-FFB2-2712-6D25-46E377AB913B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CFA172A-FFB2-2712-6D25-46E377AB913B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CFA172A-FFB2-2712-6D25-46E377AB913B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A51B439E-3A2C-47D8-AD35-102C5E7F8B61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A51B439E-3A2C-47D8-AD35-102C5E7F8B61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A51B439E-3A2C-47D8-AD35-102C5E7F8B61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A51B439E-3A2C-47D8-AD35-102C5E7F8B61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

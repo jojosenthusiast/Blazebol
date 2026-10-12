@@ -50,4 +50,4 @@ Write focused tests first for state-read and incident-write authorization; team 
 
 Work in small ordered slices. Verify each slice and make a focused work-unit commit only after its checks pass. Push the feature branch only after all required checks succeed. Cleanup is separate, explicitly approved action: inventory exact project-folder/archive paths and present the concrete list for review before any deletion. Preserve appsettings/secrets, all unlisted paths, the canonical clone, and `C:/Users/frenzied` (the misplaced ambient Git root).
 
-**Current status:** The user-approved design is updated with targeted audit findings and the confirmed live-match security scope. Parent verification passed `git diff --check` (LF-to-CRLF warnings only); the focused documentation commit is next. No implementation, tests, push, or deletion has occurred.
+**Current status:** The user-approved design and targeted audit update passed `git diff --check` and were committed as `70db5ed`. Task 1 is complete; the focused test-project task is in progress. No implementation, tests, push, or deletion has occurred.
