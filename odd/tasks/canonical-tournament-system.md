@@ -1,27 +1,33 @@
 # Canonical Tournament System — ODD Task Plan
 
-**Goal:** Audit parity against upstream master, preserve verified local/RAR/archive improvements, and fix only confirmed defects. See [Canonical Tournament System Design](../../docs/superpowers/specs/2026-10-12-canonical-tournament-system-design.md).
+**Goal:** Preserve upstream `jojosenthusiast/Blazebol` master (`f39507b`) as canonical baseline, retain verified improvements, and fix only confirmed defects. See [Canonical Tournament System Design](../../docs/superpowers/specs/2026-10-12-canonical-tournament-system-design.md) and [Canonical parity audit](../../docs/canonical-parity-audit.md).
 
-**Current status:** Planning/spec/task files were committed as `0d7ef11` (`docs: define canonical tournament consolidation plan`). No production-source changes, tests, pushes, or deletions have occurred. The application is a root-level ASP.NET Core Razor Pages app. Do not change appsettings secrets or include them in Git.
+**Current status:** User approved the design on 2026-10-12. Planning/spec/task documents were previously committed as `0d7ef11` and `4ee4e75`. Task 1's targeted archive/local parity audit is documented and passed parent `git diff --check` (LF-to-CRLF warnings only); its focused documentation commit is next. No production-source changes, tests, push, or deletions have occurred. The application is a root-level ASP.NET Core Razor Pages app. Do not inspect or change appsettings secrets or include them in Git.
 
 ## Ordered work units
 
-1. **Audit baseline and deltas.** Compare the root-level application with upstream master and inspect all meaningful local/RAR/archive deltas. The local folder matches `ExtremelyAdvanced.zip` across 160 selected source files; ten ZIPs were fingerprinted, older snapshots add no selected source paths missing from local, and `BackUp2`/`BackUpLogOut` fingerprints match. Review all meaningful differences in the March 1 RAR's 15 differing page files. Create `docs/canonical-parity-audit.md` with a reasoned disposition for every meaningful delta, recording provenance, parity, and why each change is retained or rejected. Verify parity for existing fixture/calendar, convocation, report/PDF, notification, and other upstream functionality without planning to rebuild it. Verify this audit slice, then make one focused work-unit commit.
-2. **Create the focused test project.** Create `tests/Blazebol.Tests/` using existing .NET conventions and add the project to `ControlTorneosFutbol.sln`. Keep dependencies limited to the behaviors under test. Build/verify the project and solution integration, then commit this slice.
-3. **Write focused behavior tests first.** Cover: (a) an unauthorized or non-assigned referee cannot read or write live-match incidents; (b) submitted team/player IDs must belong to the match and invalid submissions return accurate failure responses; and (c) a valid assigned referee's incident operation succeeds. Add regression assertions for existing spectator draft filtering and upcoming-match count only if straightforward in the selected test setup. Test other behavior only when the parity audit or code inspection establishes a concrete change. Capture the failing behavior for the confirmed incident defect before implementation. Verify these tests and commit this test slice.
-4. **Fix the confirmed live incident defect only.** Make the smallest change in the live-match service/page path required by failing tests to enforce referee assignment and submitted team/player membership, including accurate failure responses. Do not rebuild fixture/calendar, convocations, report/PDF, notifications, or other existing upstream behavior. Do not claim spectator implementation changes unless tests reveal a real regression. Do not modify `Migrations/` or migration-related `Program.cs`, and do not port the local broken startup `ExecuteSqlRawAsync` guard for `SELECT`. Run focused tests and commit the verified fix.
-5. **Integrated verification.** Run focused tests first, then all applicable repository validation. Record exact commands and observed results; inspect changed paths and confirm appsettings secrets are excluded. Preserve upstream's manual migration behavior. Commit any necessary, separately verified in-scope integration correction as a focused slice.
+1. **Parity audit — documented.** Compare against upstream master using the selected source scan described in the audit. The local snapshot matches `ExtremelyAdvanced.zip` across 160 selected source files; older ZIPs add no selected source paths missing from local; archive snapshots have 45 unique differing selected source paths; and the March 1 RAR has the same selected paths with 15 changed page files, listed exactly in the audit. The audit records dispositions, upstream capabilities, local/deployment risks, migration concerns, and scope limitations. This is targeted, not an exhaustive semantic audit of every shared file.
+2. **Create focused test project.** Create `tests/ControlTorneosFutbol.Tests/` using xUnit and EF InMemory 8.0.x for scoped service tests. Add the project to `ControlTorneosFutbol.sln` and add `<Compile Remove="tests/**/*.cs" />` to `ControlTorneosFutbol.csproj` because tests are nested under the web root. Verify project and solution integration.
+3. **Write focused behavior tests first.** Cover (a) unauthorized/non-assigned referee denial for live state reads and incident writes; (b) rejection of unrelated team IDs and player IDs not in the match's convocations, with accurate failure results; (c) successful incident operation by an assigned referee; and (d) antiforgery token/header handling for both AJAX paths in `Pages/Arbitro/Partidos/EnVivo.cshtml`. Use a minimal isolated test host/token/filter approach for page antiforgery if practical. Add spectator draft/upcoming assertions only if straightforward and justified; test other behavior only for concrete changes established by audit/code inspection.
+4. **Fix the confirmed live-match defects only.** Make the smallest service/page/view change needed to pass the focused tests, including assignment enforcement, ID membership checks, accurate result propagation, and antiforgery handling. Do not change `Program.cs` role/migration configuration. Do not claim spectator implementation changes unless tests prove a real regression.
+5. **Integrated verification.** Run focused tests first, then applicable validation. Record exact commands and observed results; inspect changed paths and confirm appsettings secrets are excluded. Preserve upstream's manual migration behavior. Commit any necessary, separately verified in-scope integration correction as a focused slice.
 6. **Feature-branch delivery.** Push the feature branch only after every required check passes. Never push to `master` or rewrite history. If checks fail, do not push; report the observed failure.
 7. **Separate cleanup gate.** After successful verification and feature-branch push, inventory the exact project-folder/archive paths proposed for removal and present the concrete list for review and approval before any deletion. Delete only approved paths on that list. Preserve appsettings/secrets, the canonical clone, every unlisted path, and `C:/Users/frenzied` (the misplaced ambient Git root). If a target is not an exact inventoried and approved path, preserve it.
 
 ## Allowed edit surfaces
 
-`docs/canonical-parity-audit.md`
-`Services/PartidoEnVivoService.cs`
-`Services/IPartidoEnVivoService.cs`
-`Pages/Arbitro/Partidos/EnVivo.cshtml.cs`
-`Pages/Espectador/Index.cshtml.cs`
-`Pages/Espectador/Torneos.cshtml.cs`
-`Pages/Espectador/TorneoDetalle.cshtml.cs`
-`tests/Blazebol.Tests/**`
-`ControlTorneosFutbol.sln`
+- `docs/canonical-parity-audit.md`
+- `docs/superpowers/specs/2026-10-12-canonical-tournament-system-design.md`
+- `odd/tasks/canonical-tournament-system.md`
+- `Services/PartidoEnVivoService.cs`
+- `Services/IPartidoEnVivoService.cs`
+- `Pages/Arbitro/Partidos/EnVivo.cshtml.cs`
+- `Pages/Arbitro/Partidos/EnVivo.cshtml`
+- `Pages/Espectador/Index.cshtml.cs`
+- `Pages/Espectador/Torneos.cshtml.cs`
+- `Pages/Espectador/TorneoDetalle.cshtml.cs`
+- `ControlTorneosFutbol.csproj`
+- `tests/ControlTorneosFutbol.Tests/**`
+- `ControlTorneosFutbol.sln`
+
+The player match-convocation antiforgery issue in `Pages/Jugador/Partidos/Index.cshtml` and its page model is separately gated for later review and is not an allowed surface for this live-match work. Do not modify `Program.cs`, migrations, appsettings, or other paths.
