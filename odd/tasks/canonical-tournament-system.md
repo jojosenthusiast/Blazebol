@@ -2,7 +2,7 @@
 
 **Goal:** Audit parity against upstream master, preserve verified local/RAR/archive improvements, and fix only confirmed defects. See [Canonical Tournament System Design](../../docs/superpowers/specs/2026-10-12-canonical-tournament-system-design.md).
 
-**Current status:** Planning/spec/task files have been created; no production-source changes, tests, pushes, or deletions have occurred. The only planned commit is the design/task documentation. The application is a root-level ASP.NET Core Razor Pages app. Do not change appsettings secrets or include them in Git.
+**Current status:** Planning/spec/task files were committed as `0d7ef11` (`docs: define canonical tournament consolidation plan`). No production-source changes, tests, pushes, or deletions have occurred. The application is a root-level ASP.NET Core Razor Pages app. Do not change appsettings secrets or include them in Git.
 
 ## Ordered work units
 
