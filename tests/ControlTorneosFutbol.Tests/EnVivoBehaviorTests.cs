@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using ControlTorneosFutbol.Data;
 using ControlTorneosFutbol.Data.Entities;
@@ -113,6 +114,21 @@ public sealed class EnVivoBehaviorTests
     }
 
     [Fact]
+    public async Task Finalizar_si_el_servicio_falla_no_devuelve_url_de_reporte()
+    {
+        await using var db = CreateDb();
+        await SeedRefereeAndMatch(db);
+        var service = new RecordingLiveService { FinalizationResult = false };
+        var page = CreatePage(db, service, UserId, "Arbitro");
+
+        var result = Assert.IsType<JsonResult>(await page.OnPostFinalizarAsync(MatchId));
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(result.Value));
+
+        Assert.False(json.RootElement.GetProperty("ok").GetBoolean());
+        Assert.True(json.RootElement.GetProperty("redirectUrl").ValueKind == JsonValueKind.Null);
+    }
+
+    [Fact]
     public async Task Registrar_incidencia_rechaza_equipo_existente_que_no_juega_el_partido()
     {
         await using var db = CreateDb();
@@ -173,15 +189,12 @@ public sealed class EnVivoBehaviorTests
         var sourceRoot = FindSourceRoot();
         var viewSource = File.ReadAllText(Path.Combine(sourceRoot, "Pages/Arbitro/Partidos/EnVivo.cshtml"));
         var feedSection = ExtractSection(viewSource, "function actualizarFeed(incidencias)", "function incIconFor");
-        var labelSection = ExtractSection(viewSource, "function labelFor(inc)", "// Polling every 10s");
-
         Assert.Contains("function escapeHtml(", viewSource, StringComparison.Ordinal);
-        var escapeSection = ExtractSection(viewSource, "function escapeHtml(", "function actualizarFeed(incidencias)");
+        var escapeSection = ExtractSection(viewSource, "function escapeHtml(", "function incIconFor(");
         Assert.Contains("escapeHtml(labelFor(inc))", feedSection, StringComparison.Ordinal);
         Assert.Contains("escapeHtml(inc.nombreEquipo || '')", feedSection, StringComparison.Ordinal);
-        Assert.Contains("escapeHtml(inc.nombreJugador", labelSection, StringComparison.Ordinal);
-        Assert.Contains("escapeHtml(inc.nombreJugadorSalida", labelSection, StringComparison.Ordinal);
-        Assert.Contains("escapeHtml(inc.tipo)", labelSection, StringComparison.Ordinal);
+        Assert.DoesNotContain("${labelFor(inc)}", feedSection, StringComparison.Ordinal);
+        Assert.DoesNotContain("${inc.nombreEquipo || ''}", feedSection, StringComparison.Ordinal);
         Assert.Contains("textContent", escapeSection, StringComparison.Ordinal);
         Assert.Contains("innerHTML", escapeSection, StringComparison.Ordinal);
     }
@@ -318,7 +331,7 @@ public sealed class EnVivoBehaviorTests
         public Task LoadAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
         public void Remove(string key) => _values.Remove(key);
         public void Set(string key, byte[] value) => _values[key] = value;
-        public bool TryGetValue(string key, out byte[]? value) => _values.TryGetValue(key, out value);
+        public bool TryGetValue(string key, [NotNullWhen(true)] out byte[]? value) => _values.TryGetValue(key, out value);
     }
 
     private sealed class RecordingLiveService : IPartidoEnVivoService
@@ -327,6 +340,7 @@ public sealed class EnVivoBehaviorTests
         public int IncidentCalls { get; private set; }
         public int? LastIncidentMatchId { get; private set; }
         public bool IncidentResult { get; set; } = true;
+        public bool FinalizationResult { get; set; } = true;
         public Task<bool> IniciarPartidoAsync(int partidoId, int arbitroId, INotificacionService notif) => Task.FromResult(true);
         public Task<bool> RegistrarIncidenciaAsync(int partidoId, string tipo, int equipoId, int? ejtJugadorId, int? minuto, string? desc, bool esAutogol, bool esPenal, int? ejtJugadorSalidaId = null)
         {
@@ -335,7 +349,7 @@ public sealed class EnVivoBehaviorTests
             return Task.FromResult(IncidentResult);
         }
         public Task RecalcularGolesAsync(int partidoId) => Task.CompletedTask;
-        public Task<bool> FinalizarPartidoAsync(int partidoId, int arbitroId, INotificacionService notif) => Task.FromResult(true);
+        public Task<bool> FinalizarPartidoAsync(int partidoId, int arbitroId, INotificacionService notif) => Task.FromResult(FinalizationResult);
         public Task<List<IncidenciaPartido>> GetIncidenciasAsync(int partidoId) => Task.FromResult(new List<IncidenciaPartido>());
         public Task<PartidoEnVivoVM> GetEstadoEnVivoAsync(int partidoId)
         {
