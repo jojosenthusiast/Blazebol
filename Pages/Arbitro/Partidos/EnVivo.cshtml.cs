@@ -9,7 +9,6 @@ using ControlTorneosFutbol.Services;
 
 namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
 {
-    [IgnoreAntiforgeryToken]
     public class EnVivoModel : PageModel
     {
         private readonly ApplicationDbContext _context;
@@ -104,8 +103,8 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
         [HttpGet]
         public async Task<IActionResult> OnGetEstadoAsync(int partidoId)
         {
-            if (!HttpContext.Session.IsAuthenticated())
-                return new JsonResult(new { error = "Unauthorized" }) { StatusCode = 401 };
+            if (!await TieneAccesoPartidoAsync(partidoId))
+                return new JsonResult(new { error = "Forbidden" }) { StatusCode = 403 };
 
             var vm = await _enVivoService.GetEstadoEnVivoAsync(partidoId);
             return new JsonResult(vm, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
@@ -114,11 +113,12 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
         [HttpPost]
         public async Task<IActionResult> OnPostGolAsync(int partidoId, int equipoId, int? ejtJugadorId, int minuto, bool esAutogol, bool esPenal)
         {
-            if (!HttpContext.Session.IsAuthenticated())
-                return new JsonResult(new { ok = false });
+            if (!await TieneAccesoPartidoAsync(partidoId))
+                return new JsonResult(new { ok = false, error = "Forbidden" }) { StatusCode = 403 };
 
-            await _enVivoService.RegistrarIncidenciaAsync(
+            var registrado = await _enVivoService.RegistrarIncidenciaAsync(
                 partidoId, TiposIncidencia.Gol, equipoId, ejtJugadorId, minuto, null, esAutogol, esPenal);
+            if (!registrado) return new JsonResult(new { ok = false });
 
             var vm = await _enVivoService.GetEstadoEnVivoAsync(partidoId);
             return new JsonResult(new
@@ -133,12 +133,13 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
         [HttpPost]
         public async Task<IActionResult> OnPostTarjetaAsync(int partidoId, int equipoId, int ejtJugadorId, int minuto, string tipo)
         {
-            if (!HttpContext.Session.IsAuthenticated())
-                return new JsonResult(new { ok = false });
+            if (!await TieneAccesoPartidoAsync(partidoId))
+                return new JsonResult(new { ok = false, error = "Forbidden" }) { StatusCode = 403 };
 
             string tipoIncidencia = tipo == "Roja" ? TiposIncidencia.TarjetaRoja : TiposIncidencia.TarjetaAmarilla;
-            await _enVivoService.RegistrarIncidenciaAsync(
+            var registrado = await _enVivoService.RegistrarIncidenciaAsync(
                 partidoId, tipoIncidencia, equipoId, ejtJugadorId, minuto, null, false, false);
+            if (!registrado) return new JsonResult(new { ok = false });
 
             var vm = await _enVivoService.GetEstadoEnVivoAsync(partidoId);
             return new JsonResult(new { ok = true, incidencias = vm.Incidencias, jugadoresLocal = vm.JugadoresLocal, jugadoresVisitante = vm.JugadoresVisitante },
@@ -148,11 +149,12 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
         [HttpPost]
         public async Task<IActionResult> OnPostCambioAsync(int partidoId, int equipoId, int ejtEntraId, int ejtSaleId, int minuto)
         {
-            if (!HttpContext.Session.IsAuthenticated())
-                return new JsonResult(new { ok = false });
+            if (!await TieneAccesoPartidoAsync(partidoId))
+                return new JsonResult(new { ok = false, error = "Forbidden" }) { StatusCode = 403 };
 
-            await _enVivoService.RegistrarIncidenciaAsync(
+            var registrado = await _enVivoService.RegistrarIncidenciaAsync(
                 partidoId, TiposIncidencia.Cambio, equipoId, ejtEntraId, minuto, null, false, false, ejtSaleId);
+            if (!registrado) return new JsonResult(new { ok = false });
 
             var vm = await _enVivoService.GetEstadoEnVivoAsync(partidoId);
             return new JsonResult(new { ok = true, incidencias = vm.Incidencias, jugadoresLocal = vm.JugadoresLocal, jugadoresVisitante = vm.JugadoresVisitante },
@@ -162,15 +164,36 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
         [HttpPost]
         public async Task<IActionResult> OnPostIncidenciaAsync(int partidoId, int equipoId, string tipo, int? ejtJugadorId, int minuto, string? desc)
         {
-            if (!HttpContext.Session.IsAuthenticated())
-                return new JsonResult(new { ok = false });
+            if (!await TieneAccesoPartidoAsync(partidoId))
+                return new JsonResult(new { ok = false, error = "Forbidden" }) { StatusCode = 403 };
 
-            await _enVivoService.RegistrarIncidenciaAsync(
+            if (tipo != "Lesion" && tipo != "Suspension" && tipo != "Retraso")
+                return new JsonResult(new { ok = false, error = "Tipo de incidencia no válido." }) { StatusCode = 400 };
+
+            var registrado = await _enVivoService.RegistrarIncidenciaAsync(
                 partidoId, tipo, equipoId, ejtJugadorId, minuto, desc, false, false);
+            if (!registrado) return new JsonResult(new { ok = false });
 
             var vm = await _enVivoService.GetEstadoEnVivoAsync(partidoId);
             return new JsonResult(new { ok = true, incidencias = vm.Incidencias },
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
+
+        private async Task<bool> TieneAccesoPartidoAsync(int partidoId)
+        {
+            if (!HttpContext.Session.IsAuthenticated() || !HttpContext.Session.IsInRole("Arbitro"))
+                return false;
+
+            var userId = HttpContext.Session.GetUserId();
+            if (!userId.HasValue) return false;
+
+            var arbitroId = await _context.Personas
+                .Where(p => p.UsuarioId == userId.Value && p.Arbitro != null)
+                .Select(p => (int?)p.Arbitro!.Id)
+                .FirstOrDefaultAsync();
+
+            return arbitroId.HasValue && await _context.Partidos
+                .AnyAsync(p => p.Id == partidoId && p.ArbitroId == arbitroId.Value);
         }
 
         [HttpPost]
@@ -189,7 +212,7 @@ namespace ControlTorneosFutbol.Pages.Arbitro.Partidos
             if (persona?.Arbitro == null) return new JsonResult(new { ok = false });
 
             var ok = await _enVivoService.FinalizarPartidoAsync(partidoId, persona.Arbitro.Id, _notificaciones);
-            return new JsonResult(new { ok, redirectUrl = $"/Arbitro/Partidos/Reporte?partidoId={partidoId}" });
+            return new JsonResult(new { ok, redirectUrl = ok ? $"/Arbitro/Partidos/Reporte?partidoId={partidoId}" : null });
         }
     }
 }

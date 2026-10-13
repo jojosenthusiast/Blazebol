@@ -63,6 +63,7 @@
 </style>
 
 <div class="ev-root">
+    @Html.AntiForgeryToken()
 
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
@@ -100,7 +101,7 @@
             try {
                 const resp = await fetch('?handler=Iniciar', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('input[name="__RequestVerificationToken"]').value },
                     body: JSON.stringify({ partidoId: @Model.PartidoId })
                 });
                 const data = await resp.json();
@@ -175,10 +176,10 @@
 
         <!-- TOOLBAR -->
         <div class="ev-toolbar">
-            <button class="ev-btn ev-btn-gol-l" onclick="abrirModalGol(@e.EquipoLocalId, '@e.NombreLocal', true)">
+            <button class="ev-btn ev-btn-gol-l" data-goal-team-id="@e.EquipoLocalId" data-goal-team-name="@e.NombreLocal" data-goal-is-local="true">
                 <i class="bi bi-bullseye"></i> Gol Local
             </button>
-            <button class="ev-btn ev-btn-gol-v" onclick="abrirModalGol(@e.EquipoVisitanteId, '@e.NombreVisitante', false)">
+            <button class="ev-btn ev-btn-gol-v" data-goal-team-id="@e.EquipoVisitanteId" data-goal-team-name="@e.NombreVisitante" data-goal-is-local="false">
                 <i class="bi bi-bullseye"></i> Gol Visitante
             </button>
             <button class="ev-btn ev-btn-tarjeta" onclick="abrirModalTarjeta()">
@@ -412,6 +413,16 @@ let jugadoresVisitante = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
 
 let modalGolIsLocal = true;
 
+document.querySelectorAll('[data-goal-team-id]').forEach(button => {
+    button.addEventListener('click', () => {
+        abrirModalGol(
+            Number(button.dataset.goalTeamId),
+            button.dataset.goalTeamName,
+            button.dataset.goalIsLocal === 'true'
+        );
+    });
+});
+
 function getJugadoresPorEquipo(equipoId) {
     return parseInt(equipoId) === EQUIPO_LOCAL_ID ? jugadoresLocal : jugadoresVisitante;
 }
@@ -440,10 +451,12 @@ function toggleAutogol() {
     const equipoContrario = modalGolIsLocal ? EQUIPO_VISITANTE_ID : EQUIPO_LOCAL_ID;
     const equipoActual = modalGolIsLocal ? EQUIPO_LOCAL_ID : EQUIPO_VISITANTE_ID;
 
-    // For autogol, show players of the team that committed it (the one who kicked into their own net)
+    const equipoIncidente = isAuto ? equipoContrario : equipoActual;
+    document.getElementById('golEquipoId').value = equipoIncidente;
+
     const sel = document.getElementById('golJugadorSel');
     sel.innerHTML = '<option value="">— Sin asignar —</option>';
-    const jugadores = getJugadoresPorEquipo(equipoActual);
+    const jugadores = getJugadoresPorEquipo(equipoIncidente);
     jugadores.forEach(j => {
         const opt = document.createElement('option');
         opt.value = j.ejtId;
@@ -585,7 +598,7 @@ document.querySelectorAll('.ev-modal-overlay').forEach(m => {
 async function fetchPost(url, data) {
     const resp = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('input[name="__RequestVerificationToken"]').value },
         body: JSON.stringify(data)
     });
     return await resp.json();
@@ -597,13 +610,19 @@ function actualizarFeed(incidencias) {
     const sorted = [...incidencias].sort((a, b) => (b.minuto || 0) - (a.minuto || 0));
     feed.innerHTML = sorted.map(inc => `
         <div class="ev-event">
-            <div class="ev-event-min">${inc.minuto != null ? inc.minuto + "'" : '—'}</div>
+            <div class="ev-event-min">${escapeHtml(inc.minuto != null ? inc.minuto + "'" : '—')}</div>
             <div class="ev-event-icon">${incIconFor(inc.tipo)}</div>
             <div>
-                <div style="font-weight:600;">${labelFor(inc)}</div>
-                <div style="opacity:0.5;font-size:0.75rem;">${inc.nombreEquipo || ''}</div>
+                <div style="font-weight:600;">${escapeHtml(labelFor(inc))}</div>
+                <div style="opacity:0.5;font-size:0.75rem;">${escapeHtml(inc.nombreEquipo || '')}</div>
             </div>
         </div>`).join('');
+}
+
+function escapeHtml(value) {
+    const node = document.createElement('span');
+    node.textContent = value == null ? '' : String(value);
+    return node.innerHTML;
 }
 
 function incIconFor(tipo) {

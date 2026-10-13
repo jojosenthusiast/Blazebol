@@ -23,9 +23,10 @@ namespace ControlTorneosFutbol.Services
             if (partido == null || partido.ArbitroId != arbitroId)
                 return false;
 
-            if (partido.Estado != EstadosPartido.Programado)
+            if (partido.Estado != EstadosPartido.Programado && partido.Estado != EstadosPartido.Reprogramado)
                 return false;
 
+            var estadoAnterior = partido.Estado;
             partido.Estado = EstadosPartido.EnCurso;
             partido.FechaInicioReal = DateTime.UtcNow;
             partido.MinutoActual = 0;
@@ -37,7 +38,7 @@ namespace ControlTorneosFutbol.Services
             {
                 PartidoId = partidoId,
                 TipoCambio = TiposCambioPartido.InicioPartido,
-                EstadoAnterior = EstadosPartido.Programado,
+                EstadoAnterior = estadoAnterior,
                 EstadoNuevo = EstadosPartido.EnCurso,
                 Razon = "Partido iniciado por el árbitro",
                 FechaCambio = DateTime.UtcNow
@@ -56,6 +57,15 @@ namespace ControlTorneosFutbol.Services
         {
             var partido = await _context.Partidos.FindAsync(partidoId);
             if (partido == null || partido.Estado != EstadosPartido.EnCurso)
+                return false;
+
+            if (equipoId != partido.EquipoLocalId && equipoId != partido.EquipoVisitanteId)
+                return false;
+
+            if (ejtJugadorId.HasValue && !await EstaConvocadoAsync(partidoId, equipoId, ejtJugadorId.Value))
+                return false;
+
+            if (ejtJugadorSalidaId.HasValue && !await EstaConvocadoAsync(partidoId, equipoId, ejtJugadorSalidaId.Value))
                 return false;
 
             var incidencia = new IncidenciaPartido
@@ -85,6 +95,14 @@ namespace ControlTorneosFutbol.Services
                 await RecalcularGolesAsync(partidoId);
 
             return true;
+        }
+
+        private Task<bool> EstaConvocadoAsync(int partidoId, int equipoId, int equipoJugadorTorneoId)
+        {
+            return _context.Convocatorias.AnyAsync(c =>
+                c.PartidoId == partidoId &&
+                c.EquipoId == equipoId &&
+                c.ConvocatoriaJugadores.Any(cj => cj.EquipoJugadorTorneoId == equipoJugadorTorneoId));
         }
 
         public async Task RecalcularGolesAsync(int partidoId)
