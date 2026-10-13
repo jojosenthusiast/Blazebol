@@ -184,6 +184,18 @@ public sealed class EnVivoBehaviorTests
     }
 
     [Fact]
+    public void Autogol_actualiza_equipo_incidente_y_carga_convocados_del_oponente()
+    {
+        var sourceRoot = FindSourceRoot();
+        var viewSource = File.ReadAllText(Path.Combine(sourceRoot, "Pages/Arbitro/Partidos/EnVivo.cshtml"));
+        var toggleSection = ExtractSection(viewSource, "function toggleAutogol()", "async function confirmarGol()");
+
+        Assert.Contains("const equipoIncidente = isAuto ? equipoContrario : equipoActual;", toggleSection, StringComparison.Ordinal);
+        Assert.Contains("document.getElementById('golEquipoId').value = equipoIncidente;", toggleSection, StringComparison.Ordinal);
+        Assert.Contains("getJugadoresPorEquipo(equipoIncidente)", toggleSection, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task Partido_reprogramado_asignado_puede_iniciarse()
     {
         await using var db = CreateDb();
