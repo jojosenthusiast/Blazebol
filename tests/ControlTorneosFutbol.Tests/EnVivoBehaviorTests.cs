@@ -168,6 +168,22 @@ public sealed class EnVivoBehaviorTests
     }
 
     [Fact]
+    public async Task Autogol_valida_jugador_del_equipo_que_lo_comete_y_suma_al_oponente()
+    {
+        await using var db = CreateDb();
+        await SeedMatchTeamsAndTournament(db, includePlayerAndConvocation: true);
+        var service = new PartidoEnVivoService(db);
+
+        var accepted = await service.RegistrarIncidenciaAsync(MatchId, TiposIncidencia.Gol, 10, 500, 12, null, true, false);
+
+        Assert.True(accepted);
+        Assert.Equal(1, await db.IncidenciasPartido.CountAsync());
+        var match = await db.Partidos.SingleAsync(p => p.Id == MatchId);
+        Assert.Equal(0, match.GolesLocal);
+        Assert.Equal(1, match.GolesVisitante);
+    }
+
+    [Fact]
     public async Task Partido_reprogramado_asignado_puede_iniciarse()
     {
         await using var db = CreateDb();
@@ -181,6 +197,18 @@ public sealed class EnVivoBehaviorTests
 
         Assert.True(started);
         Assert.Equal(EstadosPartido.EnCurso, (await db.Partidos.SingleAsync(p => p.Id == MatchId)).Estado);
+    }
+
+    [Fact]
+    public void Team_names_are_not_interpolated_into_inline_javascript_handlers()
+    {
+        var sourceRoot = FindSourceRoot();
+        var viewSource = File.ReadAllText(Path.Combine(sourceRoot, "Pages/Arbitro/Partidos/EnVivo.cshtml"));
+
+        Assert.DoesNotContain("onclick=\"abrirModalGol(", viewSource, StringComparison.Ordinal);
+        Assert.Contains("data-goal-team-id=", viewSource, StringComparison.Ordinal);
+        Assert.Contains("data-goal-team-name=", viewSource, StringComparison.Ordinal);
+        Assert.Contains("addEventListener('click'", viewSource, StringComparison.Ordinal);
     }
 
     [Fact]
