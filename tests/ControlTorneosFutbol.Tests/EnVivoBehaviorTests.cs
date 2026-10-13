@@ -83,6 +83,22 @@ public sealed class EnVivoBehaviorTests
     }
 
     [Fact]
+    public async Task Incidencia_generica_rechaza_tipo_gol_sin_invocar_el_servicio()
+    {
+        await using var db = CreateDb();
+        await SeedRefereeAndMatch(db);
+        var service = new RecordingLiveService();
+        var page = CreatePage(db, service, UserId, "Arbitro");
+
+        var result = Assert.IsType<JsonResult>(await page.OnPostIncidenciaAsync(MatchId, 10, "Gol", null, 12, null));
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(result.Value));
+
+        Assert.True(result.StatusCode == StatusCodes.Status400BadRequest
+            || json.RootElement.TryGetProperty("ok", out var ok) && ok.ValueKind == JsonValueKind.False);
+        Assert.Equal(0, service.IncidentCalls);
+    }
+
+    [Fact]
     public async Task Registrar_gol_si_servicio_falla_responde_ok_false()
     {
         await using var db = CreateDb();
@@ -133,6 +149,41 @@ public sealed class EnVivoBehaviorTests
 
         Assert.True(accepted);
         Assert.Equal(1, await db.IncidenciasPartido.CountAsync());
+    }
+
+    [Fact]
+    public async Task Partido_reprogramado_asignado_puede_iniciarse()
+    {
+        await using var db = CreateDb();
+        await SeedRefereeAndMatch(db);
+        var match = await db.Partidos.SingleAsync(p => p.Id == MatchId);
+        match.Estado = EstadosPartido.Reprogramado;
+        await db.SaveChangesAsync();
+        var service = new PartidoEnVivoService(db);
+
+        var started = await service.IniciarPartidoAsync(MatchId, RefereeId, new NoopNotificationService());
+
+        Assert.True(started);
+        Assert.Equal(EstadosPartido.EnCurso, (await db.Partidos.SingleAsync(p => p.Id == MatchId)).Estado);
+    }
+
+    [Fact]
+    public void Feed_en_vivo_escapa_las_etiquetas_dinamicas_antes_de_insertarlas_como_html()
+    {
+        var sourceRoot = FindSourceRoot();
+        var viewSource = File.ReadAllText(Path.Combine(sourceRoot, "Pages/Arbitro/Partidos/EnVivo.cshtml"));
+        var feedSection = ExtractSection(viewSource, "function actualizarFeed(incidencias)", "function incIconFor");
+        var labelSection = ExtractSection(viewSource, "function labelFor(inc)", "// Polling every 10s");
+
+        Assert.Contains("function escapeHtml(", viewSource, StringComparison.Ordinal);
+        var escapeSection = ExtractSection(viewSource, "function escapeHtml(", "function actualizarFeed(incidencias)");
+        Assert.Contains("escapeHtml(labelFor(inc))", feedSection, StringComparison.Ordinal);
+        Assert.Contains("escapeHtml(inc.nombreEquipo || '')", feedSection, StringComparison.Ordinal);
+        Assert.Contains("escapeHtml(inc.nombreJugador", labelSection, StringComparison.Ordinal);
+        Assert.Contains("escapeHtml(inc.nombreJugadorSalida", labelSection, StringComparison.Ordinal);
+        Assert.Contains("escapeHtml(inc.tipo)", labelSection, StringComparison.Ordinal);
+        Assert.Contains("textContent", escapeSection, StringComparison.Ordinal);
+        Assert.Contains("innerHTML", escapeSection, StringComparison.Ordinal);
     }
 
     [Fact]

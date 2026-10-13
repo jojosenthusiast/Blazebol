@@ -17,6 +17,8 @@ The audit confirmed upstream already implements fixture/calendar, convocations, 
 
 Write focused tests first for state-read and incident-write authorization; team and match-convocation player membership; failure-result propagation; valid assigned-referee success; and antiforgery token/header behavior for both AJAX paths. A minimal isolated test host/token/filter test is acceptable for page antiforgery if practical. Make only the smallest demonstrated fix in the service/page/view. Do not change `Program.cs` role or migration configuration.
 
+Independent review of the live-match change found three additional same-feature defects to test and fix before delivery: refreshed incident-feed values are interpolated into `innerHTML` without encoding (stored-XSS risk); the generic incident handler accepts arbitrary types including `Gol`, which leaves the score inconsistent; and the page offers match start for `Reprogramado` while the service rejects it. Add RED tests for these before changing their code. Keep the separate player-convocation antiforgery issue gated.
+
 ## Audit findings and dispositions
 
 | Area | Disposition |
@@ -40,7 +42,7 @@ Write focused tests first for state-read and incident-write authorization; team 
 
 - The targeted audit records the source scan scope, snapshot counts, exact 15 RAR differing paths, dispositions, live-match defects, migration/deployment risks, audit limitations, and separately gated follow-up.
 - Add `tests/ControlTorneosFutbol.Tests/` and integrate it with `ControlTorneosFutbol.sln`; exclude `tests/**/*.cs` from the web project's compile inputs.
-- Live-match tests cover denied state reads and incident writes for unauthorized/non-assigned referees; rejection of unrelated team/player IDs with accurate failure responses; successful assigned-referee handling; and antiforgery behavior for both AJAX paths.
+- Live-match tests cover denied state reads and incident writes for unauthorized/non-assigned referees; rejection of unrelated team/player IDs with accurate failure responses; successful assigned-referee handling; antiforgery behavior for both AJAX paths; safe incident-feed rendering; rejection of invalid generic incident types; and consistent start behavior for `Reprogramado` matches.
 - Write behavior tests before the implementation fix. Make only the smallest implementation change needed to pass. No spectator implementation changes unless tests prove a real regression.
 - Preserve upstream's manual migration behavior; do not modify `Migrations/` or migration-related `Program.cs`, and never port the broken local guard.
 - Run focused tests first, then applicable validation. Record exact commands and observed results. Push the feature branch only after successful required checks; never push to `master` or rewrite history.
@@ -50,4 +52,4 @@ Write focused tests first for state-read and incident-write authorization; team 
 
 Work in small ordered slices. Verify each slice and make a focused work-unit commit only after its checks pass. Push the feature branch only after all required checks succeed. Cleanup is separate, explicitly approved action: inventory exact project-folder/archive paths and present the concrete list for review before any deletion. Preserve appsettings/secrets, all unlisted paths, the canonical clone, and `C:/Users/frenzied` (the misplaced ambient Git root).
 
-**Current status:** The user-approved design/audit is committed as `70db5ed`; the test-project scaffold is committed as `da7978c` and builds successfully. The test suite has a verified RED run (6 expected assertion failures, 3 passing cases); the test work-unit commit is pending. No production-source changes, push, or deletion has occurred.
+**Current status:** The user-approved design/audit is `70db5ed`; test-project scaffold is `da7978c`; original RED test suite is `2873186` (6 expected failures, 3 passes). Core live-match changes are in the working tree and pass those 9 tests; solution build passed with 0 warnings/errors. Three additional review-found defects now have RED tests: 12 tests total, 3 expected failures and 9 passes, with no setup errors. Their implementation and final review are pending; no push or deletion has occurred.
